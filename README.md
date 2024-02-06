@@ -6,6 +6,8 @@
 
 Java 安全漏洞靶场，用于测试IAST和扫描器的被动扫描功能，集合了多个安全漏洞，利用docker镜像为每个靶场独立环境运行。
 
+参考：[IAST落地实践总结](https://mp.weixin.qq.com/s/ahxKXv5eKcULVF_VqAjbyg)
+
 ## 部署
 
 mvn版本
@@ -319,6 +321,7 @@ adding: my/agent/SimpleAgent.class(in = 492) (out= 320)(deflated 34%)
 - https://github.com/zhlu32/range_java_micro_service_seclab
 - https://rasp.baidu.com/doc/install/testcase.html
 - https://github.com/lemono0/FastJsonParty/
+- https://github.com/welk1n/JNDI-Injection-Exploit
 
 ## Star History Chart
 

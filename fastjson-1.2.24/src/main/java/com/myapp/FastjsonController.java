@@ -1,5 +1,6 @@
 package com.myapp;
 
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,8 +67,16 @@ public class FastjsonController {
 
     @PostMapping("/fastjson1.2.24-process")
     public String fastjson1_2_24_process(@RequestBody String data) {
-        JSONObject jsonObject = JSONObject.parseObject(data);
-        // 处理 jsonObject
-        return "Processed: " + jsonObject;
+        try {
+            JSONObject jsonObject = JSONObject.parseObject(data);
+            // 处理 jsonObject
+            return "Processed: " + jsonObject;
+        } catch (JSONException e) {
+            // 处理JSON解析异常
+            return "JSON解析异常: " + e.getMessage();
+        } catch (RuntimeException e) {
+            // 处理运行时异常
+            return "运行时异常: " + e.getMessage();
+        }
     }
 }
