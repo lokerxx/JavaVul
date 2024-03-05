@@ -898,14 +898,6 @@ requests_config = {
         'type': 'attack',
     },
 
-'ReDos_normal_1': {
-        'method': 'GET',
-        'url': """http://{}:9991/testReDos1?input=1""".format(
-            host),
-        'headers': {'Content-Type': 'application/x-www-form-urlencoded'},
-        'name': 'ReDoS攻击-1',
-        'type': 'normal',
-    },
 
 'ReDos_normal_1': {
         'method': 'GET',
@@ -951,8 +943,32 @@ requests_config = {
         'type': 'normal',
     },
 
+'unsafeReflection_attack': {
+        'method': 'GET',
+        'url': """http://{}:9991/unsafeReflection?className=com.example.malicious.MaliciousClass""".format(
+            host),
+        'headers': {'Content-Type': 'application/x-www-form-urlencoded'},
+        'name': '不安全反射漏洞-攻击',
+        'type': 'attack',
+    },
 
+'unsafeReflection_normal_1': {
+        'method': 'GET',
+        'url': """http://{}:9991/unsafeReflection?className=java.lang.Runtime""".format(
+            host),
+        'headers': {'Content-Type': 'application/x-www-form-urlencoded'},
+        'name': '不安全反射漏洞-无法利用',
+        'type': 'normal',
+    },
 
+'unsafeReflection_normal_2': {
+        'method': 'GET',
+        'url': """http://{}:9991/unsafeReflection?className=java.util.Date""".format(
+            host),
+        'headers': {'Content-Type': 'application/x-www-form-urlencoded'},
+        'name': '不安全反射漏洞-显示日期',
+        'type': 'normal',
+    },
 
 
     'xxe_wxpay_attack': {
