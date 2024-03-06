@@ -6,6 +6,8 @@
 
 Java 安全漏洞靶场，用于测试IAST和扫描器的被动扫描功能，集合了多个安全漏洞，利用docker镜像为每个靶场独立环境运行。
 
+文章：[IAST实践总结](https://mp.weixin.qq.com/s/ahxKXv5eKcULVF_VqAjbyg)
+
 ## 部署
 
 mvn版本
@@ -30,11 +32,11 @@ git clone https://github.com/lokerxx/JavaVul
 
 |            文件            |                             作用                             |            运行            |
 | :------------------------: | :----------------------------------------------------------: | :------------------------: |
-| docker-compose-build.yaml  | 在容器里面构建jar包，每个靶场构建会重复构建，**构建速度会很慢，不建议** | `bash run-build_images.sh` |
-| docker-compose-local.yaml  | 宿主机maven构建各个靶场的jar包，多个靶场可以基于maven缓存快速构建 | `bash run-local-build.sh`  |
-| docker-compose-remote.yaml |           直接去dockerhub下载我构建上传成功的镜像            |    `bash run-remote.sh`    |
+| docker-compose-build.yaml  | 在容器里面构建jar包，每个靶场构建会重复构建（**构建速度会很慢，不建议**） | `bash run-build_images.sh` |
+| docker-compose-local.yaml  | 宿主机maven构建各个靶场的jar包，多个靶场可以基于maven缓存快速构建（**推荐**） | `bash run-local-build.sh`  |
+| docker-compose-remote.yaml | 直接去dockerhub下载我构建上传成功的镜像（**镜像更新不及时**） |    `bash run-remote.sh`    |
 
-> 此外，需修改yaml文件里面`flask.environment.HOST`为宿主机的IP，用于跑测试用例。然后我在yaml文件已经默认挂载agent.jar，如果你们要测试IAST agent功能，直接替换到`agent/agent.jar`即可。我这边自己写了一个简单的java agent，参考下面[SimpleAgent]()
+> 此外，需修改yaml文件里面`flask.environment.HOST`为宿主机的IP，用于跑测试用例。**然后我在yaml文件已经默认挂载agent.jar**，如果你们要测试IAST agent功能，直接替换到`agent/agent.jar`即可。我这边自己写了一个简单的java agent，参考下面[SimpleAgent]()
 
 > 如果要测试被动代理扫描，需要修改`index/app.py`里面`proxy_mode`为`True`，修改自己的代理地址：`proxies`
 
@@ -43,6 +45,8 @@ git clone https://github.com/lokerxx/JavaVul
 > 因为漏洞应用比较多**但是接口比较少**，我给每个应用配置256-512M内存（测试运行要8G内存）。如果要配置大一点测试 IAST AGENT，则可以批量修改`docker-compose.yaml`的`-Xms256m -Xmx512m`的环境变量
 
 > 基本web漏洞的代码审计的细节，参考这里：https://github.com/lokerxx/CybersecurityNote/tree/master/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/JAVA%E6%BC%8F%E6%B4%9E
+
+
 
 ### 压力测试
 
@@ -60,8 +64,6 @@ git clone https://github.com/lokerxx/JavaVul
 
 
 
-
-
 ## 运行
 
 访问：`http://宿主机IP:5000/`
@@ -71,6 +73,7 @@ git clone https://github.com/lokerxx/JavaVul
 - 攻击：发送一些payload，触发漏洞
 - 正常：有可能是漏洞，但是发送是正常的数据
 - 修复：漏洞已经修复，但是payload不生效（过滤或者报错）
+- 误报：IAST或SAST误报检测的安全漏洞
 
 其中右边测试按钮，可以单独发送某个测试用户
 
