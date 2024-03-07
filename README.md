@@ -75,15 +75,15 @@ git clone https://github.com/lokerxx/JavaVul
 - 修复：漏洞已经修复，但是payload不生效（过滤或者报错）
 - 误报：IAST或SAST误报检测的安全漏洞
 
-其中右边测试按钮，可以单独发送某个测试用户
+其中右边测试按钮，可以对这个接口进行用例测试。
 
-![image-20240127215244050](.gitbook/assets/image-20240127215244050.png)
+![image-20240306164920221](.gitbook/assets/image-20240306164920221.png)
 
-![image-20240127215324114](.gitbook/assets/image-20240127215324114.png)
+也可以自定义发送payload，进行调试
 
-![image-20240127215332612](.gitbook/assets/image-20240127215332612.png)
+![image-20240306165001240](.gitbook/assets/image-20240306165001240.png)
 
-可以批量发送请求，各个漏洞的回显，会在下面显示。
+也可以批量发送请求，各个漏洞的回显，会在下面显示。
 
 ![image-20240127215349622](.gitbook/assets/image-20240127215349622.png)
 
