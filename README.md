@@ -90,7 +90,7 @@ git clone https://github.com/lokerxx/JavaVul
 
 > **修改完成之后，根据自己的需求，运行上面表格的sh脚本部署运行即可**。
 
-> 因为漏洞应用比较多**但是接口比较少**，我给每个应用配置256-512M内存（测试运行要8G内存）。如果要配置大一点测试 IAST AGENT，则可以批量修改`docker-compose.yaml`的`-Xms256m -Xmx512m`的环境变量
+> 因为漏洞应用比较多**但是接口比较少**，我给每个应用配置512-1024M内存（测试运行要16G内存）。如果要配置大一点测试 IAST AGENT，则可以批量修改`docker-compose.yaml`的`-Xms512m -Xmx1024m`的环境变量
 
 > 基本web漏洞的代码审计的细节，参考这里：https://github.com/lokerxx/CybersecurityNote/tree/master/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/JAVA%E6%BC%8F%E6%B4%9E
 

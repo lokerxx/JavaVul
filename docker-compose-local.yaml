@@ -11,7 +11,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.25-1.2.41:
     image: wushangleon/fastjson:1.2.25_1.2.41
@@ -24,7 +24,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.42:
     image: wushangleon/fastjson:1.2.42
@@ -37,7 +37,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.43:
     image: wushangleon/fastjson:1.2.43
@@ -50,7 +50,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.45:
     image: wushangleon/fastjson:1.2.45
@@ -63,7 +63,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.59:
     image: wushangleon/fastjson:1.2.59
@@ -76,7 +76,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.60:
     image: wushangleon/fastjson:1.2.60
@@ -89,7 +89,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.61:
     image: wushangleon/fastjson:1.2.61
@@ -102,7 +102,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
 
   fastjson-1.2.62:
@@ -116,7 +116,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
 
   fastjson-1.2.66:
@@ -130,7 +130,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
 
   fastjson-1.2.67:
@@ -144,7 +144,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.68:
     image: wushangleon/fastjson:1.2.68
@@ -157,7 +157,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.80:
     image: wushangleon/fastjson:1.2.80
@@ -170,7 +170,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   fastjson-1.2.83:
     image: wushangleon/fastjson:1.2.83
@@ -183,7 +183,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
 
   log4jvul:
@@ -197,7 +197,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
 
   druid_unauthorized:
@@ -211,7 +211,7 @@ services:
       - DATABASE_PASSWORD=123456
       - DATABASE_NAME=sec
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
     ports:
       - "9997:8080"      
     depends_on:
@@ -234,7 +234,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
       - DATABASE_HOST=mysql
       - DATABASE_USER=sec
       - DATABASE_PASSWORD=123456
@@ -254,7 +254,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
 
   actuator_authorized2:
@@ -268,7 +268,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   actuator_unauthorized1:
     image: wushangleon/actuator:unauthorized_1.X
@@ -281,7 +281,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   actuator_authorized1:
     image: wushangleon/actuator:authorized_1.X
@@ -294,7 +294,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   base_vul:
     image: wushangleon/base_vul
@@ -309,7 +309,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   base_vul_repair:
     image: wushangleon/base_vul_repair
@@ -324,7 +324,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   HSQLDB:
     image: wushangleon/hsqldb
@@ -337,7 +337,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   Hibernate:
     image: wushangleon/hibernate
@@ -350,7 +350,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   wxpay-xxe:
     image: wushangleon/wxpay-xxe
@@ -363,7 +363,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   CVE-2019-10173:
     image: wushangleon/cve-2019-10173
@@ -376,7 +376,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
   CVE-2019-12384:
     image: wushangleon/cve-2019-12384
@@ -389,7 +389,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
 
   cas-xxe:
@@ -403,7 +403,7 @@ services:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
 
   flask:
