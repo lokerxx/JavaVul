@@ -20,7 +20,7 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
 
- fastjson-1.2.42:
+  fastjson-1.2.42:
     image: wushangleon/fastjson:1.2.42
     ports:
       - "9986:8080"
@@ -92,18 +92,6 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
 
-  fastjson-1.2.64:
-    image: wushangleon/fastjson:1.2.64
-    ports:
-      - "9979:8080"
-    volumes:
-      - ./agent:/agent/
-    environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
-      - JAVA_OPTS=-Xms256m -Xmx512m
-
-
-
   fastjson-1.2.66:
     image: wushangleon/fastjson:1.2.66
     ports:
@@ -155,8 +143,6 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
 
-
-
   log4jvul:
     image: wushangleon/log4j2vul
     ports:
@@ -171,7 +157,7 @@ services:
   druid_unauthorized:
     image: wushangleon/druid:unauthorized
     ports:
-      - "9997:8080"      
+      - "9997:8080"
     depends_on:
       - mysql
     volumes:
@@ -184,12 +170,10 @@ services:
       - DATABASE_PASSWORD=123456
       - DATABASE_NAME=sec
 
-
-
   druid_authorized:
     image: wushangleon/druid:authorized
     ports:
-      - "9996:8080"      
+      - "9996:8080"
     depends_on:
       - mysql
     volumes:
@@ -247,7 +231,7 @@ services:
   base_vul:
     image: wushangleon/base_vul
     ports:
-      - "9991:8080"      
+      - "9991:8080"
     depends_on:
       - mysql
     volumes:
@@ -259,7 +243,7 @@ services:
   base_vul_repair:
     image: wushangleon/base_vul_repair
     ports:
-      - "9990:8080"      
+      - "9990:8080"
     depends_on:
       - mysql
     volumes:
@@ -272,7 +256,7 @@ services:
   HSQLDB:
     image: wushangleon/hsqldb
     ports:
-      - "9989:8080"      
+      - "9989:8080"
     volumes:
       - ./agent:/agent/
     environment:
@@ -282,7 +266,7 @@ services:
   Hibernate:
     image: wushangleon/hibernate
     ports:
-      - "9988:8080"      
+      - "9988:8080"
     volumes:
       - ./agent:/agent/
     environment:
@@ -332,16 +316,10 @@ services:
       - JAVA_OPTS=-Xms256m -Xmx512m
 
 
-
-
-
-
-
-
   flask:
     image: wushangleon/javavul_index
     ports:
-      - "5000:5000"      
+      - "5000:5000"
     environment:
       - HOST=192.168.0.9
 
