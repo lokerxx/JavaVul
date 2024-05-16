@@ -1,0 +1,21 @@
+server:
+  port: 29995
+
+spring:
+  application:
+    name: service-d
+
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eureka-server:29999/eureka/
+
+
+logging:
+  level:
+    root: INFO
+    com.myapp: DEBUG
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %level - %msg%n'

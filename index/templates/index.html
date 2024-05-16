@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全测试靶场</title>
+    <style>
+        body {
+            font-family: 'Google Sans', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 24px; /* 调整标题字体大小 */
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 90%; /* 增加宽度以适应不同的屏幕尺寸 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* 更细腻的阴影 */
+            border-radius: 8px; /* 轻微调整边框弧度 */
+            overflow: hidden;
+        }
+        th, td {
+            padding: 16px 20px; /* 增加填充以提高可读性 */
+            text-align: center;
+            border-bottom: 1px solid #eee; /* 更柔和的边框色 */
+        }
+        th {
+            background-color: #5D93E1; /* 更现代的蓝色 */
+            color: white;
+            font-size: 18px; /* 增加字体大小 */
+        }
+        tr:hover {
+            background-color: #f2f2f2; /* 更轻的悬浮颜色 */
+        }
+        button {
+            background-color: #8249af;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 细化阴影 */
+            transition: all 0.2s ease-in-out; /* 平滑过渡效果 */
+        }
+        button:hover {
+            background-color: #8019a0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 加强悬浮阴影 */
+        }
+        .button2 {
+            background-color: #008CBA;
+        }
+        .button3 {
+            background-color: #8a20f4;
+        }
+        #logOutput {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 600px;
+            overflow-y: scroll;
+        }
+    </style>
+
+
+</head>
+<body>
+<h2>安全漏洞清单-攻击</h2>
+<table border="1">
+    <tr>
+        <th>漏洞名称</th>
+        <th>请求方法</th>
+        <th>接口</th>
+        <th style="width: 150px;">操作</th>
+    </tr>
+    {% for item in attack_data %}
+    <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.method }}</td>
+        <td>{{ item.url }}</td>
+        <td>
+            <button onclick="sendRequest('{{ item.api }}', '{{ item.method }}')">测试</button>
+            <button onclick="openReplayModal('{{ item.api }}')">重放数据包</button>
+
+        </td>
+
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>安全漏洞清单-正常</h2>
+<table border="1">
+    <tr>
+        <th>漏洞名称</th>
+        <th>请求方法</th>
+        <th>接口</th>
+        <th style="width: 150px;">操作</th>
+    </tr>
+    {% for item in normal_data %}
+    <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.method }}</td>
+        <td>{{ item.url }}</td>
+
+        <td>
+            <button onclick="sendRequest('{{ item.api }}', '{{ item.method }}')">测试</button>
+            <button onclick="openReplayModal('{{ item.api }}')">重放数据包</button>
+
+        </td>
+
+    </tr>
+    {% endfor %}
+</table>
+
+
+<h2>安全漏洞清单-修复</h2>
+<table border="1">
+    <tr>
+        <th>漏洞名称</th>
+        <th>请求方法</th>
+        <th>接口</th>
+        <th style="width: 150px;">操作</th>
+    </tr>
+    {% for item in repair_data %}
+    <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.method }}</td>
+        <td>{{ item.url }}</td>
+        <td>
+            <button onclick="sendRequest('{{ item.api }}', '{{ item.method }}')">测试</button>
+            <button onclick="openReplayModal('{{ item.api }}')">重放数据包</button>
+
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+<h2>安全漏洞清单-误报</h2>
+<table border="1">
+    <tr>
+        <th>漏洞名称</th>
+        <th>请求方法</th>
+        <th>接口</th>
+        <th style="width: 150px;">操作</th>
+    </tr>
+    {% for item in mistake_data %}
+    <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.method }}</td>
+        <td>{{ item.url }}</td>
+        <td>
+            <button onclick="sendRequest('{{ item.api }}', '{{ item.method }}')">测试</button>
+            <button onclick="openReplayModal('{{ item.api }}')">重放数据包</button>
+
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+
+<!-- 批量请求按钮 -->
+<button onclick="sendBatchRequest(attack_data)" class="button">发送攻击批量请求</button>
+<button onclick="sendBatchRequest(normal_data)" class="button button2">发送正常批量请求</button>
+<button onclick="sendBatchRequest(repair_data)" class="button button2">发送修复批量请求</button>
+<button onclick="sendBatchRequest(mistake_data)" class="button button2">发送误报批量请求</button>
+<button onclick="clearLog()" class="button button3">清除日志</button>
+
+<!-- 日志输出区域 -->
+<div id="logOutput">
+    <h3>响应日志：</h3>
+</div>
+
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- 引入 Layui CSS -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/layui/2.5.7/css/layui.css"  media="all">
+
+    <!-- 引入 Layui JavaScript 库 -->
+    <script src="https://cdn.staticfile.org/layui/2.5.7/layui.js" charset="utf-8"></script>
+
+
+
+<script>
+    layui.use(['layer', 'element'], function(){
+        var layer = layui.layer;
+
+        window.openReplayModal = function(api) {
+            // 发送 AJAX 请求到后端
+            $.ajax({
+                url: '/get-request-config', // 后端接口
+                type: 'GET',
+                data: { 'api': api },
+                success: function(data) {
+                    // 构建请求头信息
+                    var headersText = '';
+                    for (var key in data.headers) {
+                        if (data.headers.hasOwnProperty(key)) {
+                            headersText += key + ': ' + data.headers[key] + '\n';
+                        }
+                    }
+
+                    // 根据请求方法，决定是否包含请求正文
+                    var requestText = data.method + ' ' + data.url + ' HTTP/1.1\n' + headersText;
+                    if (data.method.toUpperCase() !== 'GET') {
+                        requestText += '\n' + data.data;
+                    }
+                    // 打开模态框并显示数据
+                    layer.open({
+                        type: 1,
+                        area: ['1200px', '800px'],
+                        title: '数据包重放',
+                        closeBtn: 1, // 在标题栏右侧显示关闭按钮
+                        shadeClose: true, // 点击遮罩关闭弹出层
+                        content: '<div style="padding: 20px; display: flex;">' +
+                            '<div style="flex: 1; margin-right: 10px;">' +
+                            '<h3>Request</h3>' +
+                            '<textarea id="requestArea" rows="30" style="width: 100%;">' + requestText + '</textarea>' +
+                            '</div>' +
+                            '<div style="flex: 1; margin-left: 10px;">' +
+                            '<h3>Response</h3>' +
+                            '<textarea id="responseArea" rows="30" style="width: 100%;"></textarea>' +
+                            '</div>' +
+                            '</div>' +
+                            '<button style="margin-top: 10px;" onclick="sendRequestToBackend()">重放</button>' // 修改这里的按钮点击事件
+                    });
+                },
+                error: function(error) {
+                    // 错误处理
+                    console.error("Error fetching request config:", error);
+                }
+            });
+        };
+
+        window.replayRequest = function() {
+            // 提取请求信息
+            var requestText = document.getElementById('requestArea').value;
+            var lines = requestText.split('\n');
+            var requestLine = lines[0].split(' ');
+            var method = requestLine[0];
+            var url = requestLine[1];
+            var headers = {};
+            var body = null;
+
+            // 解析头信息和正文
+            for (var i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') {
+                    body = lines.slice(i + 1).join('\n');
+                    break;
+                }
+                var headerParts = lines[i].split(':');
+                headers[headerParts[0].trim()] = headerParts[1].trim();
+            }
+
+            // 发送请求
+            fetch(url, {
+                method: method,
+                headers: headers,
+                body: method !== 'GET' ? body : null
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(responseText => {
+                    // 显示响应
+                    document.getElementById('responseArea').value = responseText;
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    document.getElementById('responseArea').value = '请求失败: ' + error.message;
+                });
+        };
+
+        window.sendRequestToBackend = function() {
+            // 提取请求信息
+            var requestText = document.getElementById('requestArea').value;
+            var lines = requestText.split('\n');
+            var requestLine = lines[0].split(' ');
+            var method = requestLine[0];
+            var url = requestLine[1];
+            var headers = {};
+            var body = null;
+
+            // 解析头信息和正文
+            for (var i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') {
+                    body = lines.slice(i + 1).join('\n');
+                    break;
+                }
+                var headerParts = lines[i].split(':');
+                headers[headerParts[0].trim()] = headerParts[1].trim();
+            }
+
+            // 发送请求到后端
+            $.ajax({
+                url: '/replay-request', // 后端接口用于重放请求
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    api: 'your_api_here', // 替换成实际的 API 地址
+                    method: method,
+                    url: url,
+                    headers: headers,
+                    data: body
+                }),
+                success: function(data) {
+                    // 处理后端的响应数据
+                    document.getElementById('responseArea').value = data.text;
+                },
+                error: function(error) {
+                    console.error('Error sending replay request:', error);
+                    document.getElementById('responseArea').value = '请求失败: ' + error.message;
+                }
+            });
+        };
+
+
+    });
+</script>
+
+
+
+<script>
+    function sendBatchRequest(endpoints) {
+        endpoints.forEach(function(endpoint) {
+            fetch(endpoint.api, {method: endpoint.method})
+                .then(response => response.text())
+                .then(data => appendLog(endpoint.api, data))
+                .catch(error => console.error('Error:', error));
+        });
+    }
+
+    function appendLog(api, data) {
+        var logOutput = document.getElementById('logOutput');
+        logOutput.innerHTML += '<b>请求:</b> ' + api + '<br><b>响应:</b> ' + data + '<br><br>';
+    }
+
+
+
+    function clearLog() {
+        var logOutput = document.getElementById('logOutput');
+        logOutput.innerHTML = '<h3>响应日志：</h3>'; // 重置为初始内容
+    }
+
+    var attack_data = {{ attack_data | tojson | safe }};
+    var normal_data = {{ normal_data | tojson | safe }};
+    var repair_data = {{ repair_data | tojson | safe }};
+    var mistake_data = {{ mistake_data | tojson | safe }};
+
+
+</script>
+
+
+</html>

@@ -1,0 +1,137 @@
+version: '3'
+services:
+  eureka-server:
+    image: wushangleon/eureka_server
+    build:
+      context: ./microservice-eureka-service
+      dockerfile: Dockerfile_local    
+    ports:
+      - "29999:29999"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+
+  service-a:
+    image: microservice_a_service
+    build:
+      context: ./microservice-a-service
+      dockerfile: Dockerfile_local    
+    ports:
+      - "29998:29998"    
+    volumes:
+      - ./agent:/agent/    
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:29999/eureka/
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+
+  service-b:
+    image: microservice_b_service
+    build:
+      context: ./microservice-b-service
+      dockerfile: Dockerfile_local    
+    ports:
+      - "29997:29997"    
+    volumes:
+      - ./agent:/agent/    
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:29999/eureka/
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+
+  service-c:
+    image: microservice_c_service
+    build:
+      context: ./microservice-c-service
+      dockerfile: Dockerfile_local    
+    ports:
+      - "29996:29996"    
+    volumes:
+      - ./agent:/agent/    
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:29999/eureka/
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+
+  service-d:
+    image: microservice_d_service
+    build:
+      context: ./microservice-d-service
+      dockerfile: Dockerfile_local    
+    ports:
+      - "29995:29995"    
+    volumes:
+      - ./agent:/agent/    
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:29999/eureka/
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+
+
+  service-e:
+    image: microservice_e_service
+    build:
+      context: ./microservice-e-service
+      dockerfile: Dockerfile_local    
+    ports:
+      - "29994:29994"    
+    volumes:
+      - ./agent:/agent/    
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:29999/eureka/
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+
+  service-f:
+    image: microservice_f_service
+    build:
+      context: ./microservice-f-service
+      dockerfile: Dockerfile_local    
+    ports:
+      - "29993:29993"    
+    volumes:
+      - ./agent:/agent/    
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:29999/eureka/
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+
+  service-g:
+    image: microservice_g_service
+    build:
+      context: ./microservice-g-service
+      dockerfile: Dockerfile_local    
+    ports:
+      - "29992:29992"    
+    volumes:
+      - ./agent:/agent/    
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:29999/eureka/
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+
+  service-h:
+    image: microservice_h_service
+    build:
+      context: ./microservice-h-service
+      dockerfile: Dockerfile_local    
+    ports:
+      - "29991:29991"    
+    volumes:
+      - ./agent:/agent/    
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:29999/eureka/
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+
+
+
+
+  mysql-microse:
+    image: mysql:5.7
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: sec
+      MYSQL_USER: sec
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "33306:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d
+
+

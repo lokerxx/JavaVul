@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Boot DOM XSS Demo</title>
+</head>
+<body>
+<h1>Hello <span th:text="${name}"></span>!</h1>
+<p>This is an example of a DOM XSS vulnerability in a Spring Boot application.</p>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var name = /*[[${name}]]*/ 'default';
+    document.write('<p>Welcome ' + name + '!</p>');
+    /*]]>*/
+</script>
+</body>
+</html>

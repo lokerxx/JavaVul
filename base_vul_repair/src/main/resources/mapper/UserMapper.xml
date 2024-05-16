@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.myapp.mapper.UserMapper">
+
+    <select id="findById" resultType="User">
+        SELECT * FROM users WHERE id = '#{id}'
+    </select>
+
+    <select id="findUsersByIds" resultType="User">
+        SELECT * FROM users
+        WHERE id IN (#{ids})
+    </select>
+
+    <select id="findUsersByNameLike" resultType="User">
+        SELECT * FROM users
+        WHERE name LIKE CONCAT('%', #{name}, '%')
+    </select>
+
+    <select id="findUsersOrderBy" resultType="User">
+        SELECT * FROM users
+        ORDER BY #{orderByColumn} #{orderByDirection}
+    </select>
+
+    <select id="findUsersByNames" resultType="User">
+        SELECT * FROM users
+        WHERE name IN
+        <foreach item="name" collection="names" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+
+    </select>
+
+    <select id="findUsersByName" resultType="User">
+        SELECT * FROM users where name = #{name}
+    </select>
+</mapper>

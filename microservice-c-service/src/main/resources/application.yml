@@ -1,0 +1,34 @@
+server:
+  port: 29996
+
+spring:
+  application:
+    name: service-c
+  datasource:
+    url: jdbc:hsqldb:file:mydb;hsqldb.lock_file=false
+    username: sa
+    password:
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eureka-server:29999/eureka/
+
+
+
+
+
+logging:
+  level:
+    root: INFO
+    com.myapp: DEBUG
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %level - %msg%n'

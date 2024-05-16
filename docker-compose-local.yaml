@@ -1,0 +1,433 @@
+version: '3'
+services:
+  fastjson-1.2.24:
+    image: wushangleon/fastjson:1.2.24
+    build:
+      context: ./fastjson-1.2.24
+      dockerfile: Dockerfile_local
+    ports:
+      - "9999:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.25-1.2.41:
+    image: wushangleon/fastjson:1.2.25_1.2.41
+    build:
+      context: ./fastjson-1.2.25-1.2.41
+      dockerfile: Dockerfile_local
+    ports:
+      - "9987:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.42:
+    image: wushangleon/fastjson:1.2.42
+    build:
+      context: ./fastjson-1.2.42
+      dockerfile: Dockerfile_local
+    ports:
+      - "9986:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.43:
+    image: wushangleon/fastjson:1.2.43
+    build:
+      context: ./fastjson-1.2.43
+      dockerfile: Dockerfile_local
+    ports:
+      - "9985:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.45:
+    image: wushangleon/fastjson:1.2.45
+    build:
+      context: ./fastjson-1.2.45
+      dockerfile: Dockerfile_local
+    ports:
+      - "9984:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.59:
+    image: wushangleon/fastjson:1.2.59
+    build:
+      context: ./fastjson-1.2.59
+      dockerfile: Dockerfile_local
+    ports:
+      - "9983:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.60:
+    image: wushangleon/fastjson:1.2.60
+    build:
+      context: ./fastjson-1.2.60
+      dockerfile: Dockerfile_local
+    ports:
+      - "9982:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.61:
+    image: wushangleon/fastjson:1.2.61
+    build:
+      context: ./fastjson-1.2.61
+      dockerfile: Dockerfile_local
+    ports:
+      - "9981:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+
+  fastjson-1.2.62:
+    image: wushangleon/fastjson:1.2.62
+    build:
+      context: ./fastjson-1.2.62
+      dockerfile: Dockerfile_local
+    ports:
+      - "9980:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+
+  fastjson-1.2.66:
+    image: wushangleon/fastjson:1.2.66
+    build:
+      context: ./fastjson-1.2.66
+      dockerfile: Dockerfile_local
+    ports:
+      - "9979:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+
+  fastjson-1.2.67:
+    image: wushangleon/fastjson:1.2.67
+    build:
+      context: ./fastjson-1.2.67
+      dockerfile: Dockerfile_local
+    ports:
+      - "9978:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.68:
+    image: wushangleon/fastjson:1.2.68
+    build:
+      context: ./fastjson-1.2.68
+      dockerfile: Dockerfile_local
+    ports:
+      - "9977:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.80:
+    image: wushangleon/fastjson:1.2.80
+    build:
+      context: ./fastjson-1.2.80
+      dockerfile: Dockerfile_local
+    ports:
+      - "9976:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  fastjson-1.2.83:
+    image: wushangleon/fastjson:1.2.83
+    build:
+      context: ./fastjson-1.2.83
+      dockerfile: Dockerfile_local
+    ports:
+      - "9975:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+
+  log4jvul:
+    image: wushangleon/log4j2vul
+    build:
+      context: ./log4jvul
+      dockerfile: Dockerfile_local
+    ports:
+      - "9998:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+
+  druid_unauthorized:
+    image: wushangleon/druid:unauthorized
+    build:
+      context: ./druid_unauthorized
+      dockerfile: Dockerfile_local
+    environment:
+      - DATABASE_HOST=mysql
+      - DATABASE_USER=sec
+      - DATABASE_PASSWORD=123456
+      - DATABASE_NAME=sec
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    ports:
+      - "9997:8080"      
+    depends_on:
+      - mysql
+    volumes:
+      - ./agent:/agent/
+
+
+
+  druid_authorized:
+    image: wushangleon/druid:authorized
+    build:
+      context: ./druid_authorized
+      dockerfile: Dockerfile_local
+    ports:
+      - "9996:8080"      
+    depends_on:
+      - mysql
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+      - DATABASE_HOST=mysql
+      - DATABASE_USER=sec
+      - DATABASE_PASSWORD=123456
+      - DATABASE_NAME=sec
+
+
+
+
+  actuator_unauthorized2:
+    image: wushangleon/actuator:unauthorized_2.X
+    build:
+      context: ./actuator_unauthorized_2.X
+      dockerfile: Dockerfile_local
+    ports:
+      - "9995:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+
+  actuator_authorized2:
+    image: wushangleon/actuator:authorized_2.X
+    build:
+      context: ./actuator_authorized_2.X
+      dockerfile: Dockerfile_local
+    ports:
+      - "9994:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  actuator_unauthorized1:
+    image: wushangleon/actuator:unauthorized_1.X
+    build:
+      context: ./actuator_unauthorized_1.X
+      dockerfile: Dockerfile_local
+    ports:
+      - "9993:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  actuator_authorized1:
+    image: wushangleon/actuator:authorized_1.X
+    build:
+      context: ./actuator_authorized_1.X
+      dockerfile: Dockerfile_local
+    ports:
+      - "9992:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  base_vul:
+    image: wushangleon/base_vul
+    build:
+      context: ./base_vul
+      dockerfile: Dockerfile_local
+    ports:
+      - "9991:8080"      
+    depends_on:
+      - mysql
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  base_vul_repair:
+    image: wushangleon/base_vul_repair
+    build:
+      context: ./base_vul_repair
+      dockerfile: Dockerfile_local
+    ports:
+      - "9990:8080"      
+    depends_on:
+      - mysql
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  HSQLDB:
+    image: wushangleon/hsqldb
+    build:
+      context: ./HSQLDB
+      dockerfile: Dockerfile_local
+    ports:
+      - "9989:8080"      
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  Hibernate:
+    image: wushangleon/hibernate
+    build:
+      context: ./Hibernate
+      dockerfile: Dockerfile_local
+    ports:
+      - "9988:8080"      
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  wxpay-xxe:
+    image: wushangleon/wxpay-xxe
+    build:
+      context: ./wxpay-xxe
+      dockerfile: Dockerfile_local
+    ports:
+      - "9974:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  CVE-2019-10173:
+    image: wushangleon/cve-2019-10173
+    build:
+      context: ./CVE-2019-10173
+      dockerfile: Dockerfile_local
+    ports:
+      - "9973:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  CVE-2019-12384:
+    image: wushangleon/cve-2019-12384
+    build:
+      context: ./CVE-2019-12384
+      dockerfile: Dockerfile_local
+    ports:
+      - "9972:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+
+  cas-xxe:
+    image: wushangleon/cas-xxe
+    build:
+      context: ./cas_xxe
+      dockerfile: Dockerfile_local
+    ports:
+      - "9971:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+
+  flask:
+    image: wushangleon/javavul_index
+    build:
+      context: ./index
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"      
+    environment:
+      - HOST=192.168.0.9
+
+  mysql:
+    image: mysql:5.7
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: sec
+      MYSQL_USER: sec
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "33306:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d
+
+

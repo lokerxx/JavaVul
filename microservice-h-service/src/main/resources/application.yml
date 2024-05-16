@@ -1,0 +1,13 @@
+server:
+  port: 29991
+
+spring:
+  application:
+    name: service-h
+
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eureka-server:29999/eureka/
