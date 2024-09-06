@@ -1019,6 +1019,23 @@ requests_config = {
         'name': 'SQL注入-mybatics-数字',
         'type': 'repair',
     },
+
+    'sql_injection_id1_repair': {
+        'method': 'GET',
+        'url': "http://{}:9990/users1/1'/".format(host),
+        'headers': {'Content-Type': 'application/json'},
+        'name': 'SQL注入-mybatics-拦截器过滤',
+        'type': 'repair',
+    },
+
+    'sql_injection_id2_repair': {
+        'method': 'GET',
+        'url': "http://{}:9990/users2/1'/".format(host),
+        'headers': {'Content-Type': 'application/json'},
+        'name': 'SQL注入-mybatics-long类型强制转换',
+        'type': 'repair',
+    },
+
     'sql_injection_ids_repair': {
         'method': 'GET',
         'url': "http://{}:9990/users/ids/?ids=1,2,3'".format(host),
@@ -1092,7 +1109,23 @@ requests_config = {
         'method': 'GET',
         'url': 'http://{}:9990/file_read?filePath=pom.xml'.format(host),
         'headers': {'Content-Type': 'application/json'},
-        'name': '文件读取漏洞',
+        'name': '文件读取漏洞-限制路径',
+        'type': 'repair',
+    },
+
+    'file_read_repair1': {
+        'method': 'GET',
+        'url': 'http://{}:9990/file_read1?filePath=pom.xml'.format(host),
+        'headers': {'Content-Type': 'application/json'},
+        'name': '文件读取漏洞-安全方法',
+        'type': 'repair',
+    },
+
+    'file_read_repair2': {
+        'method': 'GET',
+        'url': 'http://{}:9990/file_read2?filePath=pom.xml'.format(host),
+        'headers': {'Content-Type': 'application/json'},
+        'name': '文件读取漏洞-关键字拦截器过滤',
         'type': 'repair',
     },
 

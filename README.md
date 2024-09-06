@@ -112,6 +112,38 @@ git clone https://github.com/lokerxx/JavaVul
 
 
 
+## 支持靶场
+
+|          文件夹           |                           安全漏洞                           |  测试用途  |                       备注                        |
+| :-----------------------: | :----------------------------------------------------------: | :--------: | :-----------------------------------------------: |
+|  actuator_authorized_1.X  |                   actuator 未授权访问 1.X                    |    修复    |                                                   |
+|  actuator_authorized_2.X  |                   actuator 未授权访问 2.X                    |    修复    |                                                   |
+| actuator_unauthorized_1.X |                   actuator 未授权访问 1.X                    |    漏洞    |                                                   |
+| actuator_unauthorized_2.X |                   actuator 未授权访问 2.X                    |    漏洞    |                                                   |
+|         base_vul          | SQL注入、XSS、不安全文件操作、重定向漏洞、正则DOS漏洞、Crlf注入漏洞、命令注入漏洞、SPEL漏洞、SSRF漏洞、SSTI漏洞、不安全反射漏洞、XXE漏洞 |    漏洞    |                                                   |
+|      base_vul_repair      | SQL注入、XSS、不安全文件操作、重定向漏洞、正则DOS漏洞、Crlf注入漏洞、命令注入漏洞、SPEL漏洞、SSRF漏洞、SSTI漏洞、不安全反射漏洞、XXE漏洞 |    修复    |                                                   |
+|          cas_xxe          |                           XXE漏洞                            |    漏洞    | cas在3.1.1-3.5.1存在XXE漏洞<br />修复版本为3.6.0- |
+|        collections        |                     collections 反序列化                     | **未完成** |                                                   |
+|      CVE-2019-10173       |                     XStream反序列化漏洞                      |    漏洞    |                                                   |
+|      CVE-2019-12384       |                jackson-databind 反序列化漏洞                 |    漏洞    |                                                   |
+|     druid_authorized      |                       druid未授权漏洞                        |    修复    |                                                   |
+|    druid_unauthorized     |                       druid未授权漏洞                        |    漏洞    |                                                   |
+|        fastjson-*         |                 各个版本fastjson反序列化漏洞                 |    漏洞    |                                                   |
+|         Hibernate         |                      Hibernate 注入漏洞                      | 修复、漏洞 |                                                   |
+|          HSQLDB           |                       HSQLDB 注入漏洞                        | 修复、漏洞 |                                                   |
+|            jsp            |                                                              | **未完成** |                  jsp版的base_vul                  |
+|         log4jvul          |                         log4j2 漏洞                          |    漏洞    |                                                   |
+|  microservice-*-service   |                          分布式服务                          |  性能测试  |            用于验证分布式微服务的性能             |
+|         wxpay-xxe         |                       微信支付XXE漏洞                        |    漏洞    |                                                   |
+|         logic_vul         |                        业务逻辑漏洞：                        |            |                                                   |
+|                           |                                                              |            |                                                   |
+|                           |                                                              |            |                                                   |
+|                           |                                                              |            |                                                   |
+
+
+
+
+
 ## 运行
 
 访问：`http://宿主机IP:5000/`
@@ -373,6 +405,7 @@ adding: my/agent/SimpleAgent.class(in = 492) (out= 320)(deflated 34%)
 - https://github.com/zhlu32/range_java_micro_service_seclab
 - https://rasp.baidu.com/doc/install/testcase.html
 - https://github.com/lemono0/FastJsonParty/
+- https://github.com/roottusk/vapi
 
 ## Star History Chart
 
@@ -380,5 +413,5 @@ adding: my/agent/SimpleAgent.class(in = 492) (out= 320)(deflated 34%)
 
 ## 待进行
 
-- [ ] cas-client xxe（漏洞和修复）
+- [x] cas-client xxe（漏洞和修复）
 - [ ] SQL注入传 order by 参数, 白名单列表（误报）

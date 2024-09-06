@@ -11,6 +11,11 @@ import java.util.List;
 public interface UserMapper {
     User findById(@Param("id") String id);
 
+    User findById1(@Param("id") String id);
+
+    User findById2(@Param("id") Long id);
+
+
     List<User> findUsersByIds(@Param("ids") String ids);
 
     List<User> findUsersByNameLike(@Param("name") String name);

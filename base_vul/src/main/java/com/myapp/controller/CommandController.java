@@ -12,6 +12,7 @@ public class CommandController {
     @GetMapping("/runtime_command_execute")
     public String executeRuntimeCommand(@RequestParam String  command) throws IOException {
         String output = "";
+        System.out.println("执行命令："+command);
         Process process = Runtime.getRuntime().exec(command);
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;

@@ -1,5 +1,6 @@
 package com.myapp.controller;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,10 +16,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+
+import com.myapp.util.FileFilter;
+
 
 @RestController
 public class FileController {
@@ -84,8 +89,15 @@ public class FileController {
     @GetMapping("/file_read")
     public String readFile(@RequestParam String filePath) throws IOException {
         File file = new File(ResourceUtils.getFile(filePath).getAbsolutePath());
+        String absolutePath = file.getAbsolutePath();
         String canonicalPath = file.getCanonicalPath();
-        if (!canonicalPath.startsWith(ResourceUtils.getFile(UPLOADS_FOLDER).getCanonicalPath())) {
+        String uploadPath = ResourceUtils.getFile(UPLOADS_FOLDER).getCanonicalPath();
+
+        System.out.println("Absolute Path: " + absolutePath);
+        System.out.println("Canonical Path: " + canonicalPath);
+        System.out.println("Canonical Path: " + uploadPath);
+
+        if (!canonicalPath.startsWith(uploadPath)) {
             return "Access denied";
         }
         if (!file.exists() || !file.isFile()) {
@@ -103,6 +115,101 @@ public class FileController {
         reader.close();
         return stringBuilder.toString();
     }
+
+
+    @GetMapping("/file_read1")
+    public String readFile1(@RequestParam String filePath) throws IOException {
+        // 获取并规范化路径
+        Path basePath = Paths.get(UPLOADS_FOLDER).toRealPath();
+        Path resolvedPath = basePath.resolve(filePath).normalize();
+
+        // 检查是否在指定目录下
+        if (!resolvedPath.startsWith(basePath)) {
+            return "Access denied";
+        }
+
+        // 检查文件是否存在、是否是文件、是否可读
+        if (!Files.exists(resolvedPath) || !Files.isRegularFile(resolvedPath) || !Files.isReadable(resolvedPath)) {
+            return "File not found or cannot be read";
+        }
+
+        // 读取文件内容
+        StringBuilder contentBuilder = new StringBuilder();
+        try (BufferedReader reader = Files.newBufferedReader(resolvedPath)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                contentBuilder.append(line).append("\n");
+            }
+        }
+
+        return contentBuilder.toString();
+    }
+
+
+
+    @GetMapping("/file_read2")
+    public String readFile2(@RequestParam String filePath) {
+        try {
+            // 首先过滤路径中的目录遍历字符
+            if (!FileFilter.doFilter(filePath)) {
+                return "Access denied due to invalid path";
+            }
+
+            // 验证路径是否在指定的父目录中
+            if (FileFilter.isValidDirectoryPath(filePath, UPLOADS_FOLDER)) {
+                Path resolvedPath = Paths.get(UPLOADS_FOLDER).resolve(filePath).normalize();
+
+                // 检查文件是否存在、是否是文件、是否可读
+                if (!Files.exists(resolvedPath) || !Files.isRegularFile(resolvedPath) || !Files.isReadable(resolvedPath)) {
+                    return "File not found or cannot be read";
+                }
+
+                // 读取文件内容
+                StringBuilder contentBuilder = new StringBuilder();
+                try (BufferedReader reader = Files.newBufferedReader(resolvedPath)) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        contentBuilder.append(line).append("\n");
+                    }
+                }
+
+                return contentBuilder.toString();
+            } else {
+                return "Access denied";
+            }
+        } catch (InvalidPathException | IOException e) {
+            return "Invalid file path or access error";
+        }
+    }
+
+
+    @GetMapping("/file_read3")
+    public String readFile3(@RequestParam String filePath) throws IOException {
+        File file = new File(ResourceUtils.getFile(filePath).getAbsolutePath());
+        String absolutePath = file.getAbsolutePath();
+        String canonicalPath = file.getCanonicalPath();
+        String uploadPath = ResourceUtils.getFile(UPLOADS_FOLDER).getCanonicalPath();
+
+
+        System.out.println("Absolute Path: " + absolutePath);
+        System.out.println("Canonical Path: " + canonicalPath);
+        System.out.println("Canonical Path: " + uploadPath);
+
+        if (StringUtils.contains(filePath, "/") ) {
+            return "存在目录遍历漏洞";
+        }
+
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        while ((line = reader.readLine()) != null) {
+            stringBuilder.append(line);
+        }
+        reader.close();
+        return stringBuilder.toString();
+    }
+
+
 
     @GetMapping("/file_write")
     public String writeFile(@RequestParam String fileName, @RequestParam String data) throws IOException {

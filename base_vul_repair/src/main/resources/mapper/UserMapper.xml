@@ -8,6 +8,15 @@
         SELECT * FROM users WHERE id = '#{id}'
     </select>
 
+    <select id="findById1" resultType="User">
+        SELECT * FROM users WHERE id = '${id}'
+    </select>
+
+
+    <select id="findById2" resultType="User">
+        SELECT * FROM users WHERE id = '${id}'
+    </select>
+
     <select id="findUsersByIds" resultType="User">
         SELECT * FROM users
         WHERE id IN (#{ids})

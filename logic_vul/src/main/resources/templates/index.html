@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>业务逻辑漏洞测试页面</title>
+    <style>
+        button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+<h1>业务逻辑漏洞测试页面</h1>
+<h2>个人信息泄露</h2>
+<!-- 单个生成信息的按钮 -->
+<button onclick="callApi('/api/fake-person-basic')">生成姓名、身份证、手机号码</button><br>
+<button onclick="callApi('/api/fake-person-full')">生成姓名、身份证、手机号码、地址</button><br>
+
+<!-- 批量生成信息的按钮 -->
+<button onclick="callApi('/api/fake-person-basic-list')">随机生成10-100个基本个人信息</button><br>
+<button onclick="callApi('/api/fake-person-full-list')">随机生成10-100个完整个人信息</button><br>
+
+<!-- 电商相关接口按钮 -->
+<button onclick="callApi('/api/ecommerce-order')">生成单个电商订单信息</button><br>
+<button onclick="callApi('/api/ecommerce-order-list')">随机生成10-100个电商订单信息</button><br>
+
+<h2>未授权访问</h2>
+<!-- 新增：未授权访问接口按钮 -->
+<button onclick="getUserById()">通过ID查询用户信息</button>
+<button onclick="getUserByCookie()">通过Cookie查询用户信息</button>
+
+账号爆破
+密码爆破
+密码重置
+用户注册
+短信轰炸
+短信失效
+
+
+
+
+<h2>响应结果：</h2>
+<pre id="response"></pre>
+
+<script>
+    function callApi(endpoint) {
+        fetch(endpoint)
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    displayArrayData(data);
+                } else {
+                    displayObjectData(data);
+                }
+            })
+            .catch(error => {
+                document.getElementById('response').textContent = 'Error: ' + error;
+            });
+    }
+
+    // 显示单个对象的数据
+    function displayObjectData(data) {
+        let output = JSON.stringify(data, null, 4);
+        document.getElementById('response').textContent = output;
+    }
+
+    // 显示数组的数据
+    function displayArrayData(data) {
+        let output = data.map(item => JSON.stringify(item, null, 4)).join('\n\n');
+        document.getElementById('response').textContent = output;
+    }
+
+    // 新增：通过ID查询用户信息
+    function getUserById() {
+        const userId = prompt("请输入用户ID:");
+        if (userId) {
+            fetch(`/api/user?id=${userId}`)
+                .then(response => response.json())
+                .then(data => displayObjectData(data))
+                .catch(error => {
+                    document.getElementById('response').textContent = 'Error: ' + error;
+                });
+        }
+    }
+
+    // 新增：通过Cookie查询用户信息
+    function getUserByCookie() {
+        const userId = prompt("请输入用户ID以设置Cookie:");
+        if (userId) {
+            // 设置cookie
+            document.cookie = `id=${userId}; path=/`;
+            fetch('/api/user/cookie', {
+                headers: {
+                    'Cookie': document.cookie
+                }
+            })
+                .then(response => response.json())
+                .then(data => displayObjectData(data))
+                .catch(error => {
+                    document.getElementById('response').textContent = 'Error: ' + error;
+                });
+        }
+    }
+</script>
+</body>
+</html>
