@@ -405,6 +405,32 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms512m -Xmx1024m
 
+  shior-1.2.4:
+    image: wushangleon/shior-1.2.4
+    build:
+      context: ./shior-1.2.4
+      dockerfile: Dockerfile_local
+    ports:
+      - "9970:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms512m -Xmx1024m
+
+  shiro-1.25_1.42:
+    image: wushangleon/shiro-1.25_1.42
+    build:
+      context: ./shiro-1.25_1.42
+      dockerfile: Dockerfile_local
+    ports:
+      - "9969:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms512m -Xmx1024m
+
 
   flask:
     image: wushangleon/javavul_index

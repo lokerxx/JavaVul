@@ -126,6 +126,8 @@ git clone https://github.com/lokerxx/JavaVul
 |        collections        |                     collections 反序列化                     | **未完成** |                                                   |
 |      CVE-2019-10173       |                     XStream反序列化漏洞                      |    漏洞    |                                                   |
 |      CVE-2019-12384       |                jackson-databind 反序列化漏洞                 |    漏洞    |                                                   |
+|        shior-1.2.4        |          Apache Shiro 1.2.4 RememberMe 反序列化漏洞          |    漏洞    |                  CVE-2016-4437                    |
+|      shiro-1.25_1.42      |         Apache Shiro RememberMe Padding Oracle 靶场          |    漏洞    |                  CVE-2019-12422                   |
 |     druid_authorized      |                       druid未授权漏洞                        |    修复    |                                                   |
 |    druid_unauthorized     |                       druid未授权漏洞                        |    漏洞    |                                                   |
 |        fastjson-*         |                 各个版本fastjson反序列化漏洞                 |    漏洞    |                                                   |

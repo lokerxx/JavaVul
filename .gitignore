@@ -29,3 +29,11 @@ target/
 *.iml
 
 *.iml
+actuator_authorized_1.X/actuator_authorized_1.X.iml
+actuator_authorized_2.X/actuator_authorized.iml
+actuator_unauthorized_1.X/actuator_unauthorized_1.X.iml
+actuator_unauthorized_2.X/actuator_unauthorized.iml
+base_vul/base_vul.iml
+collections/collections.iml
+CVE-2019-10173/CVE-2019-10173.iml
+CVE-2019-12384/CVE-2019-12384.iml

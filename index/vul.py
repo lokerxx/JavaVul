@@ -4,6 +4,14 @@ host = os.environ.get('HOST', '192.168.0.9')
 
 # 定义请求的配置
 requests_config = {
+    'shiro_1_2_4_normal': {
+        'method': 'POST',
+        'url': 'http://{}:9970/login'.format(host),
+        'headers': {'Content-Type': 'application/x-www-form-urlencoded'},
+        'data': 'username=admin&password=admin123&rememberMe=true',
+        'name': 'Apache Shiro 1.2.4 RememberMe鍙嶅簭鍒楁紡娲?CVE-2016-4437',
+        'type': 'normal',
+    },
     'log4j2_attack': {
         'name': 'Log4j2 远程代码执行漏洞（CVE-2021-44228）',
         'method': 'POST',
