@@ -1,5 +1,6 @@
 package com.myapp.config;
 
+import com.myapp.support.ShiroWeakKeySupport;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.realm.SimpleAccountRealm;
@@ -15,14 +16,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.DelegatingFilterProxy;
 
 import javax.servlet.DispatcherType;
-import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Configuration
 public class ShiroConfig {
 
-    public static final String WEAK_PUBLIC_KEY = "kPH+bIxk5D2deZiIxcaaaA==";
+    public static final String WEAK_PUBLIC_KEY = ShiroWeakKeySupport.DEFAULT_KEY;
 
     @Bean
     public Realm realm() {
@@ -40,8 +40,8 @@ public class ShiroConfig {
         cookie.setMaxAge(7 * 24 * 60 * 60);
         rememberMeManager.setCookie(cookie);
 
-        // Deliberately insecure for lab: fixed known public weak key.
-        rememberMeManager.setCipherKey(Base64.getDecoder().decode(WEAK_PUBLIC_KEY));
+        // Deliberately insecure for lab: the runtime really uses this fixed public weak key.
+        rememberMeManager.setCipherKey(ShiroWeakKeySupport.DEFAULT_KEY_BYTES);
         return rememberMeManager;
     }
 
@@ -67,6 +67,9 @@ public class ShiroConfig {
         chain.put("/shiro-1.8.0", "anon");
         chain.put("/login", "anon");
         chain.put("/weak-key/status", "anon");
+        chain.put("/rememberme/check", "anon");
+        chain.put("/rememberme/dictionary", "anon");
+        chain.put("/rememberme/scan", "anon");
         chain.put("/health", "anon");
         chain.put("/logout", "logout");
         chain.put("/**", "user");

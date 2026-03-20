@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+    <constant name="struts.devMode" value="true"/>
+    <constant name="struts.mapper.alwaysSelectFullNamespace" value="true"/>
+
+    <package name="default" namespace="/" extends="struts-default">
+        <action name="index" class="com.myapp.action.IndexAction">
+            <result>/WEB-INF/content/index.jsp</result>
+        </action>
+    </package>
+
+    <package name="showcase" extends="struts-default">
+        <action name="actionChain1" class="com.myapp.action.ChainAction">
+            <result type="redirect">/index.action?marker=${namespace}</result>
+        </action>
+    </package>
+</struts>

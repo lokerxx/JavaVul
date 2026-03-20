@@ -5,7 +5,7 @@
 <mapper namespace="com.myapp.mapper.UserMapper">
 
     <select id="findById" resultType="User">
-        SELECT * FROM users WHERE id = '#{id}'
+        SELECT * FROM users WHERE id = #{id}
     </select>
 
     <select id="findById1" resultType="User">
@@ -19,17 +19,29 @@
 
     <select id="findUsersByIds" resultType="User">
         SELECT * FROM users
-        WHERE id IN (#{ids})
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
     </select>
 
     <select id="findUsersByNameLike" resultType="User">
         SELECT * FROM users
-        WHERE name LIKE CONCAT('%', #{name}, '%')
+        WHERE name LIKE '%' || #{name} || '%'
     </select>
 
     <select id="findUsersOrderBy" resultType="User">
         SELECT * FROM users
-        ORDER BY #{orderByColumn} #{orderByDirection}
+        ORDER BY
+        <choose>
+            <when test="orderByColumn == 'id'">id</when>
+            <when test="orderByColumn == 'name'">name</when>
+            <otherwise>id</otherwise>
+        </choose>
+        <choose>
+            <when test="orderByDirection != null and orderByDirection.toLowerCase() == 'desc'">DESC</when>
+            <otherwise>ASC</otherwise>
+        </choose>
     </select>
 
     <select id="findUsersByNames" resultType="User">

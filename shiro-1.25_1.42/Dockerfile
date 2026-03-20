@@ -6,4 +6,5 @@ RUN mvn package -DskipTests
 
 FROM wushangleon/java:jdk8u112
 COPY --from=builder /opt/shiro/target/shiro-1.25_1.42-1.0-SNAPSHOT.jar /opt/app.jar
+EXPOSE 8080
 CMD ["java", "-jar", "/opt/app.jar"]

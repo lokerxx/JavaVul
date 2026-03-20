@@ -9,6 +9,7 @@ FROM wushangleon/java:jdk8u112
 COPY --from=builder /opt/base_vul/target/base_vul_repair-1.0-SNAPSHOT.jar /opt/app.jar
 
 # 定义启动命令
+EXPOSE 8080
 CMD ["java", "-jar", "/opt/app.jar"]
 
 

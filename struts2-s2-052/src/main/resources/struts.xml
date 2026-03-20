@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+    <constant name="struts.devMode" value="true"/>
+    <constant name="struts.mapper.class" value="rest"/>
+
+    <package name="rest" namespace="/orders" extends="rest-default">
+        <default-action-ref name="orders"/>
+        <action name="orders" class="com.myapp.action.OrdersController">
+            <result name="success">/WEB-INF/content/index.jsp</result>
+        </action>
+        <action name="{id}" class="com.myapp.action.OrdersController">
+            <result name="success">/WEB-INF/content/index.jsp</result>
+            <result name="edit">/WEB-INF/content/index.jsp</result>
+        </action>
+        <action name="{id}/edit" class="com.myapp.action.OrdersController" method="edit">
+            <result name="success">/WEB-INF/content/index.jsp</result>
+            <result name="edit">/WEB-INF/content/index.jsp</result>
+        </action>
+    </package>
+</struts>

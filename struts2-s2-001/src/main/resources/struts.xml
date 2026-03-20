@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+    <constant name="struts.devMode" value="true"/>
+
+    <package name="default" namespace="/" extends="struts-default">
+        <default-action-ref name="index"/>
+
+        <action name="index" class="com.myapp.action.IndexAction">
+            <result>/WEB-INF/content/index.jsp</result>
+        </action>
+
+        <action name="login" class="com.myapp.action.LoginAction">
+            <result name="input">/WEB-INF/content/login.jsp</result>
+            <result name="success">/WEB-INF/content/success.jsp</result>
+        </action>
+    </package>
+</struts>

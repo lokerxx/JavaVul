@@ -1,5 +1,6 @@
 package com.myapp.config;
 
+import com.myapp.support.ShiroWeakKeySupport;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.realm.SimpleAccountRealm;
@@ -36,6 +37,7 @@ public class ShiroConfig {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(7 * 24 * 60 * 60);
         rememberMeManager.setCookie(cookie);
+        rememberMeManager.setCipherKey(ShiroWeakKeySupport.DEFAULT_KEY_BYTES);
         return rememberMeManager;
     }
 
