@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SM4-CBC Bidirectional</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>SM4-CBC Bidirectional</h1>
+        <p>目标：补国密对称双向报文。这里仍然采用 mock 的 SM4-CBC，但保留“请求密文 + 响应密文 + iv 分离”的实战视角。</p>
+        <div class="chips">
+            <span class="chip">扩展方向：国密双向报文</span>
+            <span class="chip">技术点：SM4 Request + Response</span>
+            <span class="chip">推荐动作：分开抓请求解包点和响应解包点</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>核心逻辑</h2>
+<pre>function sm4Mock(text, key, iv) {
+  return btoa(text.split('').reverse().join('') + '|' + iv + '|' + key.slice(-4));
+}
+const req = { taskId: 'GM-0088', action: 'sync-case', operator: 'carol' };
+const resp = { status: 'DONE', count: 12, operator: 'carol' };</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟交互</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交关键字段，格式：<code>taskId|status|operator</code></p>
+        <input id="answer" placeholder="例如：GM-0088|DONE|carol">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+</div>
+
+<script>
+function sm4Mock(text, key, iv){
+  return btoa(text.split('').reverse().join('') + '|' + iv + '|' + key.slice(-4));
+}
+
+function renderPacket(){
+  const req = { taskId: 'GM-0088', action: 'sync-case', operator: 'carol' };
+  const resp = { status: 'DONE', count: 12, operator: 'carol' };
+  const packet = {
+    request: {
+      iv: btoa('GMREQ-IV-0088001'),
+      data: sm4Mock(JSON.stringify(req), 'GMREQ-KEY-008800', 'GMREQ-IV-0088001')
+    },
+    response: {
+      iv: btoa('GMRESP-IV-12001'),
+      data: sm4Mock(JSON.stringify(resp), 'GMRESP-KEY-1200', 'GMRESP-IV-12001')
+    }
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'GM-0088|DONE|carol';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '这题要同时从请求明文和响应明文里找字段。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

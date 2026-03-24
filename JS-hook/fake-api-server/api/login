@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "message": "登录成功",
+  "user": {
+    "id": 1,
+    "username": "管理员",
+    "email": "admin@example.com"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+  "loginTime": "2025-01-31T12:00:00.000Z",
+  "rememberMe": true
+}

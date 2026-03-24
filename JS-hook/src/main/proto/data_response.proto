@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package api;
+
+option java_package = "com.myapp.jshook.proto.report";
+option java_multiple_files = true;
+
+message DataPoint {
+  string label = 1;
+  double value = 2;
+  string unit = 3;
+  int64 timestamp = 4;
+}
+
+message ChartData {
+  string chart_type = 1;
+  string title = 2;
+  repeated DataPoint data_points = 3;
+  map<string, string> metadata = 4;
+}
+
+message ReportData {
+  string report_id = 1;
+  string title = 2;
+  string description = 3;
+  repeated ChartData charts = 4;
+  map<string, double> summary_metrics = 5;
+  int64 generated_at = 6;
+}
+
+message DataResponse {
+  string request_id = 1;
+  int64 timestamp = 2;
+  bool success = 3;
+  string message = 4;
+  int32 code = 5;
+  string category = 6;
+  string option = 7;
+  ReportData report_data = 8;
+}

@@ -1,0 +1,4 @@
+FROM wushangleon/java:jdk8u112
+COPY target/shior-1.2.4-1.0-SNAPSHOT.jar /opt/app.jar
+EXPOSE 8080
+CMD ["java", "-jar", "/opt/app.jar"]

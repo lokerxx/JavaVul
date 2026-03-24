@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>重复退款场景</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .card { background: #fff; border-radius: 18px; box-shadow: 0 12px 32px rgba(15,23,42,.08); padding: 24px; margin-bottom: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        input, textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; }
+        textarea { min-height: 140px; }
+        button, a.button { display: inline-block; margin-right: 10px; margin-top: 12px; border: 0; border-radius: 999px; background: #14532d; color: #fff; padding: 10px 16px; cursor: pointer; text-decoration: none; }
+        a.button.secondary, button.secondary { background: #475569; }
+        pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 14px; min-height: 220px; overflow: auto; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>重复退款场景</h1>
+        <p>漏洞版缺少幂等键、支付状态与归属校验，退款请求可以被反复重放；安全版要求订单已支付、token 有效且提供幂等键。</p>
+        <a class="button secondary" href="/logic-vul">返回首页</a>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <h2>漏洞版</h2>
+            <input id="refundOrderId" value="5003">
+            <textarea id="refundVulBody">{ "actingUserId": 27, "refundAmount": 59.7, "reason": "duplicate replay" }</textarea>
+            <button onclick="postRefund('/payments/' + document.getElementById('refundOrderId').value + '/refund/vul', 'refundVulBody')">执行漏洞版</button>
+        </div>
+        <div class="card">
+            <h2>安全版</h2>
+            <input id="refundToken" placeholder="先获取订单所有者 token">
+            <textarea id="refundSafeBody">{ "refundAmount": 59.7, "reason": "customer request", "idempotencyKey": "refund-5003-001" }</textarea>
+            <button onclick="getRefundToken()">获取订单所有者 token</button>
+            <button class="secondary" onclick="postRefundWithToken('/payments/' + document.getElementById('refundOrderId').value + '/refund/safe', 'refundSafeBody', 'refundToken')">执行安全版</button>
+        </div>
+    </div>
+    <div class="card"><h2>响应结果</h2><pre id="result">等待发送请求...</pre></div>
+</div>
+<script>
+    async function getRefundToken() {
+        const response = await fetch('/auth/login-safe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'jefferey.krajcik', password: 'dbd9dv0k19z0mqy' }) });
+        const data = await response.json();
+        document.getElementById('refundToken').value = data.token || '';
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    }
+    async function postRefund(url, id) {
+        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: document.getElementById(id).value });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+    async function postRefundWithToken(url, id, tokenId) {
+        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Logic-Token': document.getElementById(tokenId).value }, body: document.getElementById(id).value });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+</script>
+</body>
+</html>

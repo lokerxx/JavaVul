@@ -210,17 +210,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9997:8080"      
-    depends_on:
-      - mysql
     volumes:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
-      - DATABASE_HOST=mysql
-      - DATABASE_USER=sec
-      - DATABASE_PASSWORD=123456
-      - DATABASE_NAME=sec
 
 
   druid_authorized:
@@ -230,17 +224,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9996:8080"      
-    depends_on:
-      - mysql
     volumes:
       - ./agent:/agent/
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
-      - DATABASE_HOST=mysql
-      - DATABASE_USER=sec
-      - DATABASE_PASSWORD=123456
-      - DATABASE_NAME=sec      
 
 
 
@@ -304,8 +292,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9991:8080"      
-    depends_on:
-      - mysql
     volumes:
       - ./agent:/agent/
     environment:
@@ -319,8 +305,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9990:8080"      
-    depends_on:
-      - mysql
     volumes:
       - ./agent:/agent/
     environment:
@@ -407,14 +391,349 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
 
+  shior-1.2.4:
+    image: wushangleon/shior-1.2.4
+    build:
+      context: ./shior-1.2.4
+      dockerfile: Dockerfile
+    ports:
+      - "9970:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
 
+  shiro-1.25_1.42:
+    image: wushangleon/shiro-1.25_1.42
+    build:
+      context: ./shiro-1.25_1.42
+      dockerfile: Dockerfile
+    ports:
+      - "9969:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
 
+  shiro-1.8.0:
+    image: wushangleon/shiro-1.8.0
+    build:
+      context: ./shiro-1.8.0
+      dockerfile: Dockerfile
+    ports:
+      - "9968:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
 
+  shiro-cve-2020-17523:
+    image: wushangleon/shiro-cve-2020-17523
+    build:
+      context: ./shiro-cve-2020-17523
+      dockerfile: Dockerfile
+    ports:
+      - "9966:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
 
+  struts2-s2-016:
+    image: wushangleon/struts2-s2-016
+    build:
+      context: ./struts2-s2-016
+      dockerfile: Dockerfile
+    ports:
+      - "9957:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
 
+  struts2-s2-019:
+    image: wushangleon/struts2-s2-019
+    build:
+      context: ./struts2-s2-019
+      dockerfile: Dockerfile
+    ports:
+      - "9956:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
 
+  struts2-s2-032:
+    image: wushangleon/struts2-s2-032
+    build:
+      context: ./struts2-s2-032
+      dockerfile: Dockerfile
+    ports:
+      - "9955:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
 
+  struts2-s2-045:
+    image: wushangleon/struts2-s2-045
+    build:
+      context: ./struts2-s2-045
+      dockerfile: Dockerfile
+    ports:
+      - "9954:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
 
+  struts2-s2-046:
+    image: wushangleon/struts2-s2-046
+    build:
+      context: ./struts2-s2-046
+      dockerfile: Dockerfile
+    ports:
+      - "9953:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-048:
+    image: wushangleon/struts2-s2-048
+    build:
+      context: ./struts2-s2-048
+      dockerfile: Dockerfile
+    ports:
+      - "9952:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-052:
+    image: wushangleon/struts2-s2-052
+    build:
+      context: ./struts2-s2-052
+      dockerfile: Dockerfile
+    ports:
+      - "9951:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-053:
+    image: wushangleon/struts2-s2-053
+    build:
+      context: ./struts2-s2-053
+      dockerfile: Dockerfile
+    ports:
+      - "9950:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-057:
+    image: wushangleon/struts2-s2-057
+    build:
+      context: ./struts2-s2-057
+      dockerfile: Dockerfile
+    ports:
+      - "9949:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-059:
+    image: wushangleon/struts2-s2-059
+    build:
+      context: ./struts2-s2-059
+      dockerfile: Dockerfile
+    ports:
+      - "9948:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-061:
+    image: wushangleon/struts2-s2-061
+    build:
+      context: ./struts2-s2-061
+      dockerfile: Dockerfile
+    ports:
+      - "9947:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-062:
+    image: wushangleon/struts2-s2-062
+    build:
+      context: ./struts2-s2-062
+      dockerfile: Dockerfile
+    ports:
+      - "9946:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  collections:
+    image: wushangleon/collections
+    build:
+      context: ./collections
+      dockerfile: Dockerfile
+    ports:
+      - "9945:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-015:
+    image: wushangleon/struts2-s2-015
+    build:
+      context: ./struts2-s2-015
+      dockerfile: Dockerfile
+    ports:
+      - "9958:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-013:
+    image: wushangleon/struts2-s2-013
+    build:
+      context: ./struts2-s2-013
+      dockerfile: Dockerfile
+    ports:
+      - "9959:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-012:
+    image: wushangleon/struts2-s2-012
+    build:
+      context: ./struts2-s2-012
+      dockerfile: Dockerfile
+    ports:
+      - "9960:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-009:
+    image: wushangleon/struts2-s2-009
+    build:
+      context: ./struts2-s2-009
+      dockerfile: Dockerfile
+    ports:
+      - "9961:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-007:
+    image: wushangleon/struts2-s2-007
+    build:
+      context: ./struts2-s2-007
+      dockerfile: Dockerfile
+    ports:
+      - "9962:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  struts2-s2-005:
+    image: wushangleon/struts2-s2-005
+    build:
+      context: ./struts2-s2-005
+    ports:
+      - "9963:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms512m -Xmx1024m
+
+  struts2-s2-003:
+    image: wushangleon/struts2-s2-003
+    build:
+      context: ./struts2-s2-003
+    ports:
+      - "9964:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms512m -Xmx1024m
+
+  struts2-s2-001:
+    image: wushangleon/struts2-s2-001
+    build:
+      context: ./struts2-s2-001
+      dockerfile: Dockerfile
+    ports:
+      - "9965:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  logic_vul:
+    image: wushangleon/logic_vul
+    build:
+      context: ./logic_vul
+      dockerfile: Dockerfile
+    ports:
+      - "9967:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
+  js-hook:
+    image: wushangleon/js-hook
+    build:
+      context: ./JS-hook
+      dockerfile: Dockerfile
+    ports:
+      - "48159:8080"
 
 
   flask:
@@ -426,19 +745,3 @@ services:
       - "5000:5000"      
     environment:
       - HOST=192.168.0.9
-
-  mysql:
-    image: mysql:5.7
-    privileged: true
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: sec
-      MYSQL_USER: sec
-      MYSQL_PASSWORD: 123456
-    ports:
-      - "33306:3306"
-    volumes:
-      - ./mysql-data:/var/lib/mysql
-      - ./init-db:/docker-entrypoint-initdb.d
-
-

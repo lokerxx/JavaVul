@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟双向 Protocol Buffers 响应",
+  "data": {
+    "request_id": "abc123user",
+    "timestamp": 1738252800,
+    "success": true,
+    "service_name": "user-management",
+    "status_code": 200,
+    "user_response": {
+      "success": true,
+      "message": "用户create操作成功",
+      "user_id": "USR123456",
+      "name": "张三",
+      "email": "zhangsan@company.com",
+      "role": "user",
+      "status": "active",
+      "created_at": 1738252800,
+      "updated_at": 1738252800
+    }
+  }
+}

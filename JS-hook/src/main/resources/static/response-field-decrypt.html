@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Response Field Decryption</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .header p {
+            color: #666;
+            margin: 0;
+            font-size: 16px;
+        }
+        .user-selector {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+        }
+        select, button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .fetch-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .fetch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .fetch-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .user-info {
+            display: none;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border: 1px solid #dee2e6;
+        }
+        .info-section {
+            margin-bottom: 20px;
+        }
+        .info-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+            flex: 1;
+        }
+        .info-value {
+            flex: 2;
+            text-align: right;
+            color: #6c757d;
+        }
+        .encrypted-value {
+            color: #dc3545;
+            font-family: monospace;
+            font-size: 12px;
+            background: #f8d7da;
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: 1px solid #f5c6cb;
+        }
+        .decrypted-value {
+            color: #155724;
+            font-weight: bold;
+            background: #d4edda;
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: 1px solid #c3e6cb;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #495057;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
+        .json-block {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 10px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .encrypted-field {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .decrypt-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .decrypt-btn:hover {
+            background: #218838;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #dc3545;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>用户信息查询</h1>
+            <p>Response JSON Field Encryption Case - 响应字段解密</p>
+        </div>
+
+        <div class="user-selector">
+            <div class="form-group">
+                <label for="userId">选择用户:</label>
+                <select id="userId" name="userId">
+                    <option value="1001">张三 (ID: 1001)</option>
+                    <option value="1002">李四 (ID: 1002)</option>
+                    <option value="1003">王五 (ID: 1003)</option>
+                    <option value="1004">赵六 (ID: 1004)</option>
+                </select>
+            </div>
+            <button class="fetch-btn" id="fetchBtn">获取用户详细信息</button>
+        </div>
+
+        <div id="userInfo" class="user-info"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            const secretKey = 'response-decrypt-2025';
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 解密字段
+            const decryptField = (encryptedValue) => {
+                try {
+                    const decryptedBytes = CryptoJS.AES.decrypt(encryptedValue, secretKey);
+                    return decryptedBytes.toString(CryptoJS.enc.Utf8);
+                } catch (error) {
+                    return '解密失败';
+                }
+            };
+            
+            // 显示用户信息
+            const displayUserInfo = (userData, rawResponse) => {
+                const html = `
+                    <div class="info-section">
+                        <h3>👤 基本信息</h3>
+                        <div class="info-row">
+                            <span class="info-label">用户ID:</span>
+                            <span class="info-value">${userData.id}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">姓名:</span>
+                            <span class="info-value">${userData.name}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">邮箱:</span>
+                            <span class="info-value">${userData.email}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">部门:</span>
+                            <span class="info-value">${userData.department}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3>🔒 敏感信息 (服务器加密返回)</h3>
+                        <div class="info-row">
+                            <span class="info-label">手机号:</span>
+                            <span class="info-value">
+                                <span class="encrypted-value" id="encPhone">${userData.encryptedPhone.substring(0, 30)}...</span>
+                                <button class="decrypt-btn" onclick="decryptAndShow('encPhone', '${userData.encryptedPhone}', 'decPhone')">解密</button>
+                                <span class="decrypted-value" id="decPhone" style="display: none;"></span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">身份证号:</span>
+                            <span class="info-value">
+                                <span class="encrypted-value" id="encIdCard">${userData.encryptedIdCard.substring(0, 30)}...</span>
+                                <button class="decrypt-btn" onclick="decryptAndShow('encIdCard', '${userData.encryptedIdCard}', 'decIdCard')">解密</button>
+                                <span class="decrypted-value" id="decIdCard" style="display: none;"></span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">银行卡号:</span>
+                            <span class="info-value">
+                                <span class="encrypted-value" id="encBankCard">${userData.encryptedBankCard.substring(0, 30)}...</span>
+                                <button class="decrypt-btn" onclick="decryptAndShow('encBankCard', '${userData.encryptedBankCard}', 'decBankCard')">解密</button>
+                                <span class="decrypted-value" id="decBankCard" style="display: none;"></span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">家庭住址:</span>
+                            <span class="info-value">
+                                <span class="encrypted-value" id="encAddress">${userData.encryptedAddress.substring(0, 30)}...</span>
+                                <button class="decrypt-btn" onclick="decryptAndShow('encAddress', '${userData.encryptedAddress}', 'decAddress')">解密</button>
+                                <span class="decrypted-value" id="decAddress" style="display: none;"></span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3>📊 其他信息</h3>
+                        <div class="info-row">
+                            <span class="info-label">创建时间:</span>
+                            <span class="info-value">${new Date(userData.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">最后登录:</span>
+                            <span class="info-value">${new Date(userData.lastLogin).toLocaleString()}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">账户状态:</span>
+                            <span class="info-value">${userData.status}</span>
+                        </div>
+                    </div>
+                `;
+                
+                $('#userInfo').html(html).show();
+                
+                // 显示调试信息
+                showDebugInfo(rawResponse);
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (rawResponse) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - 响应字段解密过程</div>
+                    
+                    <strong>📡 服务器原始响应:</strong>
+                    <div class="json-block">${JSON.stringify(rawResponse, null, 2)}</div>
+                    
+                    <strong>🔑 解密说明:</strong><br>
+                    • 服务器返回的敏感字段使用AES加密<br>
+                    • 前端需要使用相同密钥解密这些字段<br>
+                    • 点击"解密"按钮可以看到解密后的明文<br>
+                    • 这种方式保护了传输过程中的敏感数据
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 全局解密函数
+            window.decryptAndShow = (encId, encryptedValue, decId) => {
+                const decrypted = decryptField(encryptedValue);
+                $(`#${encId}`).hide();
+                $(`#${decId}`).text(decrypted).show();
+                $(`#${encId}`).next('.decrypt-btn').hide();
+            };
+            
+            // 获取用户信息
+            $('#fetchBtn').on('click', function() {
+                const userId = $('#userId').val();
+                
+                // 禁用按钮
+                $(this).prop('disabled', true).text('获取中...');
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = `api/user-details-${userId}`;
+                } else {
+                    apiUrl = `http://localhost:48159/api/user-details/${userId}`;
+                }
+                
+                // 发送请求
+                $.ajax({
+                    url: apiUrl,
+                    type: 'GET',
+                    success: (response) => {
+                        displayUserInfo(response.data, response);
+                    },
+                    error: (xhr, status, error) => {
+                        let errorMsg = '获取用户信息失败';
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMsg = xhr.responseJSON.error;
+                        }
+                        
+                        const html = `
+                            <div class="error">
+                                <h3>❌ 获取失败</h3>
+                                <p><strong>错误信息:</strong> ${errorMsg}</p>
+                                <p><strong>状态码:</strong> ${xhr.status}</p>
+                                <p>请检查网络连接或稍后重试。</p>
+                            </div>
+                        `;
+                        $('#userInfo').html(html).show();
+                        console.error('Fetch error:', error);
+                    },
+                    complete: () => {
+                        // 恢复按钮
+                        $('#fetchBtn').prop('disabled', false).text('获取用户详细信息');
+                    }
+                });
+            });
+            
+            // 页面加载时自动获取第一个用户信息
+            $('#fetchBtn').trigger('click');
+        });
+    </script>
+</body>
+</html>

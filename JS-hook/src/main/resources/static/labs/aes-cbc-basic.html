@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-CBC Basic</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+    <script src="../libs/crypto-js-4.1.1.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>AES-CBC Basic</h1>
+        <p>目标：补齐最基础的 AES-CBC 场景。重点练习定位固定 <code>key</code>、固定 <code>iv</code>、明文 JSON 和真正进入 AES 前的字符串。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo / AesCbc</span>
+            <span class="chip">技术点：AES-CBC / 固定 iv</span>
+            <span class="chip">推荐动作：Hook JSON.stringify / AES.encrypt</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>function encryptOrder(body) {
+  const key = CryptoJS.enc.Utf8.parse('AesCbcKey-260321');
+  const iv = CryptoJS.enc.Utf8.parse('AesCbcIv-260321!');
+  return CryptoJS.AES.encrypt(JSON.stringify(body), key, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  }).ciphertext.toString(CryptoJS.enc.Base64);
+}</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交核心业务字段，格式：<code>orderId|amount|channel</code></p>
+        <input id="answer" placeholder="例如：ORD-20260321-88|2680|app">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>这类题最适合先 Hook <code>CryptoJS.AES.encrypt</code> 的第一个参数。</li>
+            <li>如果抓到的是对象，继续盯 <code>JSON.stringify</code>。</li>
+            <li>固定 iv 的场景在实战里不少见，是最适合入门的基线题。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+const payload = Object.freeze({
+  orderId: 'ORD-20260321-88',
+  amount: 2680,
+  channel: 'app',
+  currency: 'CNY'
+});
+
+function renderPacket(){
+  const key = CryptoJS.enc.Utf8.parse('AesCbcKey-260321');
+  const iv = CryptoJS.enc.Utf8.parse('AesCbcIv-260321!');
+  const encrypted = CryptoJS.AES.encrypt(JSON.stringify(payload), key, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  });
+  const packet = {
+    alg: 'AES-CBC',
+    iv: btoa('AesCbcIv-260321!'),
+    data: encrypted.ciphertext.toString(CryptoJS.enc.Base64)
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'ORD-20260321-88|2680|app';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '先抓 AES.encrypt 入参，再确认明文对象里的 orderId / amount / channel。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

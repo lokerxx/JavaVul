@@ -1,0 +1,25 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟响应头加密Cookie",
+  "data": {
+    "session_id": "SESABC123LOGIN",
+    "timestamp": 1738252800,
+    "authenticated": true,
+    "service_type": "login",
+    "client_ip": "192.168.1.100",
+    "login_result": {
+      "status": "success",
+      "user_id": "USERABC123",
+      "access_token": "ATLOGIN123456789ABCDEFGH",
+      "token_type": "Bearer",
+      "expires_in": 3600
+    }
+  },
+  "headers": {
+    "x-cookie": "U2FsdGVkX1+8QGqKZHMjRwJVm9QxZzNvYWJjZGVmZ2hpams1MjM0NTY3ODkwYWJjZGVmZ2hpams=",
+    "x-session-id": "SESABC123LOGIN",
+    "x-auth-status": "success",
+    "x-service-type": "login",
+    "content-type": "application/json"
+  }
+}

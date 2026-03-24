@@ -1,0 +1,392 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题库总入口 - 前端协议拆解训练场</title>
+    <meta name="description" content="统一浏览 JS 逆向、协议拆解、XHR Hook 实战题目。">
+    <style>
+        :root{
+            --bg:#08101f;
+            --panel:rgba(13,23,48,.84);
+            --panel-strong:#121d3b;
+            --line:rgba(148,163,184,.14);
+            --text:#e8eeff;
+            --muted:#9fb0d7;
+            --blue:#5b8cff;
+            --violet:#8b5cf6;
+            --shadow:0 24px 80px rgba(0,0,0,.3);
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            color:var(--text);
+            font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(91,140,255,.18), transparent 28%),
+                radial-gradient(circle at top right, rgba(139,92,246,.18), transparent 25%),
+                linear-gradient(180deg, #08101f 0%, #0c1428 100%);
+        }
+        a{color:inherit;text-decoration:none}
+        .wrap{max-width:1280px;margin:0 auto;padding:28px 20px 56px}
+        .panel{
+            background:var(--panel);
+            border:1px solid var(--line);
+            border-radius:24px;
+            box-shadow:var(--shadow);
+            backdrop-filter:blur(16px);
+        }
+        .nav,.hero,.section,.footer{padding:22px 24px}
+        .nav{
+            display:flex;justify-content:space-between;align-items:center;gap:16px;
+            margin-bottom:20px;
+        }
+        .brand{display:flex;align-items:center;gap:14px}
+        .logo{
+            width:44px;height:44px;border-radius:14px;
+            display:grid;place-items:center;
+            background:linear-gradient(135deg,var(--blue),var(--violet));
+            font-weight:800;
+        }
+        .brand h1{margin:0;font-size:18px}
+        .brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+        .nav-links{display:flex;gap:10px;flex-wrap:wrap}
+        .btn,.ghost,.filter-btn{
+            display:inline-flex;align-items:center;justify-content:center;
+            min-height:42px;padding:0 16px;border-radius:12px;
+            transition:.2s ease;font-weight:600;
+        }
+        .btn{
+            color:#fff;background:linear-gradient(135deg,var(--blue),var(--violet));
+            box-shadow:0 14px 28px rgba(91,140,255,.24);
+        }
+        .ghost,.filter-btn{
+            color:var(--muted);
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(148,163,184,.12);
+        }
+        .btn:hover,.ghost:hover,.filter-btn:hover{transform:translateY(-1px);color:var(--text)}
+        .filter-btn.active{
+            color:#fff;
+            border-color:rgba(91,140,255,.3);
+            background:linear-gradient(135deg, rgba(91,140,255,.24), rgba(139,92,246,.24));
+        }
+        .hero{
+            margin-bottom:20px;
+            display:grid;
+            grid-template-columns:1.2fr .9fr;
+            gap:22px;
+        }
+        .hero h2{margin:0 0 14px;font-size:42px;line-height:1.08}
+        .hero p{margin:0;color:var(--muted);line-height:1.85}
+        .eyebrow{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:7px 12px;border-radius:999px;
+            color:#dce6ff;background:rgba(91,140,255,.14);
+            border:1px solid rgba(91,140,255,.24);
+            font-size:13px;margin-bottom:16px;
+        }
+        .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+        .stats{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:14px;
+        }
+        .stat{
+            padding:18px;border-radius:18px;
+            background:var(--panel-strong);
+            border:1px solid rgba(148,163,184,.12);
+        }
+        .stat strong{display:block;font-size:28px;margin-bottom:6px}
+        .stat span{color:var(--muted);font-size:13px}
+        .section{margin-top:20px}
+        .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px}
+        .section-head h3{margin:0 0 8px;font-size:28px}
+        .section-head p{margin:0;color:var(--muted);line-height:1.75}
+        .filters{display:flex;gap:10px;flex-wrap:wrap}
+        .track-sections{display:grid;gap:18px}
+        .track{
+            background:var(--panel-strong);
+            border:1px solid rgba(148,163,184,.12);
+            border-radius:20px;
+            padding:20px;
+        }
+        .track-top{
+            display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+            margin-bottom:16px;
+        }
+        .track h4{margin:0 0 8px;font-size:24px}
+        .track p{margin:0;color:var(--muted);line-height:1.75}
+        .grid{
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:16px;
+        }
+        .card{
+            padding:18px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(148,163,184,.12);
+        }
+        .card h5{margin:0 0 10px;font-size:18px}
+        .card p{margin:0;color:var(--muted);line-height:1.7}
+        .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+        .pill,.mini{
+            display:inline-flex;align-items:center;border-radius:999px;
+            font-size:12px;
+        }
+        .pill{
+            padding:5px 10px;
+            background:rgba(91,140,255,.12);
+            border:1px solid rgba(91,140,255,.2);
+            color:#dce6ff;
+        }
+        .mini{
+            padding:5px 9px;
+            background:rgba(255,255,255,.04);
+            color:var(--muted);
+        }
+        .link{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-weight:600;color:#dce6ff}
+        .empty{
+            padding:18px;border-radius:16px;
+            background:rgba(255,255,255,.04);
+            color:var(--muted);
+        }
+        .footer{
+            margin-top:20px;
+            color:var(--muted);
+            display:flex;
+            justify-content:space-between;
+            gap:16px;
+            flex-wrap:wrap;
+        }
+        @media (max-width: 1024px){
+            .hero,.grid{grid-template-columns:1fr 1fr}
+        }
+        @media (max-width: 768px){
+            .nav,.hero,.section-head,.footer{flex-direction:column;align-items:flex-start}
+            .hero,.stats,.grid{grid-template-columns:1fr}
+            .hero h2{font-size:34px}
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="panel nav">
+        <div class="brand">
+            <div class="logo">JS</div>
+            <div>
+                <h1>题库总入口</h1>
+                <p>按分区浏览全部题目，并区分静态分析题与接口联动题</p>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a class="ghost" href="index.html">返回首页</a>
+            <a class="ghost" href="admin.html">后台</a>
+            <a class="btn" href="#catalog">浏览全部题目</a>
+        </div>
+    </section>
+
+    <section class="panel hero">
+        <div>
+            <div class="eyebrow">题型大类基本齐全</div>
+            <h2>现在缺的更多是“平台能力”，不是新题型名字</h2>
+            <p>
+                当前题库已经覆盖 JS 混淆/反混淆、XHR Hook、Hex、Protobuf、动态签名、国密、混合加密和多种传输形态。
+                所以后续扩建重点会偏向后台管理、统一判题、做题记录和微服务网关联动。
+            </p>
+            <div class="hero-actions">
+                <a class="btn" href="#catalog">查看全部题目</a>
+                <a class="ghost" href="#gaps">查看未补平台能力</a>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat">
+                <strong id="totalCount">--</strong>
+                <span>题目总数</span>
+            </div>
+            <div class="stat">
+                <strong id="advancedCount">--</strong>
+                <span>高阶题</span>
+            </div>
+            <div class="stat">
+                <strong id="apiCount">--</strong>
+                <span>接口联动题</span>
+            </div>
+            <div class="stat">
+                <strong id="trackCount">3</strong>
+                <span>训练分区</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel section" id="catalog">
+        <div class="section-head">
+            <div>
+                <h3>题库浏览</h3>
+                <p>可以按分区筛选，也可以直接看每题属于静态分析、训练页还是接口联动。</p>
+            </div>
+            <div class="filters" id="filters">
+                <button class="filter-btn active" type="button" data-filter="all">全部</button>
+                <button class="filter-btn" type="button" data-filter="js-reverse">JS 逆向</button>
+                <button class="filter-btn" type="button" data-filter="protocol">协议与加解密</button>
+                <button class="filter-btn" type="button" data-filter="xhr-hook">XHR / Hook</button>
+            </div>
+        </div>
+        <div class="track-sections" id="trackSections">
+            <div class="empty">题库加载中…</div>
+        </div>
+    </section>
+
+    <section class="panel section" id="gaps">
+        <div class="section-head">
+            <div>
+                <h3>当前仍未补齐的能力</h3>
+                <p>对标参考仓库，题型层面已经基本齐了，差距主要在平台化和系统化。</p>
+            </div>
+        </div>
+        <div class="grid">
+            <article class="card">
+                <h5>后台管理</h5>
+                <p>缺题目配置、难度调整、答案开关、标签管理和发布流程。</p>
+            </article>
+            <article class="card">
+                <h5>统一判题</h5>
+                <p>缺“是否真的 Hook 到点 / 是否还原明文 / 是否复现签名”的自动验题。</p>
+            </article>
+            <article class="card">
+                <h5>用户与记录</h5>
+                <p>缺用户系统、做题记录、排行榜、提交历史与学习进度。</p>
+            </article>
+            <article class="card">
+                <h5>数据库持久化</h5>
+                <p>当前改走 SQLite 轻量持久化；如后续需要再补 Redis 支撑 nonce、防重放窗口和日志。</p>
+            </article>
+            <article class="card">
+                <h5>微服务链路</h5>
+                <p>缺 Gateway、业务服务、下游服务透传与完整业务流靶场。</p>
+            </article>
+            <article class="card">
+                <h5>前后端分离</h5>
+                <p>缺独立学员端 / 管理端界面，目前仍主要是静态题页入口。</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="panel footer">
+        <div>如果你要继续扩建，建议先补：题目后台 → 判题 → 记录入库 → Gateway。</div>
+        <div>当前元数据来自 `labs/challenges.json`。</div>
+    </section>
+</div>
+
+<script>
+const tracks = {
+  'js-reverse': {
+    anchor: 'js-reverse',
+    title: 'JS 逆向训练',
+    description: '偏代码还原与运行时追踪，适合补前端逆向基本功。'
+  },
+  'protocol': {
+    anchor: 'protocol',
+    title: '协议与加解密',
+    description: '偏算法与封包分析，适合练习加密报文结构定位。'
+  },
+  'xhr-hook': {
+    anchor: 'xhr-hook',
+    title: 'XHR / Hook 实战',
+    description: '偏真实接口与链路观察，适合练习签名、解包与 Hook。'
+  }
+};
+
+const difficultyLabels = {
+  'beginner': '入门',
+  'intermediate': '进阶',
+  'advanced': '高阶'
+};
+
+const modeLabels = {
+  'static-analysis': '静态分析',
+  'lab-page': '训练页',
+  'api-backed': '接口联动'
+};
+
+const sourceLabels = {
+  'custom': '自研扩展',
+  'galaxy': 'GalaxyDemo',
+  'galaxy-style': 'Galaxy 风格扩展',
+  'js-xhr-hook-goat': 'js-xhr-hook-goat'
+};
+
+let challengeItems = [];
+let activeFilter = 'all';
+
+function setStats(items){
+  document.getElementById('totalCount').textContent = String(items.length);
+  document.getElementById('advancedCount').textContent = String(items.filter(item => item.difficulty === '高阶').length);
+  document.getElementById('apiCount').textContent = String(items.filter(item => item.mode === '接口联动').length);
+}
+
+function renderSections(){
+  const filtered = activeFilter === 'all'
+    ? challengeItems
+    : challengeItems.filter(item => item.trackKey === activeFilter);
+
+  const groups = Object.keys(tracks)
+    .map(key => [key, filtered.filter(item => item.trackKey === key)])
+    .filter(([, items]) => items.length > 0);
+
+  const html = groups.map(([key, items]) => `
+    <section class="track" id="${tracks[key].anchor}">
+      <div class="track-top">
+        <div>
+          <h4>${tracks[key].title}</h4>
+          <p>${tracks[key].description}</p>
+        </div>
+        <span class="pill">${items.length} 题</span>
+      </div>
+      <div class="grid">
+        ${items.sort((a, b) => a.sort - b.sort).map(item => `
+          <article class="card">
+            <h5>${item.title}</h5>
+            <p>${item.summary}</p>
+            <div class="meta">
+              <span class="pill">${difficultyLabels[item.difficulty] || item.difficulty}</span>
+              <span class="mini">${item.topic}</span>
+              <span class="mini">${modeLabels[item.mode] || item.mode}</span>
+              <span class="mini">${sourceLabels[item.source] || item.source}</span>
+            </div>
+            <a class="link" href="${item.href}">进入题目 →</a>
+          </article>
+        `).join('')}
+      </div>
+    </section>
+  `).join('');
+
+  document.getElementById('trackSections').innerHTML = html || '<div class="empty">当前筛选条件下暂无题目。</div>';
+}
+
+function bindFilters(){
+  document.querySelectorAll('.filter-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      activeFilter = button.dataset.filter;
+      document.querySelectorAll('.filter-btn').forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+      renderSections();
+    });
+  });
+}
+
+fetch('labs/challenges.json')
+  .then(resp => resp.json())
+  .then(items => {
+    challengeItems = items;
+    setStats(items);
+    renderSections();
+    bindFilters();
+  })
+  .catch(() => {
+    document.getElementById('trackSections').innerHTML = '<div class="empty">题库清单加载失败，请检查 `labs/challenges.json`。</div>';
+  });
+</script>
+</body>
+</html>

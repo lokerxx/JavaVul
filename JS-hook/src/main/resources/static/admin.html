@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>训练场后台 - 前端协议拆解训练场</title>
+    <style>
+        :root{
+            --bg:#08101f;
+            --panel:rgba(13,23,48,.88);
+            --panel-strong:#121d3b;
+            --line:rgba(148,163,184,.14);
+            --text:#e8eeff;
+            --muted:#9fb0d7;
+            --blue:#5b8cff;
+            --violet:#8b5cf6;
+            --green:#22c55e;
+            --amber:#f59e0b;
+            --rose:#f43f5e;
+            --shadow:0 24px 80px rgba(0,0,0,.32);
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            color:var(--text);
+            font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(91,140,255,.18), transparent 28%),
+                radial-gradient(circle at top right, rgba(139,92,246,.18), transparent 25%),
+                linear-gradient(180deg, #08101f 0%, #0c1428 100%);
+        }
+        a{color:inherit;text-decoration:none}
+        .wrap{max-width:1360px;margin:0 auto;padding:28px 20px 56px}
+        .panel{
+            background:var(--panel);
+            border:1px solid var(--line);
+            border-radius:24px;
+            box-shadow:var(--shadow);
+            backdrop-filter:blur(16px);
+        }
+        .nav,.hero,.section{padding:22px 24px}
+        .nav{
+            display:flex;justify-content:space-between;align-items:center;gap:16px;
+            margin-bottom:20px;
+        }
+        .brand{display:flex;align-items:center;gap:14px}
+        .logo{
+            width:44px;height:44px;border-radius:14px;
+            display:grid;place-items:center;
+            background:linear-gradient(135deg,var(--blue),var(--violet));
+            font-weight:800;
+        }
+        .brand h1{margin:0;font-size:18px}
+        .brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+        .actions{display:flex;gap:10px;flex-wrap:wrap}
+        .btn,.ghost{
+            display:inline-flex;align-items:center;justify-content:center;
+            min-height:42px;padding:0 16px;border-radius:12px;font-weight:600;
+            transition:.2s ease;border:none;cursor:pointer;
+        }
+        .btn{color:#fff;background:linear-gradient(135deg,var(--blue),var(--violet))}
+        .ghost{color:var(--muted);background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.12)}
+        .hero{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:20px;
+            margin-bottom:20px;
+        }
+        .hero h2{margin:0 0 12px;font-size:40px;line-height:1.08}
+        .hero p{margin:0;color:var(--muted);line-height:1.8}
+        .stats{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:14px;
+        }
+        .stat{
+            padding:18px;border-radius:18px;background:var(--panel-strong);
+            border:1px solid rgba(148,163,184,.12);
+        }
+        .stat strong{display:block;font-size:28px;margin-bottom:6px}
+        .stat span{color:var(--muted);font-size:13px}
+        .section{margin-bottom:20px}
+        .section-head{
+            display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
+            margin-bottom:18px;
+        }
+        .section-head h3{margin:0 0 8px;font-size:26px}
+        .section-head p{margin:0;color:var(--muted);line-height:1.7}
+        .grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
+        .card{
+            background:var(--panel-strong);
+            border:1px solid rgba(148,163,184,.12);
+            border-radius:20px;
+            padding:18px;
+        }
+        table{width:100%;border-collapse:collapse}
+        th,td{padding:12px 10px;border-bottom:1px solid rgba(148,163,184,.1);text-align:left;vertical-align:top}
+        th{color:#dce6ff;font-size:13px}
+        td{color:var(--muted);font-size:14px}
+        .pill{
+            display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;
+            font-size:12px;background:rgba(91,140,255,.12);color:#dce6ff
+        }
+        .success{background:rgba(34,197,94,.14);color:#caffda}
+        .warn{background:rgba(245,158,11,.14);color:#ffe0a2}
+        .danger{background:rgba(244,63,94,.14);color:#ffc5cf}
+        .form{display:grid;gap:12px}
+        label{display:grid;gap:6px;font-size:14px;color:#dce6ff}
+        input,select,textarea{
+            width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(148,163,184,.16);
+            background:rgba(255,255,255,.04);color:var(--text);font:inherit
+        }
+        textarea{min-height:110px;resize:vertical}
+        .hint,.status{color:var(--muted);font-size:13px;line-height:1.7}
+        .status{margin-top:10px}
+        @media (max-width: 1024px){
+            .hero,.grid{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="panel nav">
+        <div class="brand">
+            <div class="logo">AD</div>
+            <div>
+                <h1>训练场后台</h1>
+                <p>查看题库、规则覆盖率、最近提交，并手动测试判题接口</p>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="ghost" href="index.html">返回首页</a>
+            <a class="ghost" href="js-labs.html">题库总入口</a>
+            <button class="btn" id="syncCatalogBtn" type="button">同步题库</button>
+            <button class="ghost" id="syncRulesBtn" type="button">同步判题规则</button>
+        </div>
+    </section>
+
+    <section class="panel hero">
+        <div>
+            <h2>现在已经有轻量后台能力了</h2>
+            <p>
+                这一版后台基于 Spring Boot + SQLite，支持题库概览、规则同步、最近提交展示，
+                以及一个最小可用的自动判题入口。后续如果你要继续做管理员管理、题目编辑和人工复核，也可以沿着这里往下接。
+            </p>
+            <div class="status" id="topStatus">正在加载后台数据…</div>
+        </div>
+        <div class="stats">
+            <div class="stat"><strong id="totalChallenges">--</strong><span>题目总数</span></div>
+            <div class="stat"><strong id="submissionCount">--</strong><span>提交记录</span></div>
+            <div class="stat"><strong id="judgeRuleCount">--</strong><span>判题规则</span></div>
+            <div class="stat"><strong id="autoJudgeRuleCount">--</strong><span>自动判题规则</span></div>
+        </div>
+    </section>
+
+    <section class="panel section">
+        <div class="section-head">
+            <div>
+                <h3>题库与规则</h3>
+                <p>左侧看题库清单与规则覆盖情况，右侧直接调用判题接口测试。</p>
+            </div>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>题目</th>
+                        <th>分区</th>
+                        <th>模式</th>
+                        <th>规则</th>
+                    </tr>
+                    </thead>
+                    <tbody id="challengeBody">
+                    <tr><td colspan="4">加载中…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <form class="form" id="judgeForm">
+                    <label>
+                        题目 ID
+                        <select id="challengeId"></select>
+                    </label>
+                    <label>
+                        用户名
+                        <input id="userName" type="text" placeholder="例如：admin">
+                    </label>
+                    <label>
+                        提交答案
+                        <textarea id="answer" placeholder="输入你要测试的答案文本"></textarea>
+                    </label>
+                    <label>
+                        备注
+                        <input id="notes" type="text" placeholder="可选备注">
+                    </label>
+                    <div class="actions">
+                        <button class="btn" type="submit">调用判题</button>
+                    </div>
+                </form>
+                <div class="status" id="judgeStatus">还没有执行判题。</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel section">
+        <div class="section-head">
+            <div>
+                <h3>最近提交</h3>
+                <p>展示最近 100 条提交记录，包括自动判题结果或人工复核状态。</p>
+            </div>
+        </div>
+        <div class="card">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>题目</th>
+                    <th>结果</th>
+                    <th>判题方式</th>
+                    <th>说明</th>
+                    <th>时间</th>
+                </tr>
+                </thead>
+                <tbody id="submissionBody">
+                <tr><td colspan="6">加载中…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script>
+const trackLabels = {
+  'js-reverse': 'JS 逆向',
+  'protocol': '协议加解密',
+  'xhr-hook': 'XHR / Hook'
+};
+
+const modeLabels = {
+  'static-analysis': '静态分析',
+  'lab-page': '训练页',
+  'api-backed': '接口联动'
+};
+
+const judgeLabels = {
+  'contains_all': '关键词包含',
+  'exact': '精确匹配',
+  'non_empty': '非空校验',
+  'manual-review': '人工复核'
+};
+
+let challengeItems = [];
+let judgeRules = [];
+
+function resultClass(result){
+  if (result === 'passed') return 'pill success';
+  if (result === 'failed') return 'pill danger';
+  return 'pill warn';
+}
+
+function loadOverview(){
+  return fetch('/api/catalog/overview')
+    .then(resp => resp.json())
+    .then(data => {
+      document.getElementById('totalChallenges').textContent = data.totalChallenges ?? '--';
+      document.getElementById('submissionCount').textContent = data.submissionCount ?? '--';
+      document.getElementById('judgeRuleCount').textContent = data.judgeRuleCount ?? '--';
+      document.getElementById('autoJudgeRuleCount').textContent = data.autoJudgeRuleCount ?? '--';
+      document.getElementById('topStatus').textContent = '后台数据加载完成。';
+    });
+}
+
+function loadChallengesAndRules(){
+  return Promise.all([
+    fetch('/api/catalog/challenges').then(resp => resp.json()),
+    fetch('/api/catalog/rules').then(resp => resp.json())
+  ]).then(([challenges, rules]) => {
+    challengeItems = challenges;
+    judgeRules = rules;
+    renderChallengeTable();
+    renderChallengeOptions();
+  });
+}
+
+function renderChallengeTable(){
+  const ruleMap = Object.fromEntries(judgeRules.map(rule => [rule.challengeId, rule]));
+  const html = challengeItems.map(item => {
+    const rule = ruleMap[item.id];
+    return `
+      <tr>
+        <td><strong>${item.title}</strong><br><span class="hint">${item.id}</span></td>
+        <td>${trackLabels[item.trackKey] || item.trackKey}</td>
+        <td>${modeLabels[item.mode] || item.mode}</td>
+        <td>${rule ? (judgeLabels[rule.judgeType] || rule.judgeType) : '<span class="pill warn">未配置</span>'}</td>
+      </tr>
+    `;
+  }).join('');
+  document.getElementById('challengeBody').innerHTML = html || '<tr><td colspan="4">暂无题目</td></tr>';
+}
+
+function renderChallengeOptions(){
+  const options = challengeItems.map(item => `<option value="${item.id}">${item.title} (${item.id})</option>`).join('');
+  document.getElementById('challengeId').innerHTML = options;
+}
+
+function loadSubmissions(){
+  return fetch('/api/catalog/submissions')
+    .then(resp => resp.json())
+    .then(items => {
+      const html = items.map(item => `
+        <tr>
+          <td>${item.submissionId}</td>
+          <td>${item.challengeId}</td>
+          <td><span class="${resultClass(item.result)}">${item.result}</span></td>
+          <td>${judgeLabels[item.judgeType] || item.judgeType || '未指定'}</td>
+          <td>${item.judgeDetail || item.notes || '-'}</td>
+          <td>${item.createdAt}</td>
+        </tr>
+      `).join('');
+      document.getElementById('submissionBody').innerHTML = html || '<tr><td colspan="6">暂无提交记录</td></tr>';
+    });
+}
+
+function bindActions(){
+  document.getElementById('syncCatalogBtn').addEventListener('click', () => {
+    fetch('/api/catalog/sync', { method: 'POST' })
+      .then(resp => resp.json())
+      .then(data => {
+        document.getElementById('topStatus').textContent = `题库同步完成，共同步 ${data.synced} 题。`;
+        bootstrap();
+      });
+  });
+
+  document.getElementById('syncRulesBtn').addEventListener('click', () => {
+    fetch('/api/catalog/sync-rules', { method: 'POST' })
+      .then(resp => resp.json())
+      .then(data => {
+        document.getElementById('topStatus').textContent = `判题规则同步完成，共同步 ${data.syncedRules} 条规则。`;
+        bootstrap();
+      });
+  });
+
+  document.getElementById('judgeForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const body = {
+      challengeId: document.getElementById('challengeId').value,
+      userName: document.getElementById('userName').value,
+      answer: document.getElementById('answer').value,
+      notes: document.getElementById('notes').value
+    };
+    fetch('/api/catalog/judge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+      .then(async resp => ({ ok: resp.ok, data: await resp.json() }))
+      .then(({ ok, data }) => {
+        if (!ok) {
+          document.getElementById('judgeStatus').textContent = `判题失败：${data.message || '未知错误'}`;
+          return;
+        }
+        document.getElementById('judgeStatus').textContent =
+          `判题完成：结果=${data.result}，方式=${judgeLabels[data.judgeType] || data.judgeType}，说明=${data.judgeDetail}`;
+        loadOverview();
+        loadSubmissions();
+      });
+  });
+}
+
+function bootstrap(){
+  Promise.all([loadOverview(), loadChallengesAndRules(), loadSubmissions()])
+    .catch(() => {
+      document.getElementById('topStatus').textContent = '后台数据加载失败，请检查后端是否已启动。';
+    });
+}
+
+bindActions();
+bootstrap();
+</script>
+</body>
+</html>

@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocol Buffers Request</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/protobuf-7.2.5.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+        .api-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .operation-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #495057;
+        }
+        .tab-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .tab-btn.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+        .form-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            display: none;
+        }
+        .form-container.active {
+            display: block;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            min-height: 44px;
+            align-items: center;
+        }
+        .tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tag-input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+            padding: 4px;
+        }
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .result-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .result-display {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+        .result-value {
+            flex: 2;
+            text-align: right;
+            color: #495057;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+        }
+        .step-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        .binary-content {
+            color: #e74c3c;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .json-content {
+            color: #27ae60;
+            white-space: pre-wrap;
+        }
+        .protobuf-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .flow-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #dc3545;
+            margin-top: 20px;
+        }
+        .success {
+            background: #d1ecf1;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #28a745;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Protocol Buffers API 系统</h1>
+            <p>Protocol Buffers Request Body Case - 高效二进制序列化通信</p>
+        </div>
+
+        <div class="api-section">
+            <h2 class="section-title">🔧 选择API操作</h2>
+            
+            <div class="operation-tabs">
+                <button class="tab-btn active" data-operation="user">👤 用户管理</button>
+                <button class="tab-btn" data-operation="product">📦 产品管理</button>
+                <button class="tab-btn" data-operation="order">📋 订单管理</button>
+            </div>
+
+            <!-- 用户管理表单 -->
+            <div id="userForm" class="form-container active">
+                <h3>👤 用户信息管理</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userName">姓名:</label>
+                        <input type="text" id="userName" placeholder="请输入姓名" value="张三" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">邮箱:</label>
+                        <input type="email" id="userEmail" placeholder="请输入邮箱" value="zhangsan@example.com" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userAge">年龄:</label>
+                        <input type="number" id="userAge" placeholder="请输入年龄" value="28" min="1" max="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPhone">电话:</label>
+                        <input type="tel" id="userPhone" placeholder="请输入电话" value="13800138000" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userCompany">公司:</label>
+                        <input type="text" id="userCompany" placeholder="请输入公司名称" value="科技创新有限公司" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPosition">职位:</label>
+                        <input type="text" id="userPosition" placeholder="请输入职位" value="高级工程师" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userSalary">薪资:</label>
+                        <input type="number" id="userSalary" placeholder="请输入薪资" value="25000" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userAddress">地址:</label>
+                        <input type="text" id="userAddress" placeholder="请输入地址" value="北京市朝阳区" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>技能标签:</label>
+                    <div class="tags-input" id="userSkills">
+                        <div class="tag">JavaScript <span class="tag-remove">×</span></div>
+                        <div class="tag">Python <span class="tag-remove">×</span></div>
+                        <div class="tag">React <span class="tag-remove">×</span></div>
+                        <input type="text" class="tag-input" placeholder="输入技能后按回车">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 产品管理表单 -->
+            <div id="productForm" class="form-container">
+                <h3>📦 产品信息管理</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productName">产品名称:</label>
+                        <input type="text" id="productName" placeholder="请输入产品名称" value="智能手机" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productBrand">品牌:</label>
+                        <input type="text" id="productBrand" placeholder="请输入品牌" value="TechBrand" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productPrice">价格:</label>
+                        <input type="number" id="productPrice" placeholder="请输入价格" value="2999.99" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productStock">库存:</label>
+                        <input type="number" id="productStock" placeholder="请输入库存数量" value="100" min="0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">分类:</label>
+                    <select id="productCategory" required>
+                        <option value="electronics">电子产品</option>
+                        <option value="clothing">服装</option>
+                        <option value="books">图书</option>
+                        <option value="home">家居</option>
+                        <option value="sports">运动</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="productDescription">产品描述:</label>
+                    <textarea id="productDescription" placeholder="请输入产品描述" required>高性能智能手机，配备最新处理器和高清摄像头，支持5G网络。</textarea>
+                </div>
+                <div class="form-group">
+                    <label>产品标签:</label>
+                    <div class="tags-input" id="productTags">
+                        <div class="tag">5G <span class="tag-remove">×</span></div>
+                        <div class="tag">高清摄像 <span class="tag-remove">×</span></div>
+                        <div class="tag">长续航 <span class="tag-remove">×</span></div>
+                        <input type="text" class="tag-input" placeholder="输入标签后按回车">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 订单管理表单 -->
+            <div id="orderForm" class="form-container">
+                <h3>📋 订单信息管理</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orderCustomerName">客户姓名:</label>
+                        <input type="text" id="orderCustomerName" placeholder="请输入客户姓名" value="李四" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="orderCustomerEmail">客户邮箱:</label>
+                        <input type="email" id="orderCustomerEmail" placeholder="请输入客户邮箱" value="lisi@example.com" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orderTotalAmount">订单总额:</label>
+                        <input type="number" id="orderTotalAmount" placeholder="请输入订单总额" value="5999.98" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="orderStatus">订单状态:</label>
+                        <select id="orderStatus" required>
+                            <option value="pending">待处理</option>
+                            <option value="processing">处理中</option>
+                            <option value="shipped">已发货</option>
+                            <option value="delivered">已送达</option>
+                            <option value="cancelled">已取消</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orderPaymentMethod">支付方式:</label>
+                        <select id="orderPaymentMethod" required>
+                            <option value="credit_card">信用卡</option>
+                            <option value="debit_card">借记卡</option>
+                            <option value="alipay">支付宝</option>
+                            <option value="wechat_pay">微信支付</option>
+                            <option value="cash">现金</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="orderShippingAddress">收货地址:</label>
+                        <input type="text" id="orderShippingAddress" placeholder="请输入收货地址" value="上海市浦东新区张江高科技园区" required>
+                    </div>
+                </div>
+            </div>
+
+            <button class="submit-btn" id="submitBtn">🚀 发送 Protocol Buffers 请求</button>
+        </div>
+
+        <div id="resultSection" class="result-section"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            let currentOperation = 'user';
+            let protobufRoot = null;
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 初始化protobuf
+            const initProtobuf = async () => {
+                try {
+                    // 定义protobuf schema
+                    const protoSchema = `
+                        syntax = "proto3";
+                        package api;
+                        
+                        message UserInfo {
+                            string name = 1;
+                            string email = 2;
+                            int32 age = 3;
+                            string phone = 4;
+                            string address = 5;
+                            string company = 6;
+                            string position = 7;
+                            int64 salary = 8;
+                            repeated string skills = 9;
+                            map<string, string> metadata = 10;
+                        }
+                        
+                        message ProductInfo {
+                            string name = 1;
+                            string description = 2;
+                            double price = 3;
+                            string category = 4;
+                            string brand = 5;
+                            int32 stock = 6;
+                            repeated string tags = 7;
+                            map<string, string> attributes = 8;
+                        }
+                        
+                        message OrderInfo {
+                            string order_id = 1;
+                            string customer_name = 2;
+                            string customer_email = 3;
+                            repeated ProductInfo products = 4;
+                            double total_amount = 5;
+                            string status = 6;
+                            int64 created_at = 7;
+                            string shipping_address = 8;
+                            string payment_method = 9;
+                        }
+                        
+                        message ApiRequest {
+                            string request_id = 1;
+                            int64 timestamp = 2;
+                            string operation = 3;
+                            
+                            oneof data {
+                                UserInfo user_info = 10;
+                                ProductInfo product_info = 11;
+                                OrderInfo order_info = 12;
+                            }
+                        }
+                        
+                        message ApiResponse {
+                            string request_id = 1;
+                            int64 timestamp = 2;
+                            bool success = 3;
+                            string message = 4;
+                            int32 code = 5;
+                            
+                            oneof data {
+                                UserInfo user_info = 10;
+                                ProductInfo product_info = 11;
+                                OrderInfo order_info = 12;
+                            }
+                        }
+                    `;
+                    
+                    protobufRoot = protobuf.parse(protoSchema).root;
+                    console.log('Protocol Buffers schema loaded successfully');
+                } catch (error) {
+                    console.error('Failed to load protobuf schema:', error);
+                }
+            };
+            
+            // 处理标签页切换
+            $('.tab-btn').on('click', function() {
+                $('.tab-btn').removeClass('active');
+                $(this).addClass('active');
+                
+                currentOperation = $(this).data('operation');
+                
+                $('.form-container').removeClass('active');
+                $(`#${currentOperation}Form`).addClass('active');
+            });
+            
+            // 处理标签输入
+            $(document).on('keypress', '.tag-input', function(e) {
+                if (e.which === 13) { // Enter key
+                    const value = $(this).val().trim();
+                    if (value) {
+                        const tag = $(`<div class="tag">${value} <span class="tag-remove">×</span></div>`);
+                        $(this).before(tag);
+                        $(this).val('');
+                    }
+                }
+            });
+            
+            // 处理标签删除
+            $(document).on('click', '.tag-remove', function() {
+                $(this).parent().remove();
+            });
+            
+            // 获取标签数组
+            const getTags = (containerId) => {
+                const tags = [];
+                $(`#${containerId} .tag`).each(function() {
+                    const text = $(this).text().replace('×', '').trim();
+                    if (text) tags.push(text);
+                });
+                return tags;
+            };
+            
+            // 获取表单数据
+            const getFormData = () => {
+                const baseData = {
+                    request_id: Math.random().toString(36).substring(2, 15),
+                    timestamp: Math.floor(Date.now() / 1000),
+                    operation: currentOperation
+                };
+                
+                switch(currentOperation) {
+                    case 'user':
+                        return {
+                            ...baseData,
+                            user_info: {
+                                name: $('#userName').val(),
+                                email: $('#userEmail').val(),
+                                age: parseInt($('#userAge').val()),
+                                phone: $('#userPhone').val(),
+                                address: $('#userAddress').val(),
+                                company: $('#userCompany').val(),
+                                position: $('#userPosition').val(),
+                                salary: parseInt($('#userSalary').val()),
+                                skills: getTags('userSkills'),
+                                metadata: {
+                                    'department': '技术部',
+                                    'level': '高级'
+                                }
+                            }
+                        };
+                    case 'product':
+                        return {
+                            ...baseData,
+                            product_info: {
+                                name: $('#productName').val(),
+                                description: $('#productDescription').val(),
+                                price: parseFloat($('#productPrice').val()),
+                                category: $('#productCategory').val(),
+                                brand: $('#productBrand').val(),
+                                stock: parseInt($('#productStock').val()),
+                                tags: getTags('productTags'),
+                                attributes: {
+                                    'warranty': '2年',
+                                    'origin': '中国'
+                                }
+                            }
+                        };
+                    case 'order':
+                        return {
+                            ...baseData,
+                            order_info: {
+                                order_id: 'ORD' + Math.random().toString(36).substring(2, 15).toUpperCase(),
+                                customer_name: $('#orderCustomerName').val(),
+                                customer_email: $('#orderCustomerEmail').val(),
+                                products: [{
+                                    name: '智能手机',
+                                    price: 2999.99,
+                                    category: 'electronics',
+                                    brand: 'TechBrand',
+                                    stock: 1
+                                }],
+                                total_amount: parseFloat($('#orderTotalAmount').val()),
+                                status: $('#orderStatus').val(),
+                                created_at: Math.floor(Date.now() / 1000),
+                                shipping_address: $('#orderShippingAddress').val(),
+                                payment_method: $('#orderPaymentMethod').val()
+                            }
+                        };
+                    default:
+                        return baseData;
+                }
+            };
+            
+            // 序列化为protobuf
+            const serializeToProtobuf = (data) => {
+                try {
+                    const ApiRequest = protobufRoot.lookupType('api.ApiRequest');
+                    const message = ApiRequest.create(data);
+                    const buffer = ApiRequest.encode(message).finish();
+                    return {
+                        success: true,
+                        buffer: buffer,
+                        size: buffer.length,
+                        hex: Array.from(buffer).map(b => b.toString(16).padStart(2, '0')).join('')
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            };
+            
+            // 反序列化protobuf响应
+            const deserializeProtobufResponse = (buffer) => {
+                try {
+                    const ApiResponse = protobufRoot.lookupType('api.ApiResponse');
+                    const message = ApiResponse.decode(buffer);
+                    return {
+                        success: true,
+                        data: ApiResponse.toObject(message)
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            };
+            
+            // 显示结果
+            const displayResult = (data) => {
+                let html = `
+                    <h2 class="result-title">✅ Protocol Buffers 请求成功</h2>
+                    <div class="result-display">
+                `;
+                
+                // 通用字段
+                html += `
+                    <div class="result-row">
+                        <span class="result-label">请求ID:</span>
+                        <span class="result-value">${data.request_id}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">响应状态:</span>
+                        <span class="result-value">${data.success ? '成功' : '失败'}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">响应消息:</span>
+                        <span class="result-value">${data.message}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">响应码:</span>
+                        <span class="result-value">${data.code}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">响应时间:</span>
+                        <span class="result-value">${new Date(data.timestamp * 1000).toLocaleString()}</span>
+                    </div>
+                `;
+                
+                // 根据操作类型显示特定数据
+                if (data.user_info) {
+                    html += `
+                        <div class="result-row">
+                            <span class="result-label">用户姓名:</span>
+                            <span class="result-value">${data.user_info.name}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">用户邮箱:</span>
+                            <span class="result-value">${data.user_info.email}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">用户技能:</span>
+                            <span class="result-value">${data.user_info.skills.join(', ')}</span>
+                        </div>
+                    `;
+                } else if (data.product_info) {
+                    html += `
+                        <div class="result-row">
+                            <span class="result-label">产品名称:</span>
+                            <span class="result-value">${data.product_info.name}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">产品价格:</span>
+                            <span class="result-value">¥${data.product_info.price}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">产品库存:</span>
+                            <span class="result-value">${data.product_info.stock}件</span>
+                        </div>
+                    `;
+                } else if (data.order_info) {
+                    html += `
+                        <div class="result-row">
+                            <span class="result-label">订单号:</span>
+                            <span class="result-value">${data.order_info.order_id}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">订单金额:</span>
+                            <span class="result-value">¥${data.order_info.total_amount}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">订单状态:</span>
+                            <span class="result-value">${data.order_info.status}</span>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                $('#resultSection').html(html).show();
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (originalData, protobufData, responseBuffer, isGitHubPagesMode = false) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - Protocol Buffers 通信过程</div>
+                    
+                    <div class="protobuf-flow">
+                        <div class="flow-step">JavaScript对象</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Protobuf序列化</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">二进制数据</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">HTTP传输</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">服务器处理</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Protobuf响应</div>
+                    </div>
+                    
+                    <div class="step-title">📤 请求序列化过程</div>
+                    <div class="step-block">
+                        <div class="step-title">1. 原始JavaScript对象:</div>
+                        <div class="json-content">${JSON.stringify(originalData, null, 2)}</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">2. Protocol Buffers 二进制数据 (${protobufData.size} bytes):</div>
+                        <div class="binary-content">${protobufData.hex.substring(0, 200)}${protobufData.hex.length > 200 ? '...' : ''}</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">3. HTTP请求头:</div>
+                        <div style="color: #8e44ad;">Content-Type: application/x-protobuf</div>
+                        <div style="color: #8e44ad;">Content-Length: ${protobufData.size}</div>
+                    </div>
+                    
+                    <div class="step-title">📥 响应反序列化过程</div>
+                    <div class="step-block">
+                        <div class="step-title">1. 服务器返回的${isGitHubPagesMode ? 'JSON模拟' : '二进制'}数据:</div>
+                        <div class="binary-content">${responseBuffer ? Array.from(responseBuffer).map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 200) + '...' : (isGitHubPagesMode ? 'GitHub Pages环境使用JSON模拟protobuf响应' : '模拟数据')}</div>
+                    </div>
+
+                    ${isGitHubPagesMode ? `
+                    <div class="step-block">
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107; margin: 15px 0;">
+                            <strong>⚠️ GitHub Pages 环境说明:</strong><br>
+                            由于GitHub Pages是静态托管，无法处理真实的Protocol Buffers二进制数据。<br>
+                            本演示使用JSON格式模拟protobuf响应，展示数据结构和处理流程。<br>
+                            在真实环境中，请求和响应都是高效的二进制格式。
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <strong>🔧 Protocol Buffers 优势:</strong><br>
+                    • 高效的二进制序列化格式，比JSON更紧凑<br>
+                    • 强类型定义，确保数据结构一致性<br>
+                    • 跨语言支持，适合微服务架构<br>
+                    • 向前向后兼容性好，便于API演进<br>
+                    • 在移动端和高性能场景中广泛使用
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 提交表单
+            $('#submitBtn').on('click', async function() {
+                if (!protobufRoot) {
+                    alert('Protocol Buffers schema 未加载完成，请稍后重试');
+                    return;
+                }
+                
+                // 显示加载状态
+                $('#resultSection').html('<div class="loading">🔄 正在发送 Protocol Buffers 请求...</div>').show();
+                $(this).prop('disabled', true).text('🔄 发送中...');
+                
+                // 获取表单数据
+                const formData = getFormData();
+                
+                // 序列化为protobuf
+                const protobufResult = serializeToProtobuf(formData);
+                
+                if (!protobufResult.success) {
+                    $('#resultSection').html(`
+                        <div class="error">
+                            <h3>❌ 序列化失败</h3>
+                            <p>错误信息: ${protobufResult.error}</p>
+                        </div>
+                    `);
+                    $(this).prop('disabled', false).text('🚀 发送 Protocol Buffers 请求');
+                    return;
+                }
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = `api/protobuf-${currentOperation}`;
+                } else {
+                    apiUrl = 'http://localhost:48159/api/protobuf';
+                }
+                
+                // 发送protobuf请求
+                try {
+                    if (isGitHubPages) {
+                        // GitHub Pages环境：使用JSON模拟
+                        const response = await fetch(apiUrl);
+                        const jsonResponse = await response.json();
+
+                        if (jsonResponse.success) {
+                            displayResult(jsonResponse.data);
+                            showDebugInfo(formData, protobufResult, null, true);
+                        } else {
+                            throw new Error(jsonResponse.message || '请求失败');
+                        }
+                    } else {
+                        // 本地环境：真实的protobuf通信
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-protobuf'
+                            },
+                            body: protobufResult.buffer
+                        });
+
+                        if (response.ok) {
+                            const responseBuffer = new Uint8Array(await response.arrayBuffer());
+                            const deserializeResult = deserializeProtobufResponse(responseBuffer);
+
+                            if (deserializeResult.success) {
+                                displayResult(deserializeResult.data);
+                                showDebugInfo(formData, protobufResult, responseBuffer, false);
+                            } else {
+                                $('#resultSection').html(`
+                                    <div class="error">
+                                        <h3>❌ 响应解析失败</h3>
+                                        <p>错误信息: ${deserializeResult.error}</p>
+                                    </div>
+                                `);
+                            }
+                        } else {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                    }
+                } catch (error) {
+                    $('#resultSection').html(`
+                        <div class="error">
+                            <h3>❌ 请求失败</h3>
+                            <p>错误信息: ${error.message}</p>
+                            <p>请检查网络连接或稍后重试。</p>
+                        </div>
+                    `);
+
+                    // 显示调试信息（即使请求失败）
+                    showDebugInfo(formData, protobufResult, null, isGitHubPages);
+                }
+                
+                $(this).prop('disabled', false).text('🚀 发送 Protocol Buffers 请求');
+            });
+            
+            // 初始化
+            initProtobuf();
+        });
+    </script>
+</body>
+</html>

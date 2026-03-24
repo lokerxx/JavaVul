@@ -1,0 +1,12 @@
+{
+  "video_type": "documentary",
+  "segment_id": 0,
+  "segment_name": "segment_000.ts",
+  "encrypted_data": "U2FsdGVkX1+0SIsNbJQlTwLXo1SzbzQvYWJjZGVmZ2hpams3NDU2Nzg5MGFiY2RlZmdoaWpr",
+  "iv": "fedcba0987654321fedcba0987654321",
+  "encryption_method": "AES-128-CBC",
+  "segment_size": 1048576,
+  "duration": 30,
+  "timestamp": 1738252800,
+  "content_type": "video/mp2t"
+}

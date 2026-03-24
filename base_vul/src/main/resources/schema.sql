@@ -1,0 +1,18 @@
+DROP TABLE IF EXISTS user3;
+DROP TABLE IF EXISTS user4;
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    name TEXT
+);
+
+CREATE TABLE user3 (
+    id INTEGER PRIMARY KEY,
+    name TEXT
+);
+
+CREATE TABLE user4 (
+    id INTEGER PRIMARY KEY,
+    name TEXT
+);

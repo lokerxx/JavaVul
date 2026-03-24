@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端协议拆解训练场 - 旧入口说明</title>
+    <style>
+        body{
+            margin:0;
+            min-height:100vh;
+            display:grid;
+            place-items:center;
+            font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+            background:linear-gradient(180deg, #08101f 0%, #0c1428 100%);
+            color:#e8eeff;
+        }
+        .card{
+            width:min(720px, calc(100vw - 40px));
+            padding:32px;
+            border-radius:24px;
+            background:rgba(13,23,48,.88);
+            border:1px solid rgba(148,163,184,.16);
+            box-shadow:0 24px 80px rgba(0,0,0,.32);
+        }
+        h1{margin:0 0 14px;font-size:34px}
+        p{margin:0;color:#9fb0d7;line-height:1.85}
+        .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+        a{
+            display:inline-flex;align-items:center;justify-content:center;
+            min-height:42px;padding:0 16px;border-radius:12px;
+            color:#fff;text-decoration:none;font-weight:600;
+        }
+        .primary{background:linear-gradient(135deg,#5b8cff,#8b5cf6)}
+        .ghost{background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.14);color:#dce6ff}
+    </style>
+</head>
+<body>
+<main class="card">
+    <h1>这个 `public` 入口已切换为说明页</h1>
+    <p>
+        当前推荐使用 Spring Boot 版本入口访问靶场。统一首页位于 `http://localhost:8080/`，
+        题库总入口位于 `http://localhost:8080/js-labs.html`。后续新增题目也会优先维护 Spring Boot 版本。
+    </p>
+    <div class="actions">
+        <a class="primary" href="http://localhost:8080/">打开首页</a>
+        <a class="ghost" href="http://localhost:8080/js-labs.html">打开题库总入口</a>
+    </div>
+</main>
+</body>
+</html>

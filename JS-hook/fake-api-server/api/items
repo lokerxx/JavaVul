@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "id": 1, "name": "Static Item 1" },
+    { "id": 2, "name": "Static Item 2" },
+    { "id": 3, "name": "Static Item 3" }
+  ]
+}

@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class SqliController {
@@ -75,8 +77,12 @@ public class SqliController {
     // http://127.0.0.1:8080/users/ids/?ids=1,2,3
     @GetMapping("/users/ids")
     public List<User> findUsersByIds(@RequestParam String ids) {
-        List<User> users = userMapper.findUsersByIds(ids);
-        return users;
+        List<Long> userIds = Arrays.stream(ids.split(","))
+                .map(String::trim)
+                .filter(value -> !value.isEmpty())
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+        return userMapper.findUsersByIds(userIds);
     }
     // http://127.0.0.1:8080/users/name?name=A
     @GetMapping("/users/name")

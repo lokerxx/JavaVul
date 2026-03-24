@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟双向 Protocol Buffers 响应",
+  "data": {
+    "request_id": "jkl012notification",
+    "timestamp": 1738252800,
+    "success": true,
+    "service_name": "notification",
+    "status_code": 200,
+    "notification_response": {
+      "success": true,
+      "message": "push通知发送成功",
+      "notification_id": "NOTIJ345KL678",
+      "status": "sent",
+      "sent_at": 1738252800,
+      "delivery_status": "delivered"
+    }
+  }
+}

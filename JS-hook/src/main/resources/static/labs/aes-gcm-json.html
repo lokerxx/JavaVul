@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-GCM JSON Envelope</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}.mono{font-family:Consolas,monospace}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>AES-GCM JSON Envelope</h1>
+        <p>目标：从一个典型的 JSON 封包里还原加密前业务参数。重点关注 <code>iv</code>、<code>aad</code>、明文序列化与真正进入 <code>crypto.subtle.encrypt</code> 的字节流。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo</span>
+            <span class="chip">技术点：AES-GCM / AAD</span>
+            <span class="chip">推荐动作：Hook <span class="mono">TextEncoder.encode</span></span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>async function pack(data) {
+  const rawKey = new TextEncoder().encode('galaxy-gcm-demo!');
+  const iv = Uint8Array.from([7, 1, 1, 1, 0, 2, 4, 0, 0, 3, 1, 9]);
+  const aad = new TextEncoder().encode('x-client=lab-7');
+  const plain = new TextEncoder().encode(JSON.stringify(data));
+  const key = await crypto.subtle.importKey('raw', rawKey, 'AES-GCM', false, ['encrypt']);
+  const out = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: aad }, key, plain);
+  return { iv, aad, out };
+}</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px">
+                <button onclick="renderPacket()">重新生成</button>
+            </div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交加密前业务 JSON 里的三个核心字段，格式：<code>uid|action|amount</code></p>
+        <input id="answer" placeholder="例如：1001|refund|188">
+        <div style="margin-top:12px">
+            <button onclick="check()">校验</button>
+            <span id="result"></span>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>先盯住 <code>JSON.stringify</code> 前后的对象。</li>
+            <li>再看 <code>TextEncoder.encode</code> 进入的真实字符串。</li>
+            <li>最后确认 <code>iv</code> 和 <code>aad</code> 只是封包辅助字段，不是业务字段本身。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+const payload = Object.freeze({
+  uid: 1001,
+  action: 'refund',
+  amount: 188,
+  memo: 'galaxy-lab'
+});
+
+function bytesToBase64(buffer){
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  let binary = '';
+  bytes.forEach(item => { binary += String.fromCharCode(item); });
+  return btoa(binary);
+}
+
+async function renderPacket(){
+  const rawKey = new TextEncoder().encode('galaxy-gcm-demo!');
+  const iv = Uint8Array.from([7, 1, 1, 1, 0, 2, 4, 0, 0, 3, 1, 9]);
+  const aad = new TextEncoder().encode('x-client=lab-7');
+  const plain = new TextEncoder().encode(JSON.stringify(payload));
+  const key = await crypto.subtle.importKey('raw', rawKey, 'AES-GCM', false, ['encrypt']);
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: aad }, key, plain);
+  const packet = {
+    alg: 'AES-GCM',
+    iv: bytesToBase64(iv),
+    aad: bytesToBase64(aad),
+    ciphertext: bytesToBase64(encrypted)
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = '1001|refund|188';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '去找加密前进入 JSON.stringify 的真实对象。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

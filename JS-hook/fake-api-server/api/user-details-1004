@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "message": "获取用户信息成功",
+  "data": {
+    "id": 1004,
+    "name": "赵六",
+    "email": "zhaoliu@company.com",
+    "department": "人事部",
+    "encryptedPhone": "U2FsdGVkX18Itx0bQxK3OneM/UDoK1drNJqiZV5SCVc=",
+    "encryptedIdCard": "U2FsdGVkX1+HG4svOx2Dfe2OMInwEr6B9thUBwmkh2Csrxlo1jw8qhiBqDQV1mNt",
+    "encryptedBankCard": "U2FsdGVkX1/YoZ6cUDDDrhRdPXVX4HOc3Bm/QyvuDkfPwLYWmqcqGO8MZA1VPbSN",
+    "encryptedAddress": "U2FsdGVkX18WMyasubCLsM0qzeajRr/l3X32iuuQR09thj9OcN9rg/0oedYt6TyJSEefkpKuArVV9o77nHYU8w==",
+    "createdAt": "2023-04-05T11:10:00Z",
+    "lastLogin": "2025-01-29T14:20:00Z",
+    "status": "正常"
+  },
+  "timestamp": "2025-01-31T12:45:00.000Z"
+}

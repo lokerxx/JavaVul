@@ -9,6 +9,7 @@ FROM wushangleon/java:jdk8u112
 COPY --from=builder /opt/druid/target/druid_unauthorized-1.0-SNAPSHOT.jar /opt/app.jar
 
 # 定义启动命令
+EXPOSE 8080
 CMD ["java", "-jar", "/opt/app.jar"]
 
 

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hex Body Encryption</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+        .form-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .form-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        .success {
+            background: #d1ecf1;
+            border-left-color: #27ae60;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #e74c3c;
+            color: #721c24;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Roboto', sans-serif;
+            font-size: 18px;
+        }
+        .step-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Roboto', sans-serif;
+        }
+        .hex-content {
+            color: #e74c3c;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+        .json-content {
+            color: #27ae60;
+            white-space: pre-wrap;
+        }
+        .encryption-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .flow-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>数据安全传输</h1>
+            <p>Hex Body Encryption Case - 整个请求体十六进制加密</p>
+        </div>
+
+        <div class="form-container">
+            <h2 class="form-title">🔐 安全数据提交表单</h2>
+            
+            <form id="secureForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="companyName">公司名称:</label>
+                        <input type="text" id="companyName" name="companyName" placeholder="请输入公司名称" value="科技创新有限公司" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="industry">所属行业:</label>
+                        <select id="industry" name="industry" required>
+                            <option value="technology">科技</option>
+                            <option value="finance">金融</option>
+                            <option value="healthcare">医疗</option>
+                            <option value="education">教育</option>
+                            <option value="manufacturing">制造业</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contactPerson">联系人:</label>
+                        <input type="text" id="contactPerson" name="contactPerson" placeholder="请输入联系人姓名" value="张经理" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactPhone">联系电话:</label>
+                        <input type="tel" id="contactPhone" name="contactPhone" placeholder="请输入联系电话" value="13800138000" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">邮箱地址:</label>
+                        <input type="email" id="email" name="email" placeholder="请输入邮箱地址" value="zhang@company.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget">项目预算:</label>
+                        <input type="number" id="budget" name="budget" placeholder="请输入预算金额" value="500000" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="projectDescription">项目描述:</label>
+                    <textarea id="projectDescription" name="projectDescription" placeholder="请详细描述项目需求..." required>我们需要开发一个企业级的数据管理系统，包含用户管理、权限控制、数据分析等功能模块。系统需要支持高并发访问，确保数据安全性和系统稳定性。</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="urgency">紧急程度:</label>
+                        <select id="urgency" name="urgency" required>
+                            <option value="low">低</option>
+                            <option value="medium" selected>中</option>
+                            <option value="high">高</option>
+                            <option value="urgent">紧急</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expectedDate">期望完成日期:</label>
+                        <input type="date" id="expectedDate" name="expectedDate" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">🚀 安全提交数据</button>
+            </form>
+        </div>
+
+        <div id="result" style="display: none;"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            const secretKey = 'hex-body-encrypt-2025';
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 设置默认日期
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 30);
+            $('#expectedDate').val(tomorrow.toISOString().split('T')[0]);
+            
+            // 加密整个请求体并转换为十六进制
+            const encryptAndHexEncode = (data) => {
+                // 1. 将数据转换为JSON字符串
+                const jsonString = JSON.stringify(data);
+                
+                // 2. 使用AES加密
+                const encrypted = CryptoJS.AES.encrypt(jsonString, secretKey).toString();
+                
+                // 3. 转换为十六进制
+                const hexEncoded = CryptoJS.enc.Utf8.parse(encrypted).toString(CryptoJS.enc.Hex);
+                
+                return {
+                    original: jsonString,
+                    encrypted: encrypted,
+                    hexEncoded: hexEncoded
+                };
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (formData, encryptionSteps) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - 整个请求体十六进制加密过程</div>
+                    
+                    <div class="encryption-flow">
+                        <div class="flow-step">原始JSON</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">AES加密</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">十六进制编码</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">发送到服务器</div>
+                    </div>
+                    
+                    <div class="step-title">📝 步骤1: 原始表单数据 (JSON格式)</div>
+                    <div class="step-block">
+                        <div class="json-content">${JSON.stringify(formData, null, 2)}</div>
+                    </div>
+                    
+                    <div class="step-title">🔒 步骤2: AES加密后的数据</div>
+                    <div class="step-block">
+                        <div style="color: #f39c12; word-break: break-all;">${encryptionSteps.encrypted}</div>
+                    </div>
+                    
+                    <div class="step-title">🔢 步骤3: 十六进制编码后的最终数据</div>
+                    <div class="step-block">
+                        <div class="hex-content">${encryptionSteps.hexEncoded}</div>
+                    </div>
+                    
+                    <div class="step-title">📡 步骤4: 发送到服务器的请求体</div>
+                    <div class="step-block">
+                        <div style="color: #8e44ad;">Content-Type: text/plain</div>
+                        <div style="color: #8e44ad;">Body: ${encryptionSteps.hexEncoded.substring(0, 100)}...</div>
+                    </div>
+                    
+                    <strong>🔑 加密说明:</strong><br>
+                    • 整个JSON请求体使用AES算法加密<br>
+                    • 加密后的数据转换为十六进制字符串<br>
+                    • 服务器接收十六进制数据后需要逆向解密<br>
+                    • 这是最高级别的请求体加密方式
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 处理表单提交
+            $('#secureForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                // 禁用提交按钮
+                $('#submitBtn').prop('disabled', true).text('🔄 加密传输中...');
+                
+                // 获取表单数据
+                const formData = {
+                    companyName: $('#companyName').val(),
+                    industry: $('#industry').val(),
+                    contactPerson: $('#contactPerson').val(),
+                    contactPhone: $('#contactPhone').val(),
+                    email: $('#email').val(),
+                    budget: parseInt($('#budget').val()),
+                    projectDescription: $('#projectDescription').val(),
+                    urgency: $('#urgency').val(),
+                    expectedDate: $('#expectedDate').val(),
+                    timestamp: Math.floor(Date.now() / 1000),
+                    requestId: Math.random().toString(36).substring(2, 15)
+                };
+                
+                // 加密并十六进制编码
+                const encryptionSteps = encryptAndHexEncode(formData);
+                
+                // 显示调试信息
+                showDebugInfo(formData, encryptionSteps);
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = 'api/secure-submit';
+                } else {
+                    apiUrl = 'http://localhost:48159/api/secure-submit';
+                }
+                
+                // 发送请求 - 整个请求体就是十六进制字符串
+                $.ajax({
+                    url: apiUrl,
+                    type: 'POST',
+                    contentType: 'text/plain',
+                    data: encryptionSteps.hexEncoded,
+                    success: (response) => {
+                        const html = `
+                            <div class="result success">
+                                <h3>✅ 数据提交成功!</h3>
+                                <p><strong>提交ID:</strong> ${response.submissionId}</p>
+                                <p><strong>处理状态:</strong> ${response.status}</p>
+                                <p><strong>提交时间:</strong> ${new Date(response.timestamp).toLocaleString()}</p>
+                                <p><strong>安全等级:</strong> ${response.securityLevel}</p>
+                                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                    <strong>📊 解密验证结果:</strong><br>
+                                    公司名称: ${response.decryptedData.companyName}<br>
+                                    联系人: ${response.decryptedData.contactPerson}<br>
+                                    项目预算: ¥${response.decryptedData.budget.toLocaleString()}<br>
+                                    紧急程度: ${response.decryptedData.urgency}
+                                </div>
+                            </div>
+                        `;
+                        $('#result').html(html).show();
+                    },
+                    error: (xhr, status, error) => {
+                        let errorMsg = '数据提交失败';
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMsg = xhr.responseJSON.error;
+                        }
+                        
+                        const html = `
+                            <div class="result error">
+                                <h3>❌ 提交失败</h3>
+                                <p><strong>错误信息:</strong> ${errorMsg}</p>
+                                <p><strong>状态码:</strong> ${xhr.status}</p>
+                                <p>请检查网络连接或稍后重试。</p>
+                            </div>
+                        `;
+                        $('#result').html(html).show();
+                        console.error('Submit error:', error);
+                    },
+                    complete: () => {
+                        // 恢复提交按钮
+                        $('#submitBtn').prop('disabled', false).text('🚀 安全提交数据');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

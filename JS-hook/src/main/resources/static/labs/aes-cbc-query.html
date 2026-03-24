@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-CBC Query Variant</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+    <script src="../libs/crypto-js-4.1.1.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>AES-CBC Query Variant</h1>
+        <p>目标：补齐 <code>AesCbcQuery</code> 形态。重点观察业务对象如何先被序列化成查询串，再整体进入 AES-CBC，最后塞进 URL 的单个密文字段。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo / AesCbcQuery</span>
+            <span class="chip">技术点：Query transport</span>
+            <span class="chip">推荐动作：Hook URLSearchParams / AES.encrypt</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>const biz = { keyword: 'laptop', tenant: 'acme-shop', page: 3 };
+const plain = new URLSearchParams(biz).toString();
+const key = CryptoJS.enc.Utf8.parse('AesQueryKey-0321');
+const iv = CryptoJS.enc.Utf8.parse('AesQueryIv-0321!');
+const cipher = CryptoJS.AES.encrypt(plain, key, {
+  iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
+}).ciphertext.toString(CryptoJS.enc.Base64);
+const url = `/api/search?q=${encodeURIComponent(cipher)}&ts=1711117788`;</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交关键字段，格式：<code>keyword|tenant|page</code></p>
+        <input id="answer" placeholder="例如：laptop|acme-shop|3">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+</div>
+
+<script>
+const payload = Object.freeze({
+  keyword: 'laptop',
+  tenant: 'acme-shop',
+  page: 3
+});
+
+function renderPacket(){
+  const plain = new URLSearchParams(payload).toString();
+  const key = CryptoJS.enc.Utf8.parse('AesQueryKey-0321');
+  const iv = CryptoJS.enc.Utf8.parse('AesQueryIv-0321!');
+  const cipher = CryptoJS.AES.encrypt(plain, key, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  }).ciphertext.toString(CryptoJS.enc.Base64);
+  const packet = {
+    method: 'GET',
+    url: `/api/search?q=${encodeURIComponent(cipher)}&ts=1711117788`,
+    note: '先序列化 Query，再整体 AES-CBC'
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'laptop|acme-shop|3';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '回到 URLSearchParams 之前的业务对象，抓 keyword / tenant / page。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "message": "获取用户信息成功",
+  "data": {
+    "id": 1001,
+    "name": "张三",
+    "email": "zhangsan@company.com",
+    "department": "技术部",
+    "encryptedPhone": "U2FsdGVkX1/TCSzk2xeJ7Ygp5w3SGFWWwKk9xJ8f+yg=",
+    "encryptedIdCard": "U2FsdGVkX1+/iqcsQts6tx0MM0XcTdwQvjEKHEAIM8Tz+O3z89lDO2bB+PvZ89yM",
+    "encryptedBankCard": "U2FsdGVkX18SK/rqA4B83grGVf6BzF+2N+8BLmOOf5T3EYv2sr/LSUK1cSJn0CQa",
+    "encryptedAddress": "U2FsdGVkX18OV0bHhR2LppCpIy5tHWbsrFla7la0UX6SyoaIVUnjR4KOk25C4MC4RBOfqQytp6eUxxCyF3mdeA==",
+    "createdAt": "2023-01-15T08:30:00Z",
+    "lastLogin": "2025-01-31T10:15:00Z",
+    "status": "正常"
+  },
+  "timestamp": "2025-01-31T12:45:00.000Z"
+}

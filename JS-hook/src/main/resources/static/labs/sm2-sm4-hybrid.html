@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SM2-SM4 Hybrid</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>SM2-SM4 Hybrid</h1>
+        <p>目标：补国密混合加密题。这里用 mock 方式保留“SM2 包会话密钥 + SM4 加密业务体”的层级，训练重点还是封包拆解与参数来源定位。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo / Sm2Sm4</span>
+            <span class="chip">技术点：SM2 + SM4 / 国密混合</span>
+            <span class="chip">推荐动作：先抓会话密钥，再抓明文体</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>const sessionKey = 'GM-SM4-KEY-2603';
+function wrapKeyBySm2(key) {
+  return '04' + btoa('sm2|' + key).replace(/=/g, '').split('').reverse().join('');
+}
+function sm4EncryptMock(body, key, iv) {
+  return btoa(JSON.stringify(body).split('').reverse().join('') + '|' + iv + '|' + key.slice(-4));
+}</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交关键字段，格式：<code>tradeNo|op|deviceId</code></p>
+        <input id="answer" placeholder="例如：T-2031|bind-card|and-77">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>这题和 AES+RSA 混合题的思路是一致的，只是算法标签换成了国密组合。</li>
+            <li>先看会话密钥如何被包装，再看业务 JSON 何时进入对称加密。</li>
+            <li>很多实战里还会混进签名头和时间戳，可以继续往上扩。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+const payload = Object.freeze({
+  tradeNo: 'T-2031',
+  op: 'bind-card',
+  deviceId: 'and-77',
+  channel: 'miniapp'
+});
+
+function wrapKeyBySm2(key){
+  return '04' + btoa('sm2|' + key).replace(/=/g, '').split('').reverse().join('');
+}
+
+function sm4EncryptMock(body, key, iv){
+  return btoa(JSON.stringify(body).split('').reverse().join('') + '|' + iv + '|' + key.slice(-4));
+}
+
+function renderPacket(){
+  const sessionKey = 'GM-SM4-KEY-2603';
+  const iv = 'GMIV-2031-77001';
+  const packet = {
+    alg: 'SM2 + SM4(mock)',
+    wrappedKey: wrapKeyBySm2(sessionKey),
+    iv: btoa(iv),
+    data: sm4EncryptMock(payload, sessionKey, iv)
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'T-2031|bind-card|and-77';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '先从业务 JSON 里找 tradeNo / op / deviceId，再回看会话密钥封装。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

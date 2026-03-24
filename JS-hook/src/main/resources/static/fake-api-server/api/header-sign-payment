@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟请求头签名验证响应",
+  "data": {
+    "request_id": "REQABC123PAYMENT",
+    "timestamp": 1738252800,
+    "signature_valid": true,
+    "api_type": "payment",
+    "client_id": "CLIENT_ABC123DEF456",
+    "payment_result": {
+      "status": "success",
+      "transaction_id": "TXNPAY789012345",
+      "amount": 1299.99,
+      "payment_method": "alipay",
+      "fee": "7.80",
+      "order_id": "PAY202501270001",
+      "merchant_id": "MCH123456789"
+    }
+  }
+}

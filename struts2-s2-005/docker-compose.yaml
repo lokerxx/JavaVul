@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  struts2-s2-005:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: javavul/struts2-s2-005-local
+    ports:
+      - "8080:8080"

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-GCM Bidirectional</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>AES-GCM Bidirectional</h1>
+        <p>目标：补双向 AES-GCM 场景。请求和响应都带有 <code>iv</code> 与 <code>aad</code>，更贴近移动端和 H5 的完整协议封包。</p>
+        <div class="chips">
+            <span class="chip">扩展方向：AES-GCM 双向报文</span>
+            <span class="chip">技术点：Request + Response + AAD</span>
+            <span class="chip">推荐动作：Hook TextEncoder / crypto.subtle</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>请求逻辑</h2>
+<pre>const req = { traceId: 'gcm-req-09', op: 'create-ticket', count: 3 };
+const aad = 'req:aad:v1';
+const out = await crypto.subtle.encrypt({ name:'AES-GCM', iv, additionalData:aadBytes }, key, reqBytes);</pre>
+        </section>
+
+        <section class="card">
+            <h2>响应逻辑</h2>
+<pre>const resp = { resultCode: '00', ticket: 'TK-2031', payloadSize: 3 };
+const aad = 'resp:aad:v1';
+const out = await crypto.subtle.encrypt({ name:'AES-GCM', iv, additionalData:aadBytes }, key, respBytes);</pre>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>模拟交互</h2>
+        <pre id="packet">正在生成...</pre>
+        <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+    </section>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交请求和响应关键字段，格式：<code>traceId|resultCode|payloadSize</code></p>
+        <input id="answer" placeholder="例如：gcm-req-09|00|3">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+</div>
+
+<script>
+function bytesToBase64(buffer){
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  let binary = '';
+  bytes.forEach(item => { binary += String.fromCharCode(item); });
+  return btoa(binary);
+}
+
+async function pack(text, keyText, ivBytes, aadText){
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(keyText),
+    'AES-GCM',
+    false,
+    ['encrypt']
+  );
+  const out = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: ivBytes, additionalData: new TextEncoder().encode(aadText) },
+    key,
+    new TextEncoder().encode(text)
+  );
+  return {
+    iv: bytesToBase64(ivBytes),
+    aad: btoa(aadText),
+    data: bytesToBase64(out)
+  };
+}
+
+async function renderPacket(){
+  const req = { traceId: 'gcm-req-09', op: 'create-ticket', count: 3 };
+  const resp = { resultCode: '00', ticket: 'TK-2031', payloadSize: 3 };
+  const packet = {
+    request: await pack(JSON.stringify(req), 'GcmReqKey-260321', Uint8Array.from([3,2,1,0,9,8,7,6,5,4,3,2]), 'req:aad:v1'),
+    response: await pack(JSON.stringify(resp), 'GcmRspKey-260321', Uint8Array.from([1,1,2,2,3,3,4,4,5,5,6,6]), 'resp:aad:v1')
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'gcm-req-09|00|3';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '这题要同时回到请求加密前和响应加密前的 JSON。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>垂直越权场景</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .card { background: #fff; border-radius: 18px; box-shadow: 0 12px 32px rgba(15,23,42,.08); padding: 24px; margin-bottom: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; }
+        button, a.button { display: inline-block; margin-right: 10px; margin-top: 12px; border: 0; border-radius: 999px; background: #14532d; color: #fff; padding: 10px 16px; cursor: pointer; text-decoration: none; }
+        a.button.secondary, button.secondary { background: #475569; }
+        pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 14px; min-height: 220px; overflow: auto; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>垂直越权场景</h1>
+        <p>漏洞版仅校验客户端请求头 <code>X-Client-Role</code>；安全版必须持有管理员 token。</p>
+        <a class="button secondary" href="/logic-vul">返回首页</a>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <h2>漏洞版</h2>
+            <input id="verticalActingUserId" value="27">
+            <input id="clientRole" value="ADMIN">
+            <button onclick="callVerticalVul()">读取管理员报表</button>
+        </div>
+        <div class="card">
+            <h2>安全版</h2>
+            <input id="adminToken" placeholder="先获取管理员 token">
+            <button onclick="getAdminToken()">获取管理员 token</button>
+            <button class="secondary" onclick="callVerticalSafe()">读取管理员报表</button>
+        </div>
+    </div>
+    <div class="card"><h2>响应结果</h2><pre id="result">等待发送请求...</pre></div>
+</div>
+<script>
+    async function callVerticalVul() {
+        const response = await fetch('/api/admin/report/vul?actingUserId=' + encodeURIComponent(document.getElementById('verticalActingUserId').value), {
+            headers: { 'X-Client-Role': document.getElementById('clientRole').value }
+        });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+    async function getAdminToken() {
+        const response = await fetch('/auth/login-safe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'yon.tremblay', password: 'wyu3bxp4pc865s' }) });
+        const data = await response.json();
+        document.getElementById('adminToken').value = data.token || '';
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    }
+    async function callVerticalSafe() {
+        const response = await fetch('/api/admin/report/safe', {
+            headers: { 'X-Logic-Token': document.getElementById('adminToken').value }
+        });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+</script>
+</body>
+</html>

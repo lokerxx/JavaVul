@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package microservice;
+
+option java_package = "com.myapp.jshook.proto.microservice";
+option java_multiple_files = true;
+
+message UserRequest {
+  string action = 1;
+  string user_id = 2;
+  string name = 3;
+  string email = 4;
+  string role = 5;
+  string status = 6;
+}
+
+message UserResponse {
+  bool success = 1;
+  string message = 2;
+  string user_id = 3;
+  string name = 4;
+  string email = 5;
+  string role = 6;
+  string status = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+}
+
+message OrderRequest {
+  string action = 1;
+  string order_id = 2;
+  string customer_id = 3;
+  double amount = 4;
+  string payment_method = 5;
+  string status = 6;
+}
+
+message OrderResponse {
+  bool success = 1;
+  string message = 2;
+  string order_id = 3;
+  string customer_id = 4;
+  double amount = 5;
+  string payment_method = 6;
+  string status = 7;
+  int64 created_at = 8;
+  string tracking_number = 9;
+}
+
+message AnalyticsRequest {
+  string analytics_type = 1;
+  string time_range = 2;
+  string data_source = 3;
+  string output_format = 4;
+}
+
+message AnalyticsResponse {
+  bool success = 1;
+  string message = 2;
+  string report_id = 3;
+  string analytics_type = 4;
+  map<string, double> metrics = 5;
+  string download_url = 6;
+  int64 generated_at = 7;
+}
+
+message NotificationRequest {
+  string notification_type = 1;
+  string priority = 2;
+  string recipient = 3;
+  string template = 4;
+  string content = 5;
+}
+
+message NotificationResponse {
+  bool success = 1;
+  string message = 2;
+  string notification_id = 3;
+  string status = 4;
+  int64 sent_at = 5;
+  string delivery_status = 6;
+}
+
+message ServiceRequest {
+  string request_id = 1;
+  int64 timestamp = 2;
+  string service_name = 3;
+
+  oneof request_data {
+    UserRequest user_request = 10;
+    OrderRequest order_request = 11;
+    AnalyticsRequest analytics_request = 12;
+    NotificationRequest notification_request = 13;
+  }
+}
+
+message ServiceResponse {
+  string request_id = 1;
+  int64 timestamp = 2;
+  bool success = 3;
+  string service_name = 4;
+  int32 status_code = 5;
+
+  oneof response_data {
+    UserResponse user_response = 10;
+    OrderResponse order_response = 11;
+    AnalyticsResponse analytics_response = 12;
+    NotificationResponse notification_response = 13;
+  }
+}

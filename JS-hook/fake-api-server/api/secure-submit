@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "message": "数据提交成功",
+  "submissionId": "ABC123XYZ789",
+  "status": "已接收并处理",
+  "timestamp": "2025-01-31T14:00:00.000Z",
+  "securityLevel": "最高级别加密",
+  "decryptedData": {
+    "companyName": "科技创新有限公司",
+    "contactPerson": "张经理",
+    "budget": 500000,
+    "urgency": "medium",
+    "industry": "technology"
+  },
+  "processingInfo": {
+    "hexDataLength": 1024,
+    "encryptedDataLength": 512,
+    "originalDataSize": 256
+  }
+}

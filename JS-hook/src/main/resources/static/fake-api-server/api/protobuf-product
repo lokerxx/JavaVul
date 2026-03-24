@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟 Protocol Buffers 响应",
+  "data": {
+    "request_id": "def456",
+    "timestamp": 1738252800,
+    "success": true,
+    "message": "产品 智能手机 信息处理成功",
+    "code": 200,
+    "product_info": {
+      "name": "智能手机",
+      "description": "高性能智能手机，配备最新处理器和高清摄像头，支持5G网络。",
+      "price": 2999.99,
+      "category": "electronics",
+      "brand": "TechBrand",
+      "stock": 100,
+      "tags": ["5G", "高清摄像", "长续航"],
+      "attributes": {
+        "product_id": "PRD456DEF",
+        "created_at": "2025-01-31T16:00:00.000Z",
+        "status": "available",
+        "warranty": "2年",
+        "origin": "中国"
+      }
+    }
+  }
+}

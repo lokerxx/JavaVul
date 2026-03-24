@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Single Field Encryption</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #74b9ff;
+        }
+        .header h1 {
+            color: #2d3436;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #636e72;
+            margin: 0;
+            font-size: 16px;
+        }
+        .chat-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+        }
+        .message-form {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #74b9ff;
+            box-shadow: 0 0 0 3px rgba(116, 185, 255, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .send-btn {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(116, 185, 255, 0.3);
+        }
+        .send-btn:disabled {
+            background: #b2bec3;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .messages {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            background: white;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #74b9ff;
+            background: #f8f9fa;
+        }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .message-sender {
+            font-weight: bold;
+            color: #2d3436;
+        }
+        .message-time {
+            font-size: 12px;
+            color: #636e72;
+        }
+        .message-content {
+            color: #2d3436;
+            line-height: 1.5;
+        }
+        .encrypted-content {
+            font-family: monospace;
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 4px;
+            padding: 8px;
+            color: #c53030;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .decrypt-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        .decrypt-btn:hover {
+            background: #38a169;
+        }
+        .debug-info {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #e2e8f0;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2d3436;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 16px;
+        }
+        .json-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin: 10px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .encrypted-field {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #e53e3e;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>加密聊天室</h1>
+            <p>Single Field Encryption Case - 单字段加密通信</p>
+        </div>
+
+        <div class="chat-container">
+            <div class="message-form">
+                <div class="form-group">
+                    <label for="sender">发送者:</label>
+                    <select id="sender" name="sender">
+                        <option value="Alice">Alice</option>
+                        <option value="Bob">Bob</option>
+                        <option value="Charlie">Charlie</option>
+                        <option value="Diana">Diana</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 3;">
+                    <label for="message">消息内容 (将被加密):</label>
+                    <textarea id="message" name="message" placeholder="请输入要发送的消息..." required>这是一条需要加密传输的重要消息！</textarea>
+                </div>
+                <button class="send-btn" id="sendBtn">发送消息</button>
+            </div>
+
+            <div class="messages" id="messages">
+                <div class="message">
+                    <div class="message-header">
+                        <span class="message-sender">系统</span>
+                        <span class="message-time">刚刚</span>
+                    </div>
+                    <div class="message-content">欢迎来到加密聊天室！所有消息内容都会被加密传输。</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            const secretKey = 'single-field-2025';
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 加密消息内容
+            const encryptMessage = (message) => {
+                return CryptoJS.AES.encrypt(message, secretKey).toString();
+            };
+            
+            // 解密消息内容
+            const decryptMessage = (encryptedMessage) => {
+                try {
+                    const decryptedBytes = CryptoJS.AES.decrypt(encryptedMessage, secretKey);
+                    return decryptedBytes.toString(CryptoJS.enc.Utf8);
+                } catch (error) {
+                    return '解密失败';
+                }
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (requestData, responseData) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - 单字段加密通信</div>
+                    
+                    <strong>📤 请求数据 (发送到服务器):</strong>
+                    <div class="json-block">{
+  "sender": "${requestData.sender}",
+  <span class="encrypted-field">"encryptedMessage": "${requestData.encryptedMessage.substring(0, 40)}..."</span>,
+  "timestamp": ${requestData.timestamp}
+}</div>
+                    
+                    <strong>📥 响应数据 (服务器返回):</strong>
+                    <div class="json-block">{
+  "success": ${responseData.success},
+  "messageId": "${responseData.messageId}",
+  <span class="encrypted-field">"encryptedContent": "${responseData.encryptedContent ? responseData.encryptedContent.substring(0, 40) + '...' : 'N/A'}"</span>,
+  "sender": "${responseData.sender}",
+  "timestamp": "${responseData.timestamp}"
+}</div>
+                    
+                    <strong>🔑 加密说明:</strong><br>
+                    • 请求中的 "encryptedMessage" 字段使用AES加密<br>
+                    • 响应中的 "encryptedContent" 字段也使用AES加密<br>
+                    • 其他字段保持明文传输<br>
+                    • 这是最简化的加密通信模式
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 添加消息到聊天界面
+            const addMessage = (sender, content, isEncrypted = false, encryptedContent = null) => {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString();
+                
+                let contentHtml = content;
+                if (isEncrypted && encryptedContent) {
+                    contentHtml = `
+                        <div class="encrypted-content" id="enc_${now.getTime()}">
+                            🔒 加密内容: ${encryptedContent.substring(0, 50)}...
+                            <br><button class="decrypt-btn" onclick="decryptAndShowMessage('${encryptedContent}', 'enc_${now.getTime()}')">解密查看</button>
+                        </div>
+                    `;
+                }
+                
+                const messageHtml = `
+                    <div class="message">
+                        <div class="message-header">
+                            <span class="message-sender">${sender}</span>
+                            <span class="message-time">${timeStr}</span>
+                        </div>
+                        <div class="message-content">${contentHtml}</div>
+                    </div>
+                `;
+                
+                $('#messages').append(messageHtml);
+                $('#messages').scrollTop($('#messages')[0].scrollHeight);
+            };
+            
+            // 全局解密函数
+            window.decryptAndShowMessage = (encryptedContent, elementId) => {
+                const decrypted = decryptMessage(encryptedContent);
+                $(`#${elementId}`).html(`✅ 解密成功: ${decrypted}`).css({
+                    'background': '#f0fff4',
+                    'border-color': '#9ae6b4',
+                    'color': '#22543d'
+                });
+            };
+            
+            // 发送消息
+            $('#sendBtn').on('click', function() {
+                const sender = $('#sender').val();
+                const message = $('#message').val().trim();
+                
+                if (!message) {
+                    alert('请输入消息内容');
+                    return;
+                }
+                
+                // 禁用发送按钮
+                $(this).prop('disabled', true).text('发送中...');
+                
+                // 加密消息
+                const encryptedMessage = encryptMessage(message);
+                const timestamp = Math.floor(Date.now() / 1000);
+                
+                // 构建请求数据
+                const requestData = {
+                    sender: sender,
+                    encryptedMessage: encryptedMessage,
+                    timestamp: timestamp
+                };
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = 'api/send-message';
+                } else {
+                    apiUrl = 'http://localhost:48159/api/send-message';
+                }
+                
+                // 发送请求
+                $.ajax({
+                    url: apiUrl,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(requestData),
+                    success: (response) => {
+                        // 显示调试信息
+                        showDebugInfo(requestData, response);
+                        
+                        // 添加发送的消息到界面
+                        addMessage(sender, message);
+                        
+                        // 如果服务器返回了加密的回复消息
+                        if (response.encryptedContent) {
+                            setTimeout(() => {
+                                addMessage('服务器', '', true, response.encryptedContent);
+                            }, 500);
+                        }
+                        
+                        // 清空输入框
+                        $('#message').val('');
+                    },
+                    error: (xhr, status, error) => {
+                        let errorMsg = '发送消息失败';
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMsg = xhr.responseJSON.error;
+                        }
+                        
+                        addMessage('系统', `❌ ${errorMsg}`, false);
+                        console.error('Send error:', error);
+                    },
+                    complete: () => {
+                        // 恢复发送按钮
+                        $('#sendBtn').prop('disabled', false).text('发送消息');
+                    }
+                });
+            });
+            
+            // 回车发送
+            $('#message').on('keypress', function(e) {
+                if (e.which === 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    $('#sendBtn').click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

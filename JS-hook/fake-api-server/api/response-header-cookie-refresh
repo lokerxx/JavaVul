@@ -1,0 +1,25 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟响应头加密Cookie",
+  "data": {
+    "session_id": "SESJKL012REFRESH",
+    "timestamp": 1738252800,
+    "authenticated": true,
+    "service_type": "refresh",
+    "client_ip": "192.168.1.100",
+    "refresh_result": {
+      "status": "refreshed",
+      "new_access_token": "RATREFRESH567890123QRSTUV",
+      "new_refresh_token": "RRTREFRESH890123456WXYZAB",
+      "expires_in": 86400,
+      "scope": "reduced"
+    }
+  },
+  "headers": {
+    "x-cookie": "U2FsdGVkX1+1TJtOcKRmUwMYp2T0czRvYWJjZGVmZ2hpams4NTY3ODkwMWFiY2RlZmdoaWpr",
+    "x-session-id": "SESJKL012REFRESH",
+    "x-auth-status": "success",
+    "x-service-type": "refresh",
+    "content-type": "application/json"
+  }
+}

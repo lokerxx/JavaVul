@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3DES-CBC Basic</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+    <script src="../libs/crypto-js-4.1.1.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>3DES-CBC Basic</h1>
+        <p>目标：补齐 3DES 场景。它和 DES 的区别不在于你的解题思路，而在于“更长的 key”“更像遗留系统网关”的识别特征。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo / 3DES</span>
+            <span class="chip">技术点：TripleDES / 遗留系统</span>
+            <span class="chip">推荐动作：Hook TripleDES.encrypt</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>function encryptLegacy(body) {
+  const key = CryptoJS.enc.Utf8.parse('TripleDesKey-260321-ABC!');
+  const iv = CryptoJS.enc.Utf8.parse('3DESIv01');
+  return CryptoJS.TripleDES.encrypt(JSON.stringify(body), key, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  }).ciphertext.toString(CryptoJS.enc.Base64);
+}</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交关键字段，格式：<code>biz|region|priority</code></p>
+        <input id="answer" placeholder="例如：legacy.transfer|east|P1">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>别被“算法更老 / 更长 key”带偏，题目的核心仍是抓明文。</li>
+            <li>你需要能快速区分 DES、3DES、AES 这类库调用差异。</li>
+            <li>很多老网关会把 3DES 和签名逻辑堆在一起，适合后续扩展成组合题。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+const payload = Object.freeze({
+  biz: 'legacy.transfer',
+  region: 'east',
+  priority: 'P1',
+  traceId: 'trace-3des-01'
+});
+
+function renderPacket(){
+  const key = CryptoJS.enc.Utf8.parse('TripleDesKey-260321-ABC!');
+  const iv = CryptoJS.enc.Utf8.parse('3DESIv01');
+  const encrypted = CryptoJS.TripleDES.encrypt(JSON.stringify(payload), key, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  });
+  const packet = {
+    alg: '3DES-CBC',
+    iv: btoa('3DESIv01'),
+    data: encrypted.ciphertext.toString(CryptoJS.enc.Base64)
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'legacy.transfer|east|P1';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '回到 TripleDES 之前的明文对象，重点看 biz / region / priority。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-CBC Bidirectional</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+    <script src="../libs/crypto-js-4.1.1.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>AES-CBC Bidirectional</h1>
+        <p>目标：补双向密文交互。请求体整体 AES-CBC，加密响应也再走一层 AES-CBC，更接近真实网关式前后端协议。</p>
+        <div class="chips">
+            <span class="chip">扩展方向：双向报文</span>
+            <span class="chip">技术点：Request + Response</span>
+            <span class="chip">推荐动作：Hook fetch body 和响应解密函数</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>请求逻辑</h2>
+<pre>const req = { traceId: 'trace-6601', op: 'query-balance', uid: 'u-77' };
+const reqCipher = aesCbc(JSON.stringify(req), reqKey, reqIv);
+fetch('/api/balance', { body: JSON.stringify({ data: reqCipher }) });</pre>
+        </section>
+
+        <section class="card">
+            <h2>响应逻辑</h2>
+<pre>const resp = { resultCode: '00', balance: 9950, currency: 'CNY' };
+const respCipher = aesCbc(JSON.stringify(resp), respKey, respIv);
+return { data: respCipher, iv: btoa(respIv) };</pre>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>模拟交互</h2>
+        <pre id="packet">正在生成...</pre>
+        <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+    </section>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交请求和响应的关键字段，格式：<code>traceId|resultCode|balance</code></p>
+        <input id="answer" placeholder="例如：trace-6601|00|9950">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+</div>
+
+<script>
+function aesCbc(text, keyText, ivText){
+  return CryptoJS.AES.encrypt(text, CryptoJS.enc.Utf8.parse(keyText), {
+    iv: CryptoJS.enc.Utf8.parse(ivText),
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  }).ciphertext.toString(CryptoJS.enc.Base64);
+}
+
+function renderPacket(){
+  const req = { traceId: 'trace-6601', op: 'query-balance', uid: 'u-77' };
+  const resp = { resultCode: '00', balance: 9950, currency: 'CNY' };
+  const packet = {
+    request: {
+      iv: btoa('ReqIv-660100001!'),
+      data: aesCbc(JSON.stringify(req), 'ReqKey-660100001', 'ReqIv-660100001!')
+    },
+    response: {
+      iv: btoa('RespIv-99500001'),
+      data: aesCbc(JSON.stringify(resp), 'RespKey-9950001', 'RespIv-99500001')
+    }
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'trace-6601|00|9950';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '这题要同时回到请求加密前和响应解密前的 JSON。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

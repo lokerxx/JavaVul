@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SM4-CBC Basic</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>SM4-CBC Basic</h1>
+        <p>目标：定位前端在进入 SM4-CBC 之前如何准备 key、iv 和业务 JSON。为了避免再引入额外算法库，这道题把 SM4 运算本身做成轻量 mock，训练重点放在 Hook 点和参数来源定位。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo</span>
+            <span class="chip">技术点：SM4-CBC / key iv 来源</span>
+            <span class="chip">推荐动作：先抓 keyRule，再抓 ivRule</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>function deriveSm4Key(ticket, userId) {
+  return (`SM4KEY-${userId}-LAB`).slice(0, 16);
+}
+
+function deriveIv(ticket) {
+  return ticket.slice(0, 16);
+}
+
+function sm4CbcEncryptMock(payload, key, iv) {
+  return btoa(JSON.stringify(payload).split('').reverse().join('') + '|' + iv + '|' + key.slice(-4));
+}</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px">
+                <button onclick="renderPacket()">重新生成</button>
+            </div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交业务 JSON 的关键字段，格式：<code>scene|tenant|level</code></p>
+        <input id="answer" placeholder="例如：contract.sync|acme-lab|P2">
+        <div style="margin-top:12px">
+            <button onclick="check()">校验</button>
+            <span id="result"></span>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>先确认这题的重点是参数来源，而不是算法实现细节。</li>
+            <li>盯住 <code>deriveSm4Key</code> 和 <code>deriveIv</code> 的入参来源。</li>
+            <li>很多业务代码会把 ticket、userId、deviceId 这类上下文直接揉进密钥材料里。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+const runtime = Object.freeze({
+  ticket: 'TICKET-20260321-XYZ',
+  userId: 'u10086'
+});
+
+const payload = Object.freeze({
+  scene: 'contract.sync',
+  tenant: 'acme-lab',
+  level: 'P2'
+});
+
+function deriveSm4Key(ticket, userId){
+  return (`SM4KEY-${userId}-LAB`).slice(0, 16);
+}
+
+function deriveIv(ticket){
+  return ticket.slice(0, 16);
+}
+
+function sm4CbcEncryptMock(body, key, iv){
+  return btoa(JSON.stringify(body).split('').reverse().join('') + '|' + iv + '|' + key.slice(-4));
+}
+
+function renderPacket(){
+  const key = deriveSm4Key(runtime.ticket, runtime.userId);
+  const iv = deriveIv(runtime.ticket);
+  const packet = {
+    alg: 'SM4-CBC(mock)',
+    iv: btoa(iv),
+    ciphertext: sm4CbcEncryptMock(payload, key, iv)
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'contract.sync|acme-lab|P2';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '先别纠结 SM4 算法细节，先把进入算法前的业务对象抠出来。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

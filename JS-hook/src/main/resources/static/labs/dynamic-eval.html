@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Eval Payload</title>
+    <style>
+        body{font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0;margin:0}
+        .wrap{max-width:1100px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        textarea,input{width:100%;box-sizing:border-box;background:#111827;color:#e2e8f0;border:1px solid #334155;border-radius:12px;padding:12px}
+        pre{white-space:pre-wrap;background:#111827;padding:16px;border-radius:12px;overflow:auto}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}.hint{color:#cbd5e1}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>Dynamic Eval Payload</h1>
+        <p>目标：找出二阶段 payload 里最终打印的 token。推荐做法：Hook <code>eval</code>、<code>Function</code> 或直接替换执行入口。</p>
+    </div>
+    <div class="card">
+<pre>const stage1 = "dmFyIHBheWxvYWQgPSAiY29uc29sZS5sb2coJ1RPS0VOLUVWQUwtNDUyMScpIjsgZXZhbChwYXlsb2FkKTs=";
+(function(){
+  const realEval = window.eval;
+  const encoded = atob(stage1);
+  realEval(encoded);
+})();</pre>
+        <p class="hint">提交你恢复出来的 token：</p>
+        <input id="answer" placeholder="例如 TOKEN-XXXX">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </div>
+</div>
+<script>
+function check(){
+  const ok = document.getElementById('answer').value.trim() === 'TOKEN-EVAL-4521';
+  document.getElementById('result').textContent = ok ? '回答正确' : '回答错误，再 Hook 一次执行点';
+  document.getElementById('result').className = ok ? 'ok' : 'bad';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟 Protocol Buffers 响应",
+  "data": {
+    "request_id": "abc123sales",
+    "timestamp": 1738252800,
+    "success": true,
+    "message": "analytics-sales 数据获取成功",
+    "code": 200,
+    "category": "analytics",
+    "option": "sales",
+    "report_data": {
+      "report_id": "RPT123SALES",
+      "title": "销售数据分析报告",
+      "description": "基于最近30天的销售数据，分析销售趋势、热门产品和销售渠道表现",
+      "generated_at": 1738252800,
+      "summary_metrics": {
+        "总销售额": 156780,
+        "订单数量": 1245,
+        "平均客单价": 125.9,
+        "同比增长": 15.6
+      },
+      "charts": [{
+        "chart_type": "line",
+        "title": "销售趋势图",
+        "data_points": [
+          {"label": "第1天", "value": 8500, "unit": "元", "timestamp": 1738166400},
+          {"label": "第2天", "value": 9200, "unit": "元", "timestamp": 1738252800},
+          {"label": "第3天", "value": 7800, "unit": "元", "timestamp": 1738339200},
+          {"label": "第4天", "value": 10500, "unit": "元", "timestamp": 1738425600},
+          {"label": "第5天", "value": 11200, "unit": "元", "timestamp": 1738512000},
+          {"label": "第6天", "value": 9800, "unit": "元", "timestamp": 1738598400},
+          {"label": "第7天", "value": 12300, "unit": "元", "timestamp": 1738684800}
+        ],
+        "metadata": {
+          "period": "最近7天",
+          "currency": "CNY"
+        }
+      }]
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "video_type": "live-stream",
+  "segment_id": 0,
+  "segment_name": "segment_000.ts",
+  "encrypted_data": "U2FsdGVkX1+1TJtOcKRmUwMYp2T0czRvYWJjZGVmZ2hpams4NTY3ODkwMWFiY2RlZmdoaWpr",
+  "iv": "0123456789abcdef0123456789abcdef",
+  "encryption_method": "AES-128-CBC",
+  "segment_size": 262144,
+  "duration": 30,
+  "timestamp": 1738252800,
+  "content_type": "video/mp2t"
+}

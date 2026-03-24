@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+    <constant name="struts.devMode" value="true"/>
+
+    <package name="default" namespace="/" extends="struts-default">
+        <default-action-ref name="index"/>
+
+        <action name="index" class="com.myapp.action.IndexAction">
+            <result>/WEB-INF/content/index.jsp</result>
+        </action>
+
+        <action name="param" class="com.myapp.action.ParamAction">
+            <result name="success" type="httpheader">
+                <param name="status">305</param>
+                <param name="headers.x-s2-015">${message}</param>
+            </result>
+        </action>
+
+        <action name="*" class="com.myapp.action.PageAction">
+            <result>/WEB-INF/content/{1}.jsp</result>
+        </action>
+    </package>
+</struts>

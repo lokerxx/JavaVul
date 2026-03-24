@@ -1,0 +1,12 @@
+{
+  "video_type": "movie-action",
+  "segment_id": 2,
+  "segment_name": "segment_002.ts",
+  "encrypted_data": "U2FsdGVkX1+6RIqMaJQkTwLXo2SzbzQvYWJjZGVmZ2hpams4NDU2Nzg5MGFiY2RlZmdoaWpr",
+  "iv": "3456789012cdef123456789012cdef12",
+  "encryption_method": "AES-128-CBC",
+  "segment_size": 512345,
+  "duration": 30,
+  "timestamp": 1738252860,
+  "content_type": "video/mp2t"
+}

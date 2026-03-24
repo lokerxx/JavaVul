@@ -1,0 +1,41 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟 Protocol Buffers 响应",
+  "data": {
+    "request_id": "jkl012trends",
+    "timestamp": 1738252800,
+    "success": true,
+    "message": "insights-trends 数据获取成功",
+    "code": 200,
+    "category": "insights",
+    "option": "trends",
+    "report_data": {
+      "report_id": "RPT012TRENDS",
+      "title": "趋势预测分析",
+      "description": "基于历史数据和机器学习算法预测未来趋势",
+      "generated_at": 1738252800,
+      "summary_metrics": {
+        "预测准确率": 85.6,
+        "趋势强度": 7.8,
+        "置信度": 92.3,
+        "预测周期": 12
+      },
+      "charts": [{
+        "chart_type": "line",
+        "title": "趋势预测",
+        "data_points": [
+          {"label": "未来第1月", "value": 15000, "unit": "元", "timestamp": 1740844800},
+          {"label": "未来第2月", "value": 16500, "unit": "元", "timestamp": 1743523200},
+          {"label": "未来第3月", "value": 18200, "unit": "元", "timestamp": 1746028800},
+          {"label": "未来第4月", "value": 19800, "unit": "元", "timestamp": 1748707200},
+          {"label": "未来第5月", "value": 21500, "unit": "元", "timestamp": 1751299200},
+          {"label": "未来第6月", "value": 23200, "unit": "元", "timestamp": 1753977600}
+        ],
+        "metadata": {
+          "confidence": "85%",
+          "model": "ARIMA"
+        }
+      }]
+    }
+  }
+}

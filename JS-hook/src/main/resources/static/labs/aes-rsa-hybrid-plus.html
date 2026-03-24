@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-RSA Hybrid Plus</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+    <script src="../libs/crypto-js-4.1.1.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>AES-RSA Hybrid Plus</h1>
+        <p>目标：定位混合加密报文里的业务明文、会话密钥包装和签名基串。为了便于浏览器静态演示，这一题把 RSA 封装简化成 mock 包装，但保留了真实的封包层次与字段关系。</p>
+        <div class="chips">
+            <span class="chip">参考方向：encrypt-labs / GalaxyDemo</span>
+            <span class="chip">技术点：混合加密 / 签名基串</span>
+            <span class="chip">推荐动作：Hook AES 入参与 sign base</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>const sessionKey = 'HybridKey-260321';
+const iv = 'HybridIv-260321!';
+const signBase = [biz.bizCode, biz.amount, biz.account.slice(-4), 'hybrid-lab'].join('|');
+const encrypted = CryptoJS.AES.encrypt(
+  JSON.stringify(biz),
+  CryptoJS.enc.Utf8.parse(sessionKey),
+  { iv: CryptoJS.enc.Utf8.parse(iv), mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+);
+return {
+  wrappedKey: mockRsaWrap(sessionKey),
+  data: encrypted.ciphertext.toString(CryptoJS.enc.Base64),
+  sign: CryptoJS.SHA256(signBase).toString().slice(0, 24)
+};</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px">
+                <button onclick="renderPacket()">重新生成</button>
+            </div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交签名基串里的三个关键字段，格式：<code>bizCode|amount|accountLast4</code></p>
+        <input id="answer" placeholder="例如：transfer.submit|5200|0011">
+        <div style="margin-top:12px">
+            <button onclick="check()">校验</button>
+            <span id="result"></span>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>不要被 <code>wrappedKey</code> 吸走注意力，先找明文对象和 sign base。</li>
+            <li>这类题更容易从 <code>JSON.stringify</code>、AES 封装函数和签名 helper 三处下手。</li>
+            <li>很多实战项目里，RSA 只是保护会话密钥，真正业务还原还是要回到 AES 入参。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+const biz = Object.freeze({
+  bizCode: 'transfer.submit',
+  account: '6222000000000011',
+  amount: 5200,
+  currency: 'CNY'
+});
+
+function mockRsaWrap(text){
+  return btoa(text).split('').reverse().join('');
+}
+
+function renderPacket(){
+  const sessionKey = 'HybridKey-260321';
+  const iv = 'HybridIv-260321!';
+  const signBase = [biz.bizCode, biz.amount, biz.account.slice(-4), 'hybrid-lab'].join('|');
+  const encrypted = CryptoJS.AES.encrypt(
+    JSON.stringify(biz),
+    CryptoJS.enc.Utf8.parse(sessionKey),
+    {
+      iv: CryptoJS.enc.Utf8.parse(iv),
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    }
+  );
+  const packet = {
+    alg: 'AES-CBC + RSA(mock)',
+    kid: 'galaxy-demo-01',
+    wrappedKey: mockRsaWrap(sessionKey),
+    iv: btoa(iv),
+    data: encrypted.ciphertext.toString(CryptoJS.enc.Base64),
+    sign: CryptoJS.SHA256(signBase).toString().slice(0, 24)
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'transfer.submit|5200|0011';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '盯住 signBase，尤其是账户后四位的截取逻辑。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

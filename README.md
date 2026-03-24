@@ -4,13 +4,40 @@
 
 ## 介绍
 
-Java 安全漏洞靶场，用于测试IAST和扫描器的被动扫描功能，集合了多个安全漏洞，利用docker镜像为每个靶场独立环境运行。
+Java 安全漏洞靶场集合，主要用于验证 IAST、被动扫描器和各类安全测试工具在真实业务接口场景下的效果。
+
+仓库把不同漏洞拆成独立项目，并通过 Docker 为每个靶场提供隔离运行环境，方便按项目单独验证，也方便统一批量回放流量。
 
 文章：[IAST实践总结](https://mp.weixin.qq.com/s/ahxKXv5eKcULVF_VqAjbyg)
 
+## 快速开始
+
+1. 克隆项目：
+
+```sh
+git clone https://github.com/lokerxx/JavaVul
+cd JavaVul
+```
+
+2. 按需选择一种启动方式：
+
+| 文件 | 作用 | 推荐命令 |
+| :-- | :-- | :-- |
+| `docker-compose-local.yaml` | 宿主机本地先构建，再启动全部靶场，构建速度更快，**推荐** | `bash run-local-build.sh` |
+| `docker-compose-build.yaml` | 直接在容器内构建各项目，速度较慢 | `bash run-build_images.sh` |
+| `docker-compose-remote.yaml` | 直接拉取我已发布的镜像，更新可能不及时 | `bash run-remote.sh` |
+
+3. 启动后按需使用：
+
+- 总控台：`http://宿主机IP:5000/`
+- 单项目访问：参考 [`doc/project-tutorials.md`](./doc/project-tutorials.md)
+- 接口批量回放：参考 [`doc/testing-pocs.md`](./doc/testing-pocs.md)
+
 ## 部署
 
-mvn版本
+下面的版本信息是我开发这个仓库时使用过的参考环境，不要求完全一致，但建议使用较新的 Docker 和 Docker Compose。
+
+Maven 版本参考：
 
 ```sh
 # mvn --version
@@ -22,7 +49,7 @@ Default locale: en_US, platform encoding: UTF-8
 OS name: "linux", version: "3.10.0-1160.el7.x86_64", arch: "amd64", family: "unix"
 ```
 
-docker和docker-compose版本
+Docker / Docker Compose 版本参考：
 
 ```sh
 # docker version
@@ -52,7 +79,7 @@ CPython version: 3.6.8
 OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
 ```
 
-> 默认docker和docker-compose太低，需要安装比较新的
+> 如果宿主机默认的 Docker / Docker Compose 版本过低，建议升级到更新版本后再运行。
 >
 > ```
 >  yum remove docker \
@@ -70,330 +97,104 @@ OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
 > sudo yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
 > ```
 
-下载项目
+## 运行说明
 
-```sh
-git clone https://github.com/lokerxx/JavaVul
-```
+- 运行前，请把 compose 里的 `flask.environment.HOST` 改成宿主机 IP，方便首页测试和回放脚本访问靶场。
+- 当前 compose 默认已经挂载 `agent/agent.jar`。如果你要测试 IAST Agent，可以直接替换这个文件。
+- `SimpleAgent` 的构建与挂载说明见 [`doc/projects/simpleagent.md`](./doc/projects/simpleagent.md)。
+- 如果你要测试被动代理扫描，需要把 `index/app.py` 里的 `proxy_mode` 改成 `True`，并配置自己的代理地址 `proxies`。
+- 仓库里的靶场较多，默认每个应用分配 `512M-1024M` 内存；全部启动时建议预留 `16G` 左右内存。
+- 如果需要增大内存测试 Agent 或压力场景，可以统一调整 compose 文件里的 `-Xms512m -Xmx1024m`。
 
-以下是运行脚本：
+基础 Web 漏洞代码审计细节可参考：
 
-|            文件            |                             作用                             |            运行            |
-| :------------------------: | :----------------------------------------------------------: | :------------------------: |
-| docker-compose-build.yaml  | 在容器里面构建jar包，每个靶场构建会重复构建（**构建速度会很慢，不建议**） | `bash run-build_images.sh` |
-| docker-compose-local.yaml  | 宿主机maven构建各个靶场的jar包，多个靶场可以基于maven缓存快速构建（**推荐**） | `bash run-local-build.sh`  |
-| docker-compose-remote.yaml | 直接去dockerhub下载我构建上传成功的镜像（**镜像更新不及时**） |    `bash run-remote.sh`    |
-
-> 此外，需修改yaml文件里面`flask.environment.HOST`为宿主机的IP，用于跑测试用例。**然后我在yaml文件已经默认挂载agent.jar**，如果你们要测试IAST agent功能，直接替换到`agent/agent.jar`即可。我这边自己写了一个简单的java agent，参考下面[SimpleAgent]()
-
-> 如果要测试被动代理扫描，需要修改`index/app.py`里面`proxy_mode`为`True`，修改自己的代理地址：`proxies`
-
-> **修改完成之后，根据自己的需求，运行上面表格的sh脚本部署运行即可**。
-
-> 因为漏洞应用比较多**但是接口比较少**，我给每个应用配置512-1024M内存（测试运行要16G内存）。如果要配置大一点测试 IAST AGENT，则可以批量修改`docker-compose.yaml`的`-Xms512m -Xmx1024m`的环境变量
-
-> 基本web漏洞的代码审计的细节，参考这里：https://github.com/lokerxx/CybersecurityNote/tree/master/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/JAVA%E6%BC%8F%E6%B4%9E
-
-
-
-### 压力测试
-
-部署运行
-
-|              文件               |                         作用                         |          运行          |
-| :-----------------------------: | :--------------------------------------------------: | :--------------------: |
-| docker-compose-microservice.yml | 运行多个springcloud微服务，用于测试多链路 IAST agent | `run-local-service.sh` |
-
-测试用例
-
-| 接口                                            | 压测命令                                                     |
-| ----------------------------------------------- | ------------------------------------------------------------ |
-| http://ip:29998/process-user-data?userData=test | ` ab -n 1000 -c 20 "http://IP:29998/process-user-data?userData=test"` |
+- https://github.com/lokerxx/CybersecurityNote/tree/master/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/JAVA%E6%BC%8F%E6%B4%9E
 
 
 
 ## 支持靶场
 
-|          文件夹           |                           安全漏洞                           |  测试用途  |                       备注                        |
-| :-----------------------: | :----------------------------------------------------------: | :--------: | :-----------------------------------------------: |
-|  actuator_authorized_1.X  |                   actuator 未授权访问 1.X                    |    修复    |                                                   |
-|  actuator_authorized_2.X  |                   actuator 未授权访问 2.X                    |    修复    |                                                   |
-| actuator_unauthorized_1.X |                   actuator 未授权访问 1.X                    |    漏洞    |                                                   |
-| actuator_unauthorized_2.X |                   actuator 未授权访问 2.X                    |    漏洞    |                                                   |
-|         base_vul          | SQL注入、XSS、不安全文件操作、重定向漏洞、正则DOS漏洞、Crlf注入漏洞、命令注入漏洞、SPEL漏洞、SSRF漏洞、SSTI漏洞、不安全反射漏洞、XXE漏洞 |    漏洞    |                                                   |
-|      base_vul_repair      | SQL注入、XSS、不安全文件操作、重定向漏洞、正则DOS漏洞、Crlf注入漏洞、命令注入漏洞、SPEL漏洞、SSRF漏洞、SSTI漏洞、不安全反射漏洞、XXE漏洞 |    修复    |                                                   |
-|          cas_xxe          |                           XXE漏洞                            |    漏洞    | cas在3.1.1-3.5.1存在XXE漏洞<br />修复版本为3.6.0- |
-|        collections        |                     collections 反序列化                     | **未完成** |                                                   |
-|      CVE-2019-10173       |                     XStream反序列化漏洞                      |    漏洞    |                                                   |
-|      CVE-2019-12384       |                jackson-databind 反序列化漏洞                 |    漏洞    |                                                   |
-|     druid_authorized      |                       druid未授权漏洞                        |    修复    |                                                   |
-|    druid_unauthorized     |                       druid未授权漏洞                        |    漏洞    |                                                   |
-|        fastjson-*         |                 各个版本fastjson反序列化漏洞                 |    漏洞    |                                                   |
-|         Hibernate         |                      Hibernate 注入漏洞                      | 修复、漏洞 |                                                   |
-|          HSQLDB           |                       HSQLDB 注入漏洞                        | 修复、漏洞 |                                                   |
-|            jsp            |                                                              | **未完成** |                  jsp版的base_vul                  |
-|         log4jvul          |                         log4j2 漏洞                          |    漏洞    |                                                   |
-|  microservice-*-service   |                          分布式服务                          |  性能测试  |            用于验证分布式微服务的性能             |
-|         wxpay-xxe         |                       微信支付XXE漏洞                        |    漏洞    |                                                   |
-|         logic_vul         |                        业务逻辑漏洞：                        |            |                                                   |
-|                           |                                                              |            |                                                   |
-|                           |                                                              |            |                                                   |
-|                           |                                                              |            |                                                   |
+当前仓库里的数据库类靶场已经统一为本地 SQLite 初始化，`base_vul`、`base_vul_repair`、`druid_unauthorized` 与 `druid_authorized` 都不再依赖 MySQL。
+目前项目内已经移除了 MySQL 运行依赖，启动单体靶场时不需要额外准备数据库容器。
+
+可以按下面几类理解当前仓库里的靶场：
+
+### 基础 Web 漏洞与数据访问
+
+| 文件夹 | 安全漏洞 | 测试用途 | 备注 |
+| :-- | :-- | :-- | :-- |
+| `base_vul` | SQL 注入、XSS、不安全文件操作、重定向、ReDoS、CRLF、命令执行、SPEL、SSRF、SSTI、不安全反射、XXE | 漏洞 | 综合基础漏洞集合 |
+| `base_vul_repair` | 与 `base_vul` 对应的修复版本 | 修复 | 方便与漏洞版对照 |
+| `HSQLDB` | HSQLDB 注入漏洞 | 修复、漏洞 |  |
+| `Hibernate` | Hibernate 注入漏洞 | 修复、漏洞 |  |
+| `druid_unauthorized` | Druid 未授权访问 | 漏洞 |  |
+| `druid_authorized` | Druid 未授权访问修复版 | 修复 |  |
+| `logic_vul` | 伪造身份、水平越权、垂直越权、流程绕过 | 漏洞 | 业务逻辑漏洞综合靶场 |
+
+### Spring / Java 生态组件
+
+| 文件夹 | 安全漏洞 | 测试用途 | 备注 |
+| :-- | :-- | :-- | :-- |
+| `actuator_unauthorized_1.X` | Actuator 未授权访问 1.X | 漏洞 |  |
+| `actuator_authorized_1.X` | Actuator 未授权访问 1.X 修复版 | 修复 |  |
+| `actuator_unauthorized_2.X` | Actuator 未授权访问 2.X | 漏洞 |  |
+| `actuator_authorized_2.X` | Actuator 未授权访问 2.X 修复版 | 修复 |  |
+| `log4jvul` | Log4j2 漏洞 | 漏洞 |  |
+| `wxpay-xxe` | 微信支付 XXE | 漏洞 |  |
+| `cas_xxe` | CAS XXE | 漏洞 | CAS 3.1.1-3.5.1 存在 XXE，修复版本为 3.6.0+ |
+
+### 反序列化与表达式执行
+
+| 文件夹 | 安全漏洞 | 测试用途 | 备注 |
+| :-- | :-- | :-- | :-- |
+| `fastjson-*` | 各版本 Fastjson 反序列化漏洞 | 漏洞 | 多版本并行维护 |
+| `CVE-2019-10173` | XStream 反序列化漏洞 | 漏洞 |  |
+| `CVE-2019-12384` | Jackson-databind 反序列化漏洞 | 漏洞 |  |
+| `collections` | Commons Collections 反序列化 | 漏洞 | 已接入统一 compose 与回放脚本 |
+
+### Shiro 系列
+
+| 文件夹 | 安全漏洞 | 测试用途 | 备注 |
+| :-- | :-- | :-- | :-- |
+| `shior-1.2.4` | Apache Shiro 1.2.4 RememberMe 反序列化漏洞 | 漏洞 | `CVE-2016-4437` |
+| `shiro-1.25_1.42` | Apache Shiro RememberMe Padding Oracle 靶场 | 漏洞 | `CVE-2019-12422` |
+| `shiro-1.8.0` | Apache Shiro 1.8.0 弱 Key 集成配置靶场 | 漏洞 | 高版本仍使用公开弱 `rememberMe` key |
+| `shiro-cve-2020-17523` | Apache Shiro 认证绕过靶场 | 漏洞 | `CVE-2020-17523` |
+
+### Struts2 系列
+
+| 文件夹 | 安全漏洞 | 测试用途 | 备注 |
+| :-- | :-- | :-- | :-- |
+| `struts2-s2-001` | Struts2 S2-001 OGNL 回填解析靶场 | 漏洞 | `CVE-2007-4556` |
+| `struts2-s2-003` | Struts2 S2-003 参数名 OGNL 上下文污染靶场 | 漏洞 | `CVE-2008-6504` |
+| `struts2-s2-005` | Struts2 S2-005 参数名 OGNL 命令执行靶场 | 漏洞 | `CVE-2010-1870` |
+| `struts2-s2-007` | Struts2 S2-007 类型转换错误 OGNL 靶场 | 漏洞 | `CVE-2012-0838` |
+| `struts2-s2-009` | Struts2 S2-009 参数二次求值 OGNL 靶场 | 漏洞 | `CVE-2011-3923` |
+| `struts2-s2-012` | Struts2 S2-012 redirect 变量 OGNL 靶场 | 漏洞 | `CVE-2013-1965` |
+| `struts2-s2-013` | Struts2 S2-013 includeParams OGNL 靶场 | 漏洞 | `CVE-2013-1966` |
+| `struts2-s2-015` | Struts2 S2-015 通配符与二次引用 OGNL 靶场 | 漏洞 | `CVE-2013-2134` |
 
 
 
 
 
-## 运行
 
-访问：`http://宿主机IP:5000/`
+## 文档导航
 
-我配置了三种模式：
+- `SimpleAgent` 构建与挂载说明：[`doc/projects/simpleagent.md`](./doc/projects/simpleagent.md)
+- 项目快速操作教程：[`doc/project-tutorials.md`](./doc/project-tutorials.md)
+- 支持测试的接口清单与回放方式：[`doc/testing-pocs.md`](./doc/testing-pocs.md)
+- 全部项目文档索引：[`doc/README.md`](./doc/README.md)
 
-- 攻击：发送一些payload，触发漏洞
-- 正常：有可能是漏洞，但是发送是正常的数据
-- 修复：漏洞已经修复，但是payload不生效（过滤或者报错）
-- 误报：IAST或SAST误报检测的安全漏洞
+## 项目操作教程
 
-其中右边测试按钮，可以对这个接口进行用例测试。
+每个项目的独立操作教程已经整理到 `doc/` 目录，建议优先从总索引进入：
 
-![image-20240306164920221](.gitbook/assets/image-20240306164920221.png)
+[doc/README.md](./doc/README.md)
 
-也可以自定义发送payload，进行调试
+如果你想直接看“按项目怎么测”的总表入口，可以看：
 
-![image-20240306165001240](.gitbook/assets/image-20240306165001240.png)
-
-也可以批量发送请求，各个漏洞的回显，会在下面显示。
-
-![image-20240127215349622](.gitbook/assets/image-20240127215349622.png)
-
-
-
-## SimpleAgent
-
-Java Agent 是一种工具，它可以使用 Java Instrumentation API 在运行时修改字节码。一个非常简单的 Java Agent 可以仅仅记录一个消息，以表明它已被加载。
-
-首先，创建 Agent 类 `SimpleAgent.java`：
-
-```java
-package my.agent;
-
-import java.lang.instrument.Instrumentation;
-
-public class SimpleAgent {
-    public static void premain(String agentArgs, Instrumentation inst) {
-        System.out.println("SimpleAgent 已加载");
-    }
-}
-```
-
-在这段代码中，`premain` 方法是 Java Agent 的入口点。它在应用程序的 `main` 方法之前被调用。
-
-接下来，你需要一个 manifest 文件来指定 Agent-Class。创建一个名为 `MANIFEST.MF` 的文件，内容如下：
-
-```
-Manifest-Version: 1.0
-Premain-Class: my.agent.SimpleAgent
-Can-Redefine-Classes: true
-Can-Retransform-Classes: true
-```
-
-这个 manifest 文件指定了 agent 类并启用了一些功能，如类的重定义和重转换。
-
-现在，将 Java Agent 编译并打包成 JAR 文件。假设你的 Java 文件在 `src` 目录中，使用 `javac` 和 `jar` 命令，你可以这样做：
-
-1. 编译 agent 类：
-
-```sh
-# javac -source 1.8 -target 1.8 -d . src/main/java/my/agent/SimpleAgent.java
-```
-
-2. 将编译后的类打包成带有 manifest 的 JAR 文件：
-
-```sh
-# jar cvfm SimpleAgent.jar MANIFEST.MF my/agent/SimpleAgent.class
-added manifest
-adding: my/agent/SimpleAgent.class(in = 492) (out= 320)(deflated 34%)
-```
-
-现在你有了一个可以作为 Java Agent 使用的 `SimpleAgent.jar`。要将这个 agent 附加到你的应用程序上，启动 Java 应用程序时使用 `-javaagent` 选项，将`SimpleAgent.jar`重命名到`./agent/agent.jar`
-
-```sh
-# mv SimpleAgent.jar ../agent/agent.jar
-```
-
-
-
-## 支持测试的漏洞
-
-| 接口 | 漏洞名字 | 请求方法 | url | 接口类型 |
-| :----------------------------------------: | :---------------------------------------------------------: | -------- | :----------------------------------------------------------: | :------: |
-| druid_authorized | druid未授权漏洞 | GET | http://192.168.0.9:9996/druid | 修复 |
-| actuator2_authorized | SpringBoot Actuator未授权访问漏洞2.X | GET | http://192.168.0.9:9994/actuator | 修复 |
-| actuator1_authorized | SpringBoot Actuator未授权访问漏洞1.X | GET | http://192.168.0.9:9992/trace | 修复 |
-| sql_injection_id_repair | SQL注入-mybatics-数字 | GET | http://192.168.0.9:9990/users/1'/ | 修复 |
-| sql_injection_ids_repair | SQL注入-mybatics-数组 | GET | http://192.168.0.9:9990/users/ids/?ids=1,2,3' | 修复 |
-| sql_injection_like_repair | SQL注入-mybatics-like模糊匹配 | GET | http://192.168.0.9:9990/users/name?name=A' | 修复 |
-| sql_injection_strs_repair | SQL注入-mybatics-字符串数组 | GET | http://192.168.0.9:9990/users/names?names=Alice&names=Bob' | 修复 |
-| sql_injection_orderby_repair | SQL注入-mybatics-排序 | GET | http://192.168.0.9:9990/users/sort?orderByColumn=name&orderByDirection=asc' | 修复 |
-| xss_reflect_htmlEscape_repair | 反射型XSS漏洞-htmlEscape类 | GET | http://192.168.0.9:9990/xss_reflect_htmlEscape?name=<script>alert(123)</script> | 修复 |
-| xss_reflect_escapeHtml4_repair | 反射型XSS漏洞-escapeHtml4类 | GET | http://192.168.0.9:9990/xss_reflect_escapeHtml4?name=<script>alert(123)</script> | 修复 |
-| xss_reflect_escapeHtml_reparir | 反射型XSS漏洞-html编码 | GET | http://192.168.0.9:9990/xss_reflect_escapeHtml?name=<script>alert(123)</script> | 修复 |
-| xss_storage_thymeleaf_reparir | 存储型XSS漏洞-thymeleaf模板过滤 | GET | http://192.168.0.9:9990/xss_storage_thymeleaf?name=<script>alert(123)</script> | 修复 |
-| file_upload_repair | 任意文件上传漏洞 | POST | http://192.168.0.9:9990/file_upload | 修复 |
-| file_read_repair | 文件读取漏洞 | GET | http://192.168.0.9:9990/file_read?filePath=pom.xml | 修复 |
-| file_write_repair | 任意文件写入漏洞 | GET | http://192.168.0.9:9990/file_write?fileName=test.txt&data=test | 修复 |
-| file_download_repair | 任意文件下载漏洞 | GET | http://192.168.0.9:9990/file_download?fileName=../test.log | 修复 |
-| file_delete_repair | 任意文件删除漏洞 | GET | http://192.168.0.9:9990/file_delete?fileName=test.txt | 修复 |
-| runtime_command_execute_repair | 命令执行漏洞-Runtime | GET | http://192.168.0.9:9990/runtime_command_execute?command=whoami | 修复 |
-| process_builder_command_repair | 命令执行漏洞-ProcessBuilder | GET | http://192.168.0.9:9990/process_builder_command_execute?command=whoami | 修复 |
-| crlf_injection_repair | CRLF注入 | GET | http://192.168.0.9:9990/crlf_injection?name=%0D%0ASet-Cookie: sessionid=123456 | 修复 |
-| spel_expression_repair | SPEL表达式攻击 | GET | http://192.168.0.9:9990/spel_expression?input=T(java.lang.Runtime).getRuntime().exec('whoami') | 修复 |
-| ssrf_openStream_repair | SSRF攻击-openStream | GET | http://192.168.0.9:9990/ssrf_openStream?url=https://www.baidu.com | 修复 |
-| ssrf_openConnection_repair | SSRF攻击-openConnection | GET | http://192.168.0.9:9990/ssrf_openConnection?url=http://www.baidu.com | 修复 |
-| ssrf_requestGet_repair | SSRF攻击-requestGet | GET | http://192.168.0.9:9990/ssrf_requestGet?url=http://www.baidu.com | 修复 |
-| ssrf_okhttp_repair | SSRF攻击-okhttp | GET | http://192.168.0.9:9990/ssrf_okhttp?url=http://www.baidu.com | 修复 |
-| ssrf_defaultHttpClient_repair | SSRF攻击-defaultHttpClient | GET | http://192.168.0.9:9990/ssrf_defaultHttpClient?url=http://www.baidu.com | 修复 |
-| ssti_velocity_repair | SSTI攻击-velocity | GET | http://192.168.0.9:9990/ssti_velocity?content=%23set (%24exp %3d "exp")%3b%24exp.getClass().forName("java.lang.Runtime").getRuntime().exec("whoami") | 修复 |
-| xxe_saxparserfactory_repair | XXE-saxparserfactory | POST | http://192.168.0.9:9990/xxe_saxparserfactory | 修复 |
-| xxe_xmlreaderfactory_repair | XXE-xmlreaderfactory | POST | http://192.168.0.9:9990/xxe_xmlreaderfactory | 修复 |
-| xxe_saxbuilder_repair | XXE-saxbuilder | POST | http://192.168.0.9:9990/xxe_saxbuilder | 修复 |
-| xxe_saxreader_repair | XXE-saxreader | POST | http://192.168.0.9:9990/xxe_saxreader | 修复 |
-| xxe_documentbuilderfactory_repair | XXE-documentbuilderfactory | POST | http://192.168.0.9:9990/xxe_documentbuilderfactory | 修复 |
-| xxe_documentbuilderfactory_xinclude_repair | XXE-documentbuilderfactory_xinclude | POST | http://192.168.0.9:9990/xxe_documentbuilderfactory_xinclude | 修复 |
-| OpenRedirector_ModelAndView_repair | URL重定向漏洞-ModelAndView | GET | http://192.168.0.9:9990/OpenRedirector_ModelAndView?url=https://www.baidu.com | 修复 |
-| OpenRedirector_sendRedirect_repair | URL重定向漏洞-sendRedirect | GET | http://192.168.0.9:9990/OpenRedirector_sendRedirect?url=https://www.baidu.com | 修复 |
-| OpenRedirector_lacation_repair | URL重定向漏洞-location | GET | http://192.168.0.9:9990/OpenRedirector_lacation?url=https://www.baidu.com | 修复 |
-| swagger-ui_repair | swagger-ui-未授权访问漏洞 | GET | http://192.168.0.9:9990/swagger-ui.html | 修复 |
-| sql_injection_Optional_repair | SQL注入-Optional<String> | GET | http://192.168.0.9:9990/users/findByOptionalUsername?username=test' | 修复 |
-| sql_injection_Object_repair | SQL注入-Object[] | POST | http://192.168.0.9:9990/users/get_name_object | 修复 |
-| sql_injection_Annotation_repair | SQL注入-MyBatis注解方式 | GET | http://192.168.0.9:9990/users/by-username?name=test | 修复 |
-| sql_injection_lombok_repair | SQL注入-lombok | POST | http://192.168.0.9:9990/users/lombok | 修复 |
-| sql_injection_hsqldb_repair | SQL注入-hsqldb | GET | http://192.168.0.9:9989/hsqldb_repair?username=1' | 修复 |
-| sql_injection_Hibernate_repair | SQL注入-Hibernate | GET | http://192.168.0.9:9988/Hibernate_injection_repair?username=foobar' OR (SELECT COUNT(*) FROM User)>=0 OR 'foobar'=' | 修复 |
-| log4j2_attack | Log4j2 远程代码执行漏洞（CVE-2021-44228） | POST | http://192.168.0.9:9998/log4j2 | 攻击 |
-| fastjson1_2_24_attack | fastjson-1.2.24反序列漏洞 | POST | http://192.168.0.9:9999/fastjson1.2.24-process | 攻击 |
-| fastjson1_2_25_attack | fastjson-1.2.25-1.2.47反序列漏洞-不需要AutoTypeSupport-通杀 | POST | http://192.168.0.9:9987/fastjson1.2.25-process | 攻击 |
-| fastjson1_2_41_attack | fastjson-1.2.25-1.2.41反序列漏洞-setAutoTypeSupport | POST | http://192.168.0.9:9987/fastjson1.2.41-process-setAutoTypeSupport | 攻击 |
-| fastjson1_2_42_attack | fastjson-1.2.42反序列漏洞 | POST | http://192.168.0.9:9986/fastjson1.2.42-process | 攻击 |
-| fastjson1_2_43_attack | fastjson-1.2.43反序列漏洞 | POST | http://192.168.0.9:9985/fastjson1.2.43-process | 攻击 |
-| fastjson1_2_45_attack | fastjson-1.2.45反序列漏洞 | POST | http://192.168.0.9:9984/fastjson1.2.45-process | 攻击 |
-| fastjson1_2_59_attack_1 | fastjson-1.2.59反序列漏洞(1.2.5 <= 1.2.59)-payload1 | POST | http://192.168.0.9:9983/fastjson1.2.59-process | 攻击 |
-| fastjson1_2_59_attack_2 | fastjson-1.2.59反序列漏洞(1.2.5 <= 1.2.59)-payload2 | POST | http://192.168.0.9:9983/fastjson1.2.59-process | 攻击 |
-| fastjson1_2_60_attack_1 | fastjson-1.2.60反序列漏洞(1.2.5 <= 1.2.60)-payload1 | POST | http://192.168.0.9:9982/fastjson1.2.60-process | 攻击 |
-| fastjson1_2_60_attack_2 | fastjson-1.2.60反序列漏洞(1.2.5 <= 1.2.60)-payload2 | POST | http://192.168.0.9:9982/fastjson1.2.60-process | 攻击 |
-| fastjson1_2_61_attack_1 | fastjson-1.2.61反序列漏洞-payload1 | POST | http://192.168.0.9:9981/fastjson1.2.61-process | 攻击 |
-| fastjson1_2_61_attack_2 | fastjson-1.2.61反序列漏洞-payload2 | POST | http://192.168.0.9:9981/fastjson1.2.61-process | 攻击 |
-| fastjson1_2_62_attack_1 | fastjson-1.2.62反序列漏洞-payload1 | POST | http://192.168.0.9:9980/fastjson1.2.62-process | 攻击 |
-| fastjson1_2_62_attack_2 | fastjson-1.2.62反序列漏洞-payload2 | POST | http://192.168.0.9:9980/fastjson1.2.62-process | 攻击 |
-| fastjson1_2_66_attack_1 | fastjson-1.2.66反序列漏洞-payload1 | POST | http://192.168.0.9:9979/fastjson1.2.66-process | 攻击 |
-| fastjson1_2_66_attack_2 | fastjson-1.2.66反序列漏洞-payload2 | POST | http://192.168.0.9:9979/fastjson1.2.66-process | 攻击 |
-| fastjson1_2_66_attack_3 | fastjson-1.2.66反序列漏洞-payload3 | POST | http://192.168.0.9:9979/fastjson1.2.66-process | 攻击 |
-| fastjson1_2_66_attack_4 | fastjson-1.2.66反序列漏洞-payload4 | POST | http://192.168.0.9:9979/fastjson1.2.66-process | 攻击 |
-| fastjson1_2_66_attack_5 | fastjson-1.2.66反序列漏洞-payload5 | POST | http://192.168.0.9:9979/fastjson1.2.66-process | 攻击 |
-| fastjson1_2_66_attack_6 | fastjson-1.2.66反序列漏洞-payload6 | POST | http://192.168.0.9:9979/fastjson1.2.66-process | 攻击 |
-| fastjson1_2_67_attack_1 | fastjson-1.2.67反序列漏洞-payload1 | POST | http://192.168.0.9:9978/fastjson1.2.67-process | 攻击 |
-| fastjson1_2_67_attack_2 | fastjson-1.2.67反序列漏洞-payload2 | POST | http://192.168.0.9:9978/fastjson1.2.67-process | 攻击 |
-| fastjson1_2_68_attack_1 | fastjson-1.2.68反序列漏洞-payload1 | POST | http://192.168.0.9:9977/fastjson1.2.68-process | 攻击 |
-| fastjson1_2_68_attack_2 | fastjson-1.2.68反序列漏洞-payload2 | POST | http://192.168.0.9:9977/fastjson1.2.68-process | 攻击 |
-| fastjson1_2_80_attack | fastjson-1.2.80反序列漏洞 | POST | http://192.168.0.9:9976/fastjson1.2.80-process | 攻击 |
-| druid_unauthorized | druid未授权漏洞 | GET | http://192.168.0.9:9997/druid | 攻击 |
-| actuator2_unauthorized | SpringBoot Actuator未授权访问漏洞2.X | GET | http://192.168.0.9:9995/actuator | 攻击 |
-| actuator1_unauthorized | SpringBoot Actuator未授权访问漏洞1.X | GET | http://192.168.0.9:9993/trace | 攻击 |
-| sql_injection_id_attack | SQL注入-mybatics-数字 | GET | http://192.168.0.9:9991/users/1'/ | 攻击 |
-| sql_injection_ids_attack | SQL注入-mybatics-数组 | GET | http://192.168.0.9:9991/users/ids/?ids=1,2,3' | 攻击 |
-| sql_injection_like_attack | SQL注入-mybatics-like模糊匹配 | GET | http://192.168.0.9:9991/users/name?name=A' | 攻击 |
-| sql_injection_strs_attack | SQL注入-mybatics-字符串数组 | GET | http://192.168.0.9:9991/users/names?names=Alice&names=Bob' | 攻击 |
-| sql_injection_orderby_attack | SQL注入-mybatics-排序 | GET | http://192.168.0.9:9991/users/sort?orderByColumn=name&orderByDirection=asc' | 攻击 |
-| sql_injection_Optional_attack | SQL注入-Optional<String> | GET | http://192.168.0.9:9991/users/findByOptionalUsername?username=test' | 攻击 |
-| sql_injection_Object_attack | SQL注入-Object<String> | POST | http://192.168.0.9:9991/users/get_name_object | 攻击 |
-| sql_injection_Annotation_attack | SQL注入-MyBatis注解方式 | GET | http://192.168.0.9:9991/users/by-username?name=test' | 攻击 |
-| sql_injection_lombok_attack | SQL注入-lombok | POST | http://192.168.0.9:9991/users/lombok | 攻击 |
-| sql_injection_hsqldb_attack | SQL注入-hsqldb | GET | http://192.168.0.9:9989/hsqldb?username=1' | 攻击 |
-| sql_injection_Hibernate_attack | SQL注入-Hibernate | GET | http://192.168.0.9:9988/Hibernate_injection?username=foobar' OR (SELECT COUNT(*) FROM User)>=0 OR 'foobar'=' | 攻击 |
-| xss_reflect_attack | 反射型XSS漏洞 | GET | http://192.168.0.9:9991/xss_reflect?name=<script>alert(123)</script> | 攻击 |
-| xss_storage_attack | 存储型XSS漏洞 | GET | http://192.168.0.9:9991/xss_storage?name=<script>alert(123)</script> | 攻击 |
-| xss_dom_attack | DOM XSS漏洞 | POST | http://192.168.0.9:9991/xss_dom | 攻击 |
-| file_upload_attack | 任意文件上传漏洞 | POST | http://192.168.0.9:9991/file_upload | 攻击 |
-| file_read_attack | 任意文件读取漏洞 | GET | http://192.168.0.9:9991/file_read?filePath=/etc/passwd | 攻击 |
-| file_write_attack | 任意文件写入漏洞 | GET | http://192.168.0.9:9991/file_write?fileName=test.txt&data=test | 攻击 |
-| file_download_attack | 任意文件下载漏洞 | GET | http://192.168.0.9:9991/file_download?fileName=../pom.xml | 攻击 |
-| file_delete_attack | 任意文件删除漏洞 | GET | http://192.168.0.9:9991/file_delete?fileName=test.txt | 攻击 |
-| runtime_command_execute | 命令执行漏洞-runtime | GET | http://192.168.0.9:9991/runtime_command_execute?command=whoami | 攻击 |
-| process_builder_command_execute | 命令执行漏洞-ProcessBuilder | GET | http://192.168.0.9:9991/process_builder_command_execute?command=whoami | 攻击 |
-| crlf_injection_attack | CRLF注入 | GET | http://192.168.0.9:9991/crlf_injection?name=%0D%0ASet-Cookie: sessionid=123456 | 攻击 |
-| spel_expression_attack | SPEL表达式攻击 | GET | http://192.168.0.9:9991/spel_expression?input=T(java.lang.Runtime).getRuntime().exec('whoami') | 攻击 |
-| ssrf_openStream_attack | SSRF攻击-openStream | GET | http://192.168.0.9:9991/ssrf_openStream?url=https://www.baidu.com | 攻击 |
-| ssrf_openConnection_attack | SSRF攻击-openConnection | GET | http://192.168.0.9:9991/ssrf_openConnection?url=http://www.baidu.com | 攻击 |
-| ssrf_requestGet_attack | SSRF攻击-requestGet | GET | http://192.168.0.9:9991/ssrf_requestGet?url=https://www.baidu.com | 攻击 |
-| ssrf_okhttp_attack | SSRF攻击-okhttp | GET | http://192.168.0.9:9991/ssrf_okhttp?url=https://www.baidu.com | 攻击 |
-| ssrf_defaultHttpClient_attack | SSRF攻击-defaultHttpClient | GET | http://192.168.0.9:9991/ssrf_defaultHttpClient?url=https://www.baidu.com | 攻击 |
-| ssti_velocity_attack | SSTI攻击-velocity | GET | http://192.168.0.9:9991/ssti_velocity?content=%23set (%24exp %3d "exp")%3b%24exp.getClass().forName("java.lang.Runtime").getRuntime().exec("whoami") | 攻击 |
-| ssti_freemarker_attack | SSTI攻击-freemarker | GET | http://192.168.0.9:9991/ssti_freemarker?templateContent=%3C%23assign%20ex%3D%22freemarker.template.utility.Execute%22%3Fnew%28%29%3E%24%7B%20ex%28%22bash%20-c%20whoami%22%29%20%7D | 攻击 |
-| xxe_saxparserfactory_attack | XXE-saxparserfactory | POST | http://192.168.0.9:9991/xxe_saxparserfactory | 攻击 |
-| xxe_xmlreaderfactory_attack | XXE-xmlreaderfactory | POST | http://192.168.0.9:9991/xxe_xmlreaderfactory | 攻击 |
-| xxe_saxbuilder_attack | XXE-saxbuilder | POST | http://192.168.0.9:9991/xxe_saxbuilder | 攻击 |
-| xxe_saxreader_attack | XXE-saxreader | POST | http://192.168.0.9:9991/xxe_saxreader | 攻击 |
-| xxe_documentbuilderfactory_attack | XXE-documentbuilderfactory | POST | http://192.168.0.9:9991/xxe_documentbuilderfactory | 攻击 |
-| xxe_documentbuilderfactory_xinclude_attack | XXE-documentbuilderfactory_xinclude | POST | http://192.168.0.9:9991/xxe_documentbuilderfactory_xinclude | 攻击 |
-| OpenRedirector_ModelAndView_attack | URL重定向漏洞-ModelAndView | GET | http://192.168.0.9:9991/OpenRedirector_ModelAndView?url=https://www.baidu.com | 攻击 |
-| OpenRedirector_sendRedirect_attack | URL重定向漏洞-sendRedirect | GET | http://192.168.0.9:9991/OpenRedirector_sendRedirect?url=https://www.baidu.com | 攻击 |
-| OpenRedirector_lacation_attack | URL重定向漏洞-location | GET | http://192.168.0.9:9991/OpenRedirector_lacation?url=https://www.baidu.com | 攻击 |
-| swagger-ui_attack | swagger-ui-未授权访问漏洞 | GET | http://192.168.0.9:9991/swagger-ui.html | 攻击 |
-| xxe_wxpay_attack | 微信支付XXE漏洞 | POST | http://192.168.0.9:9974/wxpay-xxe | 攻击 |
-| xstream_CVE-2019-10173 | xstream 反序列化漏洞(CVE-2019-10173) | POST | http://192.168.0.9:9973/CVE-2019-10173 | 攻击 |
-| jackson-databind_CVE-2019-12384 | jackson-databind 反序列化漏洞(CVE-2019-12384) | GET | http://192.168.0.9:9971/CVE-2019-12384 | 攻击 |
-| log4j2_normal | Log4j2 远程代码执行漏洞（CVE-2021-44228） | POST | http://192.168.0.9:9998/log4j2 | 正常 |
-| fastjson_1_2_24_normal | fastjson-1.2.24反序列漏洞 | POST | http://192.168.0.9:9999/fastjson1.2.24-process | 正常 |
-| fastjson1_2_25_normal | fastjson-1.2.25-1.2.41反序列漏洞-disableAutoTypeSupport | POST | http://192.168.0.9:9987/fastjson1.2.25-process | 正常 |
-| fastjson1_2_41_normal | fastjson-1.2.25-1.2.41反序列漏洞-setAutoTypeSupport | POST | http://192.168.0.9:9987/fastjson1.2.41-process-setAutoTypeSupport | 正常 |
-| fastjson1_2_42_normal | fastjson-1.2.42反序列漏洞 | POST | http://192.168.0.9:9986/fastjson1.2.42-process | 正常 |
-| fastjson1_2_43_normal | fastjson-1.2.43反序列漏洞 | POST | http://192.168.0.9:9985/fastjson1.2.43-process | 正常 |
-| fastjson1_2_45_normal | fastjson-1.2.45反序列漏洞 | POST | http://192.168.0.9:9984/fastjson1.2.45-process | 正常 |
-| fastjson1_2_59_normal | fastjson-1.2.59反序列漏洞(1.2.5 <= 1.2.59) | POST | http://192.168.0.9:9983/fastjson1.2.59-process | 正常 |
-| fastjson1_2_60_normal | fastjson-1.2.60反序列漏洞(1.2.5 <= 1.2.60) | POST | http://192.168.0.9:9982/fastjson1.2.60-process | 正常 |
-| fastjson1_2_61_normal | fastjson-1.2.61反序列漏洞 | POST | http://192.168.0.9:9981/fastjson1.2.61-process | 正常 |
-| fastjson1_2_62_normal | fastjson-1.2.62反序列漏洞 | POST | http://192.168.0.9:9980/fastjson1.2.62-process | 正常 |
-| fastjson1_2_66_normal | fastjson-1.2.66反序列漏洞 | POST | http://192.168.0.9:9979/fastjson1.2.66-process | 正常 |
-| fastjson1_2_67_normal | fastjson-1.2.67反序列漏洞 | POST | http://192.168.0.9:9978/fastjson1.2.67-process | 正常 |
-| fastjson1_2_68_normal | fastjson-1.2.68反序列漏洞 | POST | http://192.168.0.9:9977/fastjson1.2.68-process | 正常 |
-| fastjson1_2_80_normal | fastjson-1.2.80反序列漏洞 | POST | http://192.168.0.9:9976/fastjson1.2.80-process | 正常 |
-| fastjson1_2_83_normal | fastjson-1.2.83-反序列漏洞 | POST | http://192.168.0.9:9975/fastjson1.2.83-process | 正常 |
-| sql_injection_hsqldb_normal | SQL注入-hsqldb | GET | http://192.168.0.9:9989/hsqldb?username=1' | 正常 |
-| sql_injection_lombok_normal | SQL注入-lombok | POST | http://192.168.0.9:9991/users/lombok | 正常 |
-| sql_injection_longlist_normal | SQL注入-longlist | POST | http://192.168.0.9:9991/users/findByIds | 正常 |
-| sql_injection_longint_normal | SQL注入-longint | POST | http://192.168.0.9:9991/users/getUserByUId | 正常 |
-| sql_injection_jpaone_normal | SQL注入-jpaone | GET | http://192.168.0.9:9991/users/jpaone?name=test | 正常 |
-| sql_injection_jpawithAnnotations_normal | SQL注入-jpawithAnnotations | GET | http://192.168.0.9:9991/users/jpawithAnnotations?name=test | 正常 |
-| sql_injection_Annotation_normal | SQL注入-MyBatis注解方式 | GET | http://192.168.0.9:9991/users/by-username?name=test | 正常 |
-| sql_injection_id_normal | SQL注入-mybatics-数字 | GET | http://192.168.0.9:9991/users/1/ | 正常 |
-| sql_injection_ids_normal | SQL注入-mybatics-数组 | GET | http://192.168.0.9:9991/users/ids/?ids=1,2,3 | 正常 |
-| sql_injection_like_normal | SQL注入-mybatics-like模糊匹配 | GET | http://192.168.0.9:9991/users/name?name=A | 正常 |
-| sql_injection_strs_normal | SQL注入-mybatics-字符串数组 | GET | http://192.168.0.9:9991/users/names?names=Alice&names=Bob | 正常 |
-| sql_injection_orderby_normal | SQL注入-mybatics-排序 | GET | http://192.168.0.9:9991/users/sort?orderByColumn=name&orderByDirection=asc | 正常 |
-| sql_injection_Optional_normal | SQL注入-Optional<String> | GET | http://192.168.0.9:9991/users/findByOptionalUsername?username=test | 正常 |
-| sql_injection_Object_normal | SQL注入-Object<String> | POST | http://192.168.0.9:9991/users/get_name_object | 正常 |
-| xss_reflect_normal | 反射型XSS漏洞 | GET | http://192.168.0.9:9991/xss_reflect?name=1 | 正常 |
-| xss_dom_normal | DOM XSS漏洞 | POST | http://192.168.0.9:9991/xss_dom | 正常 |
-| file_download_normal | 任意文件下载漏洞 | GET | http://192.168.0.9:9990/file_download?fileName=test.log | 正常 |
-| ReDos_normal_1 | ReDoS攻击-(a+)+ | GET | http://192.168.0.9:9991/testReDos1?input=1 | 正常 |
-| ReDos_normal_2 | ReDoS攻击-([a-zA-Z]+)* | GET | http://192.168.0.9:9991/testReDos2?input=1 | 正常 |
-| ReDos_normal_3 | ReDoS攻击-(a\|aa)+ | GET | http://192.168.0.9:9991/testReDos3?input=1 | 正常 |
-| ReDos_normal_4 | ReDoS攻击-(a\|a?)+ | GET | http://192.168.0.9:9991/testReDos4?input=1 | 正常 |
-| ReDos_normal_5 | ReDoS攻击-(.*a){20} | GET | http://192.168.0.9:9991/testReDos5?input=1 | 正常 |
-| file_write_normal | 任意文件写入漏洞 | GET | http://192.168.0.9:9990/file_write?fileName=test.log&data=test | 正常 |
-| runtime_command_execute_normal | 命令执行漏洞-Runtime | GET | http://192.168.0.9:9990/runtime_command_execute?command=ls | 正常 |
-| process_builder_command_normal | 命令执行漏洞-ProcessBuilder | GET | http://192.168.0.9:9990/process_builder_command_execute?command=ls | 正常 |
-| spel_expression_normal | SPEL表达式攻击 | GET | http://192.168.0.9:9990/spel_expression?input=1 | 正常 |
-| ssrf_openStream_normal | SSRF攻击-openStream | GET | http://192.168.0.9:9990/ssrf_openStream?url=http://example.com | 正常 |
-| ssrf_openConnection_normal | SSRF攻击-openConnection | GET | http://192.168.0.9:9990/ssrf_openConnection?url=http://example.com | 正常 |
-| ssrf_requestGet_normal | SSRF攻击-requestGet | GET | http://192.168.0.9:9990/ssrf_requestGet?url=http://example.com | 正常 |
-| ssrf_okhttp_normal | SSRF攻击-okhttp | GET | http://192.168.0.9:9990/ssrf_okhttp?url=http://example.com | 正常 |
-| ssrf_defaultHttpClient_normal | SSRF攻击-defaultHttpClient | GET | http://192.168.0.9:9990/ssrf_defaultHttpClient?url=http://example.com | 正常 |
-| OpenRedirector_ModelAndView_normal | URL重定向漏洞-ModelAndView | GET | http://192.168.0.9:9990/OpenRedirector_ModelAndView?url=https://example.com | 正常 |
-| OpenRedirector_sendRedirect_normal | URL重定向漏洞-sendRedirect | GET | http://192.168.0.9:9990/OpenRedirector_sendRedirect?url=https://example.com | 正常 |
-| OpenRedirector_lacation_normal | URL重定向漏洞-location | GET | http://192.168.0.9:9990/OpenRedirector_lacation?url=https://example.com | 正常 |
-| druid_sqlwall | druid-SQL防火墙 | GET | http://192.168.0.9:9997/druid_sql?id=1 | 误报 |
+[doc/project-tutorials.md](./doc/project-tutorials.md)
 
 
 ## 参考开发代码
@@ -406,6 +207,12 @@ adding: my/agent/SimpleAgent.class(in = 492) (out= 320)(deflated 34%)
 - https://rasp.baidu.com/doc/install/testcase.html
 - https://github.com/lemono0/FastJsonParty/
 - https://github.com/roottusk/vapi
+- https://github.com/jweny/shiro-cve-2020-17523
+- https://github.com/SwagXz/encrypt-labs
+- https://github.com/JSREI/js-xhr-hook-goat
+- https://github.com/outlaws-bai/GalaxyDemo
+- https://github.com/0ctDay/encrypt-decrypt-vuls/
+- https://github.com/r0eXpeR/fingerprint
 
 ## Star History Chart
 

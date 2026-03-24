@@ -1,0 +1,20 @@
+{
+  "request_id": "REQPQR678NOTIFICATION",
+  "timestamp": 1738252800,
+  "signature_valid": true,
+  "service_name": "notification-service",
+  "interceptor_id": "INTNOT678",
+  "client_id": "CLIENT_PQR678STU901",
+  "service_result": {
+    "status": "success",
+    "messages_sent": 4567,
+    "delivery_rate": "96.78",
+    "failed_deliveries": 23,
+    "notification_data": {
+      "email_sent": 1567,
+      "sms_sent": 678,
+      "push_sent": 2345,
+      "channels": ["email", "sms", "push", "webhook"]
+    }
+  }
+}

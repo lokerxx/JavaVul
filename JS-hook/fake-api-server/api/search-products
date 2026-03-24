@@ -1,0 +1,16 @@
+{
+  "products": [
+    { "id": 1, "name": "静态商品 - 苹果手机", "price": 6999, "category": "electronics" },
+    { "id": 2, "name": "静态商品 - 华为手机", "price": 4999, "category": "electronics" },
+    { "id": 3, "name": "静态商品 - 小米手机", "price": 2999, "category": "electronics" },
+    { "id": 4, "name": "静态商品 - 时尚T恤", "price": 199, "category": "clothing" },
+    { "id": 5, "name": "静态商品 - 牛仔裤", "price": 299, "category": "clothing" }
+  ],
+  "searchParams": {
+    "keyword": "手机",
+    "category": "electronics",
+    "minPrice": 100,
+    "maxPrice": 5000
+  },
+  "total": 5
+}

@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bidirectional Protocol Buffers</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/protobuf-7.2.5.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+        .api-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .service-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .service-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .service-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+        .service-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .service-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .service-card p {
+            color: #7f8c8d;
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .service-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .form-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-top: 20px;
+            display: none;
+        }
+        .form-container.active {
+            display: block;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .result-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .result-card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+        .result-value {
+            flex: 1;
+            text-align: right;
+            color: #495057;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+        }
+        .step-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        .binary-content {
+            color: #e74c3c;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .json-content {
+            color: #27ae60;
+            white-space: pre-wrap;
+        }
+        .protobuf-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .flow-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #dc3545;
+            margin-top: 20px;
+        }
+        .success {
+            background: #d1ecf1;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #28a745;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .performance-metrics {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .metrics-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .metrics-row:last-child {
+            border-bottom: none;
+        }
+        .metrics-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .metrics-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>企业级微服务平台</h1>
+            <p>Bidirectional Protocol Buffers Case - 双向高效二进制通信</p>
+        </div>
+
+        <div class="api-section">
+            <h2 class="section-title">🚀 选择微服务</h2>
+            
+            <div class="service-cards">
+                <div class="service-card" data-service="user-management">
+                    <span class="service-icon">👥</span>
+                    <h3>用户管理服务</h3>
+                    <p>处理用户注册、登录、权限管理等核心用户功能</p>
+                </div>
+                <div class="service-card" data-service="order-processing">
+                    <span class="service-icon">📦</span>
+                    <h3>订单处理服务</h3>
+                    <p>处理订单创建、支付、物流跟踪等电商核心业务</p>
+                </div>
+                <div class="service-card" data-service="data-analytics">
+                    <span class="service-icon">📊</span>
+                    <h3>数据分析服务</h3>
+                    <p>提供实时数据分析、报表生成、业务洞察等功能</p>
+                </div>
+                <div class="service-card" data-service="notification">
+                    <span class="service-icon">🔔</span>
+                    <h3>通知服务</h3>
+                    <p>处理邮件、短信、推送等多渠道消息通知</p>
+                </div>
+            </div>
+
+            <!-- 用户管理服务表单 -->
+            <div id="userManagementForm" class="form-container">
+                <h3>👥 用户管理服务</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userAction">操作类型:</label>
+                        <select id="userAction" required>
+                            <option value="create">创建用户</option>
+                            <option value="update">更新用户</option>
+                            <option value="delete">删除用户</option>
+                            <option value="query">查询用户</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="userId">用户ID:</label>
+                        <input type="text" id="userId" placeholder="请输入用户ID" value="USR123456">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userName">用户名:</label>
+                        <input type="text" id="userName" placeholder="请输入用户名" value="张三">
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">邮箱:</label>
+                        <input type="email" id="userEmail" placeholder="请输入邮箱" value="zhangsan@company.com">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userRole">用户角色:</label>
+                        <select id="userRole" required>
+                            <option value="admin">管理员</option>
+                            <option value="user" selected>普通用户</option>
+                            <option value="guest">访客</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="userStatus">用户状态:</label>
+                        <select id="userStatus" required>
+                            <option value="active" selected>激活</option>
+                            <option value="inactive">未激活</option>
+                            <option value="suspended">暂停</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 订单处理服务表单 -->
+            <div id="orderProcessingForm" class="form-container">
+                <h3>📦 订单处理服务</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orderAction">操作类型:</label>
+                        <select id="orderAction" required>
+                            <option value="create">创建订单</option>
+                            <option value="update">更新订单</option>
+                            <option value="cancel">取消订单</option>
+                            <option value="query">查询订单</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="orderId">订单ID:</label>
+                        <input type="text" id="orderId" placeholder="请输入订单ID" value="ORD789012">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customerId">客户ID:</label>
+                        <input type="text" id="customerId" placeholder="请输入客户ID" value="CUST456789">
+                    </div>
+                    <div class="form-group">
+                        <label for="orderAmount">订单金额:</label>
+                        <input type="number" id="orderAmount" placeholder="请输入订单金额" value="1299.99" step="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paymentMethod">支付方式:</label>
+                        <select id="paymentMethod" required>
+                            <option value="credit_card">信用卡</option>
+                            <option value="alipay" selected>支付宝</option>
+                            <option value="wechat_pay">微信支付</option>
+                            <option value="bank_transfer">银行转账</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="orderStatus">订单状态:</label>
+                        <select id="orderStatus" required>
+                            <option value="pending" selected>待处理</option>
+                            <option value="processing">处理中</option>
+                            <option value="shipped">已发货</option>
+                            <option value="delivered">已送达</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据分析服务表单 -->
+            <div id="dataAnalyticsForm" class="form-container">
+                <h3>📊 数据分析服务</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="analyticsType">分析类型:</label>
+                        <select id="analyticsType" required>
+                            <option value="sales">销售分析</option>
+                            <option value="user_behavior">用户行为分析</option>
+                            <option value="performance">性能分析</option>
+                            <option value="prediction">预测分析</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="timeRange">时间范围:</label>
+                        <select id="timeRange" required>
+                            <option value="1d">最近1天</option>
+                            <option value="7d" selected>最近7天</option>
+                            <option value="30d">最近30天</option>
+                            <option value="90d">最近90天</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dataSource">数据源:</label>
+                        <select id="dataSource" required>
+                            <option value="database">数据库</option>
+                            <option value="api" selected>API接口</option>
+                            <option value="file">文件系统</option>
+                            <option value="stream">实时流</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="outputFormat">输出格式:</label>
+                        <select id="outputFormat" required>
+                            <option value="json">JSON</option>
+                            <option value="csv">CSV</option>
+                            <option value="excel">Excel</option>
+                            <option value="pdf" selected>PDF报告</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 通知服务表单 -->
+            <div id="notificationForm" class="form-container">
+                <h3>🔔 通知服务</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="notificationType">通知类型:</label>
+                        <select id="notificationType" required>
+                            <option value="email">邮件通知</option>
+                            <option value="sms">短信通知</option>
+                            <option value="push" selected>推送通知</option>
+                            <option value="webhook">Webhook</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">优先级:</label>
+                        <select id="priority" required>
+                            <option value="low">低</option>
+                            <option value="normal" selected>普通</option>
+                            <option value="high">高</option>
+                            <option value="urgent">紧急</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="recipient">接收者:</label>
+                        <input type="text" id="recipient" placeholder="请输入接收者" value="user@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="template">消息模板:</label>
+                        <select id="template" required>
+                            <option value="welcome">欢迎消息</option>
+                            <option value="order_confirm" selected>订单确认</option>
+                            <option value="payment_success">支付成功</option>
+                            <option value="system_alert">系统警告</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="messageContent">消息内容:</label>
+                    <textarea id="messageContent" placeholder="请输入消息内容">您的订单已确认，我们将尽快为您处理。感谢您的信任！</textarea>
+                </div>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" disabled>🚀 发送 Protocol Buffers 请求</button>
+        </div>
+
+        <div id="resultSection" class="result-section"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            let selectedService = null;
+            let protobufRoot = null;
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 初始化protobuf
+            const initProtobuf = async () => {
+                try {
+                    // 定义双向protobuf schema
+                    const protoSchema = `
+                        syntax = "proto3";
+                        package microservice;
+                        
+                        // 用户管理相关消息
+                        message UserRequest {
+                            string action = 1;
+                            string user_id = 2;
+                            string name = 3;
+                            string email = 4;
+                            string role = 5;
+                            string status = 6;
+                        }
+                        
+                        message UserResponse {
+                            bool success = 1;
+                            string message = 2;
+                            string user_id = 3;
+                            string name = 4;
+                            string email = 5;
+                            string role = 6;
+                            string status = 7;
+                            int64 created_at = 8;
+                            int64 updated_at = 9;
+                        }
+                        
+                        // 订单处理相关消息
+                        message OrderRequest {
+                            string action = 1;
+                            string order_id = 2;
+                            string customer_id = 3;
+                            double amount = 4;
+                            string payment_method = 5;
+                            string status = 6;
+                        }
+                        
+                        message OrderResponse {
+                            bool success = 1;
+                            string message = 2;
+                            string order_id = 3;
+                            string customer_id = 4;
+                            double amount = 5;
+                            string payment_method = 6;
+                            string status = 7;
+                            int64 created_at = 8;
+                            string tracking_number = 9;
+                        }
+                        
+                        // 数据分析相关消息
+                        message AnalyticsRequest {
+                            string analytics_type = 1;
+                            string time_range = 2;
+                            string data_source = 3;
+                            string output_format = 4;
+                        }
+                        
+                        message AnalyticsResponse {
+                            bool success = 1;
+                            string message = 2;
+                            string report_id = 3;
+                            string analytics_type = 4;
+                            map<string, double> metrics = 5;
+                            string download_url = 6;
+                            int64 generated_at = 7;
+                        }
+                        
+                        // 通知服务相关消息
+                        message NotificationRequest {
+                            string notification_type = 1;
+                            string priority = 2;
+                            string recipient = 3;
+                            string template = 4;
+                            string content = 5;
+                        }
+                        
+                        message NotificationResponse {
+                            bool success = 1;
+                            string message = 2;
+                            string notification_id = 3;
+                            string status = 4;
+                            int64 sent_at = 5;
+                            string delivery_status = 6;
+                        }
+                        
+                        // 通用服务请求
+                        message ServiceRequest {
+                            string request_id = 1;
+                            int64 timestamp = 2;
+                            string service_name = 3;
+                            
+                            oneof request_data {
+                                UserRequest user_request = 10;
+                                OrderRequest order_request = 11;
+                                AnalyticsRequest analytics_request = 12;
+                                NotificationRequest notification_request = 13;
+                            }
+                        }
+                        
+                        // 通用服务响应
+                        message ServiceResponse {
+                            string request_id = 1;
+                            int64 timestamp = 2;
+                            bool success = 3;
+                            string service_name = 4;
+                            int32 status_code = 5;
+                            
+                            oneof response_data {
+                                UserResponse user_response = 10;
+                                OrderResponse order_response = 11;
+                                AnalyticsResponse analytics_response = 12;
+                                NotificationResponse notification_response = 13;
+                            }
+                        }
+                    `;
+                    
+                    protobufRoot = protobuf.parse(protoSchema).root;
+                    console.log('Bidirectional Protocol Buffers schema loaded successfully');
+                } catch (error) {
+                    console.error('Failed to load bidirectional protobuf schema:', error);
+                }
+            };
+            
+            // 处理服务选择
+            $('.service-card').on('click', function() {
+                $('.service-card').removeClass('selected');
+                $(this).addClass('selected');
+                selectedService = $(this).data('service');
+                
+                // 隐藏所有表单
+                $('.form-container').removeClass('active');
+                
+                // 显示对应表单
+                const formMap = {
+                    'user-management': 'userManagementForm',
+                    'order-processing': 'orderProcessingForm',
+                    'data-analytics': 'dataAnalyticsForm',
+                    'notification': 'notificationForm'
+                };
+                
+                $(`#${formMap[selectedService]}`).addClass('active');
+                $('#submitBtn').prop('disabled', false);
+            });
+            
+            // 获取表单数据
+            const getFormData = () => {
+                const baseData = {
+                    request_id: Math.random().toString(36).substring(2, 15),
+                    timestamp: Math.floor(Date.now() / 1000),
+                    service_name: selectedService
+                };
+                
+                switch(selectedService) {
+                    case 'user-management':
+                        return {
+                            ...baseData,
+                            user_request: {
+                                action: $('#userAction').val(),
+                                user_id: $('#userId').val(),
+                                name: $('#userName').val(),
+                                email: $('#userEmail').val(),
+                                role: $('#userRole').val(),
+                                status: $('#userStatus').val()
+                            }
+                        };
+                    case 'order-processing':
+                        return {
+                            ...baseData,
+                            order_request: {
+                                action: $('#orderAction').val(),
+                                order_id: $('#orderId').val(),
+                                customer_id: $('#customerId').val(),
+                                amount: parseFloat($('#orderAmount').val()),
+                                payment_method: $('#paymentMethod').val(),
+                                status: $('#orderStatus').val()
+                            }
+                        };
+                    case 'data-analytics':
+                        return {
+                            ...baseData,
+                            analytics_request: {
+                                analytics_type: $('#analyticsType').val(),
+                                time_range: $('#timeRange').val(),
+                                data_source: $('#dataSource').val(),
+                                output_format: $('#outputFormat').val()
+                            }
+                        };
+                    case 'notification':
+                        return {
+                            ...baseData,
+                            notification_request: {
+                                notification_type: $('#notificationType').val(),
+                                priority: $('#priority').val(),
+                                recipient: $('#recipient').val(),
+                                template: $('#template').val(),
+                                content: $('#messageContent').val()
+                            }
+                        };
+                    default:
+                        return baseData;
+                }
+            };
+            
+            // 序列化请求为protobuf
+            const serializeRequest = (data) => {
+                try {
+                    const ServiceRequest = protobufRoot.lookupType('microservice.ServiceRequest');
+                    const message = ServiceRequest.create(data);
+                    const buffer = ServiceRequest.encode(message).finish();
+                    return {
+                        success: true,
+                        buffer: buffer,
+                        size: buffer.length,
+                        hex: Array.from(buffer).map(b => b.toString(16).padStart(2, '0')).join('')
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            };
+            
+            // 反序列化protobuf响应
+            const deserializeResponse = (buffer) => {
+                try {
+                    const ServiceResponse = protobufRoot.lookupType('microservice.ServiceResponse');
+                    const message = ServiceResponse.decode(buffer);
+                    return {
+                        success: true,
+                        data: ServiceResponse.toObject(message)
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            };
+            
+            // 显示结果
+            const displayResult = (data) => {
+                let html = `
+                    <h2 class="result-title">✅ Protocol Buffers 双向通信成功</h2>
+                    
+                    <div class="performance-metrics">
+                        <div class="metrics-row">
+                            <span class="metrics-label">请求ID:</span>
+                            <span class="metrics-value">${data.request_id}</span>
+                        </div>
+                        <div class="metrics-row">
+                            <span class="metrics-label">服务名称:</span>
+                            <span class="metrics-value">${data.service_name}</span>
+                        </div>
+                        <div class="metrics-row">
+                            <span class="metrics-label">响应状态:</span>
+                            <span class="metrics-value">${data.success ? '成功' : '失败'}</span>
+                        </div>
+                        <div class="metrics-row">
+                            <span class="metrics-label">状态码:</span>
+                            <span class="metrics-value">${data.status_code}</span>
+                        </div>
+                        <div class="metrics-row">
+                            <span class="metrics-label">响应时间:</span>
+                            <span class="metrics-value">${new Date(data.timestamp * 1000).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+                
+                // 根据服务类型显示具体响应数据
+                html += '<div class="result-grid">';
+                
+                if (data.user_response) {
+                    const user = data.user_response;
+                    html += `
+                        <div class="result-card">
+                            <h4>👥 用户管理响应</h4>
+                            <div class="result-row">
+                                <span class="result-label">用户ID:</span>
+                                <span class="result-value">${user.user_id}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">用户名:</span>
+                                <span class="result-value">${user.name}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">邮箱:</span>
+                                <span class="result-value">${user.email}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">角色:</span>
+                                <span class="result-value">${user.role}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">状态:</span>
+                                <span class="result-value">${user.status}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">创建时间:</span>
+                                <span class="result-value">${new Date(user.created_at * 1000).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (data.order_response) {
+                    const order = data.order_response;
+                    html += `
+                        <div class="result-card">
+                            <h4>📦 订单处理响应</h4>
+                            <div class="result-row">
+                                <span class="result-label">订单ID:</span>
+                                <span class="result-value">${order.order_id}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">客户ID:</span>
+                                <span class="result-value">${order.customer_id}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">订单金额:</span>
+                                <span class="result-value">¥${order.amount}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">支付方式:</span>
+                                <span class="result-value">${order.payment_method}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">订单状态:</span>
+                                <span class="result-value">${order.status}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">跟踪号:</span>
+                                <span class="result-value">${order.tracking_number}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (data.analytics_response) {
+                    const analytics = data.analytics_response;
+                    html += `
+                        <div class="result-card">
+                            <h4>📊 数据分析响应</h4>
+                            <div class="result-row">
+                                <span class="result-label">报告ID:</span>
+                                <span class="result-value">${analytics.report_id}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">分析类型:</span>
+                                <span class="result-value">${analytics.analytics_type}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">下载链接:</span>
+                                <span class="result-value">${analytics.download_url}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">生成时间:</span>
+                                <span class="result-value">${new Date(analytics.generated_at * 1000).toLocaleString()}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="result-card">
+                            <h4>📈 分析指标</h4>
+                    `;
+                    
+                    if (analytics.metrics) {
+                        Object.entries(analytics.metrics).forEach(([key, value]) => {
+                            html += `
+                                <div class="result-row">
+                                    <span class="result-label">${key}:</span>
+                                    <span class="result-value">${typeof value === 'number' ? value.toLocaleString() : value}</span>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    html += '</div>';
+                } else if (data.notification_response) {
+                    const notification = data.notification_response;
+                    html += `
+                        <div class="result-card">
+                            <h4>🔔 通知服务响应</h4>
+                            <div class="result-row">
+                                <span class="result-label">通知ID:</span>
+                                <span class="result-value">${notification.notification_id}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">发送状态:</span>
+                                <span class="result-value">${notification.status}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">投递状态:</span>
+                                <span class="result-value">${notification.delivery_status}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">发送时间:</span>
+                                <span class="result-value">${new Date(notification.sent_at * 1000).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                $('#resultSection').html(html).show();
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (requestData, requestSteps, responseSteps, isGitHubPagesMode = false) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - 双向 Protocol Buffers 通信过程</div>
+                    
+                    <div class="protobuf-flow">
+                        <div class="flow-step">请求对象</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Protobuf序列化</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">二进制传输</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">服务器处理</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Protobuf响应</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">反序列化</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">结果展示</div>
+                    </div>
+                    
+                    <div class="step-title">📤 请求序列化过程</div>
+                    <div class="step-block">
+                        <div class="step-title">1. 原始请求对象:</div>
+                        <div class="json-content">${JSON.stringify(requestData, null, 2)}</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">2. Protocol Buffers 二进制数据 (${requestSteps.size} bytes):</div>
+                        <div class="binary-content">${requestSteps.hex.substring(0, 200)}${requestSteps.hex.length > 200 ? '...' : ''}</div>
+                    </div>
+                    
+                    <div class="step-title">📥 响应反序列化过程</div>
+                    <div class="step-block">
+                        <div class="step-title">1. 服务器返回的${isGitHubPagesMode ? 'JSON模拟' : '二进制'}数据:</div>
+                        <div class="binary-content">${responseSteps && responseSteps.data ? (isGitHubPagesMode ? 'GitHub Pages环境使用JSON模拟protobuf响应' : Array.from(responseSteps.buffer || []).map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 200) + '...') : '模拟数据'}</div>
+                    </div>
+                    
+                    ${isGitHubPagesMode ? `
+                    <div class="step-block">
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107; margin: 15px 0;">
+                            <strong>⚠️ GitHub Pages 环境说明:</strong><br>
+                            由于GitHub Pages是静态托管，无法处理真实的Protocol Buffers二进制通信。<br>
+                            本演示使用JSON格式模拟protobuf双向通信，展示数据结构和处理流程。<br>
+                            在真实环境中，请求和响应都是高效的二进制格式。
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="step-block">
+                        <div class="step-title">2. 最终响应数据:</div>
+                        <div class="json-content">${responseSteps && responseSteps.data ? JSON.stringify(responseSteps.data, null, 2) : '无响应数据'}</div>
+                    </div>
+                    
+                    <strong>🔧 双向 Protocol Buffers 优势:</strong><br>
+                    • 请求和响应都使用高效的二进制序列化格式<br>
+                    • 强类型定义确保数据结构的一致性和可靠性<br>
+                    • 跨语言支持，完美适配微服务架构<br>
+                    • 向前向后兼容，便于服务版本演进<br>
+                    • 在高并发和大数据量场景中性能优势显著<br>
+                    • 减少网络传输开销，提升系统整体性能
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 提交表单
+            $('#submitBtn').on('click', async function() {
+                if (!selectedService || !protobufRoot) {
+                    alert('请选择服务或等待 Protocol Buffers schema 加载完成');
+                    return;
+                }
+                
+                // 显示加载状态
+                $('#resultSection').html('<div class="loading">🔄 正在进行 Protocol Buffers 双向通信...</div>').show();
+                $(this).prop('disabled', true).text('🔄 通信中...');
+                
+                // 获取表单数据
+                const formData = getFormData();
+                
+                // 序列化请求为protobuf
+                const requestSteps = serializeRequest(formData);
+                
+                if (!requestSteps.success) {
+                    $('#resultSection').html(`
+                        <div class="error">
+                            <h3>❌ 请求序列化失败</h3>
+                            <p>错误信息: ${requestSteps.error}</p>
+                        </div>
+                    `);
+                    $(this).prop('disabled', false).text('🚀 发送 Protocol Buffers 请求');
+                    return;
+                }
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = `api/bidirectional-protobuf-${selectedService}`;
+                } else {
+                    apiUrl = 'http://localhost:48159/api/bidirectional-protobuf';
+                }
+                
+                try {
+                    if (isGitHubPages) {
+                        // GitHub Pages环境：使用JSON模拟
+                        const response = await fetch(apiUrl);
+                        const jsonResponse = await response.json();
+                        
+                        if (jsonResponse.success) {
+                            displayResult(jsonResponse.data);
+                            showDebugInfo(formData, requestSteps, { data: jsonResponse.data }, true);
+                        } else {
+                            throw new Error(jsonResponse.message || '请求失败');
+                        }
+                    } else {
+                        // 本地环境：真实的protobuf双向通信
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-protobuf',
+                                'Accept': 'application/x-protobuf'
+                            },
+                            body: requestSteps.buffer
+                        });
+                        
+                        if (response.ok) {
+                            const responseBuffer = new Uint8Array(await response.arrayBuffer());
+                            const deserializeResult = deserializeResponse(responseBuffer);
+                            
+                            if (deserializeResult.success) {
+                                displayResult(deserializeResult.data);
+                                showDebugInfo(formData, requestSteps, { data: deserializeResult.data, buffer: responseBuffer }, false);
+                            } else {
+                                $('#resultSection').html(`
+                                    <div class="error">
+                                        <h3>❌ 响应解析失败</h3>
+                                        <p>错误信息: ${deserializeResult.error}</p>
+                                    </div>
+                                `);
+                            }
+                        } else {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                    }
+                } catch (error) {
+                    $('#resultSection').html(`
+                        <div class="error">
+                            <h3>❌ 通信失败</h3>
+                            <p>错误信息: ${error.message}</p>
+                            <p>请检查网络连接或稍后重试。</p>
+                        </div>
+                    `);
+                    
+                    // 显示调试信息（即使请求失败）
+                    showDebugInfo(formData, requestSteps, null, isGitHubPages);
+                }
+                
+                $(this).prop('disabled', false).text('🚀 发送 Protocol Buffers 请求');
+            });
+            
+            // 初始化
+            initProtobuf();
+            
+            // 默认选择第一个服务
+            $('.service-card').first().click();
+        });
+    </script>
+</body>
+</html>

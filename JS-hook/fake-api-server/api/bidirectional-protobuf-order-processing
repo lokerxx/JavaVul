@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟双向 Protocol Buffers 响应",
+  "data": {
+    "request_id": "def456order",
+    "timestamp": 1738252800,
+    "success": true,
+    "service_name": "order-processing",
+    "status_code": 200,
+    "order_response": {
+      "success": true,
+      "message": "订单create操作成功",
+      "order_id": "ORD789012",
+      "customer_id": "CUST456789",
+      "amount": 1299.99,
+      "payment_method": "alipay",
+      "status": "processing",
+      "created_at": 1738252800,
+      "tracking_number": "TRKAB123CD456"
+    }
+  }
+}

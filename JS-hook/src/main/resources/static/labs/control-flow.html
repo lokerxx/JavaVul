@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Flow Flattening</title>
+    <style>
+        body{font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0;margin:0}
+        .wrap{max-width:1100px;margin:0 auto;padding:24px}.card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        pre,input{background:#111827;color:#e2e8f0;border:1px solid #334155;border-radius:12px;padding:12px;width:100%;box-sizing:border-box}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px}.ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>Control Flow Flattening</h1>
+        <p>目标：恢复程序真实执行顺序后，写出最终 token。提示：看 <code>order.split('|')</code> 的调度序列。</p>
+    </div>
+    <div class="card">
+<pre>var order = '2|0|3|1';
+var token = [];
+var step = order.split('|'), i = 0;
+while (true) {
+  switch (step[i++]) {
+    case '0': token.push('FLOW'); continue;
+    case '1': token.push('9001'); break;
+    case '2': token.push('CF'); continue;
+    case '3': token.push('OK'); continue;
+  }
+  break;
+}
+console.log(token.join('-'));</pre>
+        <input id="answer" placeholder="提交最终输出">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </div>
+</div>
+<script>
+function check(){
+  const ok = document.getElementById('answer').value.trim() === 'CF-FLOW-OK-9001';
+  document.getElementById('result').textContent = ok ? '回答正确' : '先按真实顺序展开 switch';
+  document.getElementById('result').className = ok ? 'ok' : 'bad';
+}
+</script>
+</body>
+</html>

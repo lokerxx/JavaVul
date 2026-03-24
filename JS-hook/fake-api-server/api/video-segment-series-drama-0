@@ -1,0 +1,12 @@
+{
+  "video_type": "series-drama",
+  "segment_id": 0,
+  "segment_name": "segment_000.ts",
+  "encrypted_data": "U2FsdGVkX1+9RHrLaIMkSwKWn0RyazOvYWJjZGVmZ2hpams2MzQ1Njc4OTBhYmNkZWZnaGlqaw==",
+  "iv": "abcdef1234567890abcdef1234567890",
+  "encryption_method": "AES-128-CBC",
+  "segment_size": 387456,
+  "duration": 30,
+  "timestamp": 1738252800,
+  "content_type": "video/mp2t"
+}
