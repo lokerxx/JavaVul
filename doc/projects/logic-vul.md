@@ -1,63 +1,71 @@
-# logic_vul 操作教程
+# logic_vul 操作说明
 
 - 类型：单体靶场
 - 目录：`logic_vul`
-- 端口：`9967`
+- 端口：`8080`
 - 推荐入口：`/logic-vul`
 
-## 这是什么
+## 项目简介
 
-业务逻辑漏洞靶场
+`logic_vul` 是一个业务逻辑漏洞靶场，覆盖认证绕过、越权、流程绕过、验证码逻辑、短信轰炸、弱口令登录爆破，以及优惠券、退款、折扣、密码重置、审批流、状态机等典型场景。
 
-## 启动前准备
+## 页面入口
 
-1. 在仓库根目录执行 `bash run-local-build.sh`。
-2. 等待对应容器启动完成，并确认端口 `9967` 已经监听。
-3. 如果你还想通过首页统一发包，再额外确认 `http://宿主机IP:5000/` 能打开。
+- 首页导航：`GET /logic-vul`
+- 伪造身份：`GET /logic-vul/identity`
+- 水平越权：`GET /logic-vul/horizontal`
+- 垂直越权：`GET /logic-vul/vertical`
+- 流程绕过：`GET /logic-vul/checkout`
+- 短信验证码逻辑：`GET /logic-vul/sms-code`
+- 短信轰炸：`GET /logic-vul/sms-bomb`
+- 弱口令登录爆破：`GET /auth/bruteforce-vul`
+- 图形验证码登录：`GET /auth/bruteforce-safe`
+- 优惠券重复核销：`GET /logic-vul/coupon`
+- 重复退款：`GET /logic-vul/refund`
+- 折扣叠加：`GET /logic-vul/discount`
+- 密码重置 Token 复用：`GET /logic-vul/reset`
+- 审批流跳步：`GET /logic-vul/approval`
+- 订单状态机绕过：`GET /logic-vul/state-machine`
 
-## 方式一：通过首页测试
+## 调试接口
 
-1. 打开 `http://宿主机IP:5000/`。
-2. 在搜索框输入 `logic_vul、logic、business` 过滤到当前项目。
-3. 推荐先跑 `logic_vul_identity_attack`，再依次跑水平越权、垂直越权、流程绕过和短信验证码模板。
-4. 最后再用 `logic_vul_safe_login_normal`、`logic_vul_sms_safe_normal` 和 `logic_vul_info_normal` 做对照。
+- 场景总览：`GET /logic-vul/info`
+- 漏洞版登录：`POST /auth/login-vul`
+- 安全版登录：`POST /auth/login-safe`
+- 当前登录用户：`GET /auth/me`
 
-推荐直接使用的首页条目：
-- `logic_vul_identity_attack`：POST http://宿主机IP:9967/auth/login-vul
-- `logic_vul_horizontal_attack`：GET http://宿主机IP:9967/api/personal/2/vul?actingUserId=27
-- `logic_vul_vertical_attack`：GET http://宿主机IP:9967/api/admin/report/vul?actingUserId=27
-- `logic_vul_workflow_attack`：POST http://宿主机IP:9967/api/orders/5002/checkout/vul?actingUserId=27
-- `logic_vul_sms_send_attack`：POST http://宿主机IP:9967/sms/send-vul
-- `logic_vul_sms_verify_attack`：POST http://宿主机IP:9967/sms/verify-vul
-- `logic_vul_sms_bomb_attack`：POST http://宿主机IP:9967/sms/bomb-vul?phoneNumber=15134299958&batch=5
-- `logic_vul_safe_login_normal`：POST http://宿主机IP:9967/auth/login-safe
+## 业务逻辑漏洞接口
 
-## 方式二：直接访问接口测试
+- 水平越权：`GET /api/personal/{profileId}/vul`、`GET /api/personal/{profileId}/safe`
+- 垂直越权：`GET /api/admin/report/vul`、`GET /api/admin/report/safe`
+- 流程绕过：`POST /api/orders/{orderId}/checkout/vul`、`POST /api/orders/{orderId}/checkout/safe`
+- 短信验证码逻辑：`POST /sms/send-vul`、`POST /sms/verify-vul`、`POST /sms/send-safe`、`POST /sms/verify-safe`
+- 短信轰炸：`POST /sms/bomb-vul`、`POST /sms/bomb-safe`
+- 优惠券重复核销：`POST /promo/coupons/redeem/vul`、`POST /promo/coupons/redeem/safe`
+- 重复退款：`POST /payments/{orderId}/refund/vul`、`POST /payments/{orderId}/refund/safe`
+- 折扣叠加：`POST /pricing/discounts/calculate/vul`、`POST /pricing/discounts/calculate/safe`
+- 密码重置 Token 复用：`POST /auth/reset/send-vul`、`POST /auth/reset/confirm-vul`、`POST /auth/reset/send-safe`、`POST /auth/reset/confirm-safe`
+- 审批流跳步：`POST /workflow/approval/{taskId}/vul`、`POST /workflow/approval/{taskId}/safe`
+- 订单状态机绕过：`POST /workflow/orders/{orderId}/state/vul`、`POST /workflow/orders/{orderId}/state/safe`
 
-1. 先访问推荐入口：`http://宿主机IP:9967/logic-vul`。
-2. 查看靶场信息：`curl "http://宿主机IP:9967/logic-vul/info"`。
-3. 伪造身份：`curl -X POST "http://宿主机IP:9967/auth/login-vul" -H "Content-Type: application/json" -d "{\"username\":\"frances.goldner\",\"debugUserId\":29}"`。
-4. 水平越权：`curl "http://宿主机IP:9967/api/personal/2/vul?actingUserId=27"`。
-5. 垂直越权：`curl "http://宿主机IP:9967/api/admin/report/vul?actingUserId=27" -H "X-Client-Role: ADMIN"`。
-6. 流程绕过：`curl -X POST "http://宿主机IP:9967/api/orders/5002/checkout/vul?actingUserId=27" -H "Content-Type: application/json" -d "{\"clientTotal\":0.01,\"markAsPaid\":true,\"skipInventoryCheck\":true}"`。
-7. 短信码漏洞演示第一步：`curl -X POST "http://宿主机IP:9967/sms/send-vul" -H "Content-Type: application/json" -d "{\"phoneNumber\":\"15134299958\"}"`，返回里会直接回显验证码。
-8. 短信码漏洞演示第二步：把上一步拿到的验证码，换到别的手机号上测试：`curl -X POST "http://宿主机IP:9967/sms/verify-vul" -H "Content-Type: application/json" -d "{\"phoneNumber\":\"15933988032\",\"smsCode\":\"把上一步回显的验证码填这里\"}"`。
-9. 安全版短信发送对照：`curl -X POST "http://宿主机IP:9967/sms/send-safe" -H "Content-Type: application/json" -d "{\"phoneNumber\":\"15134299958\"}"`。
-10. 短信轰炸漏洞演示：`curl -X POST "http://宿主机IP:9967/sms/bomb-vul?phoneNumber=15134299958&batch=5"`。
-11. 短信频控安全版对照：`curl -X POST "http://宿主机IP:9967/sms/bomb-safe?phoneNumber=15134299958&batch=5"`。
-12. 正常登录对照：`curl -X POST "http://宿主机IP:9967/auth/login-safe" -H "Content-Type: application/json" -d "{\"username\":\"frances.goldner\",\"password\":\"3jwl2i3t6\"}"`。
+## 登录爆破与验证码场景
 
-## 测试时重点看什么
+- 漏洞版提示接口：`GET /auth/bruteforce-vul/hints`
+- 漏洞版登录提交：`POST /auth/bruteforce-vul/login`
+- 安全版验证码初始化：`GET /auth/bruteforce-safe/captcha/new`
+- 安全版验证码图片：`GET /auth/bruteforce-safe/captcha/image?token=...`
+- 安全版登录提交：`POST /auth/bruteforce-safe/login`
 
-1. 伪造身份时，是否能直接拿到管理员 token 或管理员身份信息。
-2. 水平越权时，普通用户是否能读取别人的资料。
-3. 垂直越权时，只改一个客户端角色头是否就能拿到管理员报表。
-4. 流程绕过时，是否能以异常价格或跳过库存/支付直接把订单置为已支付。
-5. 短信验证码场景里，自己的验证码是否能用于别人的手机号，验证码是否会直接回显，验证成功后是否还能复用。
-6. 短信发送场景里，是否能在短时间内无限制重复发送，安全版是否会在阈值后拦截。
+### 说明
 
-## 相关入口
+1. 漏洞版登录依赖 SQLite 表 `brute_force_users`，预置了多组弱口令账号。
+2. 漏洞版会区分“用户名不存在”和“密码错误”，并且没有验证码、锁定和冷却机制。
+3. 安全版要求输入数字字母混合的图形验证码，验证码单次有效，约 2 分钟过期。
+4. 安全版统一返回“用户名、密码或验证码错误”，连续失败 5 次后锁定 60 秒。
 
-- 总控台：`http://宿主机IP:5000/`
-- 文档索引：[`doc/README.md`](../README.md)
-- 根项目说明：[`README.md`](../../README.md)
+## 推荐验证方式
+
+1. 先打开 `GET /logic-vul`，逐个点击进入对应页面。
+2. 每个页面都提供漏洞版与安全版请求示例，可直接点击执行。
+3. 需要 token 的页面，先点击“获取安全版 token”后再执行安全版接口。
+4. 如需查看所有种子数据和场景清单，访问 `GET /logic-vul/info`。

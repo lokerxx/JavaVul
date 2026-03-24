@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocol Buffers Response</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/protobuf-7.2.5.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+        .query-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .data-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .category-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .category-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+        .category-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .category-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .category-card p {
+            color: #7f8c8d;
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .category-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .query-options {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-top: 20px;
+            display: none;
+        }
+        .query-options.active {
+            display: block;
+        }
+        .option-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .option-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: #495057;
+        }
+        .option-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .option-btn.selected {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+        .fetch-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .fetch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        .fetch-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .result-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .data-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .data-card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .data-row:last-child {
+            border-bottom: none;
+        }
+        .data-label {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+        .data-value {
+            flex: 1;
+            text-align: right;
+            color: #495057;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+        }
+        .step-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        .binary-content {
+            color: #e74c3c;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .json-content {
+            color: #27ae60;
+            white-space: pre-wrap;
+        }
+        .protobuf-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .flow-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #dc3545;
+            margin-top: 20px;
+        }
+        .success {
+            background: #d1ecf1;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #28a745;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .stats-summary {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+        .stats-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .stats-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>数据分析平台</h1>
+            <p>Protocol Buffers Response Case - 高效二进制响应体解析</p>
+        </div>
+
+        <div class="query-section">
+            <h2 class="section-title">📊 选择数据类型</h2>
+            
+            <div class="data-categories">
+                <div class="category-card" data-category="analytics">
+                    <span class="category-icon">📈</span>
+                    <h3>业务分析</h3>
+                    <p>获取业务指标、销售数据、用户行为等分析报告</p>
+                </div>
+                <div class="category-card" data-category="reports">
+                    <span class="category-icon">📋</span>
+                    <h3>系统报告</h3>
+                    <p>查看系统性能、错误日志、监控数据等技术报告</p>
+                </div>
+                <div class="category-card" data-category="statistics">
+                    <span class="category-icon">📊</span>
+                    <h3>统计数据</h3>
+                    <p>获取用户统计、访问量、转化率等关键数据指标</p>
+                </div>
+                <div class="category-card" data-category="insights">
+                    <span class="category-icon">🔍</span>
+                    <h3>深度洞察</h3>
+                    <p>AI驱动的数据洞察、趋势预测、智能建议等</p>
+                </div>
+            </div>
+
+            <!-- 业务分析选项 -->
+            <div id="analyticsOptions" class="query-options">
+                <h4>📈 业务分析选项</h4>
+                <div class="option-row">
+                    <div class="option-btn" data-option="sales">销售数据</div>
+                    <div class="option-btn" data-option="revenue">收入分析</div>
+                    <div class="option-btn" data-option="customers">客户分析</div>
+                    <div class="option-btn" data-option="products">产品分析</div>
+                </div>
+            </div>
+
+            <!-- 系统报告选项 -->
+            <div id="reportsOptions" class="query-options">
+                <h4>📋 系统报告选项</h4>
+                <div class="option-row">
+                    <div class="option-btn" data-option="performance">性能报告</div>
+                    <div class="option-btn" data-option="errors">错误日志</div>
+                    <div class="option-btn" data-option="security">安全报告</div>
+                    <div class="option-btn" data-option="usage">使用情况</div>
+                </div>
+            </div>
+
+            <!-- 统计数据选项 -->
+            <div id="statisticsOptions" class="query-options">
+                <h4>📊 统计数据选项</h4>
+                <div class="option-row">
+                    <div class="option-btn" data-option="traffic">流量统计</div>
+                    <div class="option-btn" data-option="conversion">转化统计</div>
+                    <div class="option-btn" data-option="engagement">用户参与</div>
+                    <div class="option-btn" data-option="retention">留存分析</div>
+                </div>
+            </div>
+
+            <!-- 深度洞察选项 -->
+            <div id="insightsOptions" class="query-options">
+                <h4>🔍 深度洞察选项</h4>
+                <div class="option-row">
+                    <div class="option-btn" data-option="trends">趋势预测</div>
+                    <div class="option-btn" data-option="recommendations">智能推荐</div>
+                    <div class="option-btn" data-option="anomalies">异常检测</div>
+                    <div class="option-btn" data-option="forecasting">预测分析</div>
+                </div>
+            </div>
+
+            <button class="fetch-btn" id="fetchBtn" disabled>🔍 获取 Protocol Buffers 数据</button>
+        </div>
+
+        <div id="resultSection" class="result-section"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            let selectedCategory = null;
+            let selectedOption = null;
+            let protobufRoot = null;
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 初始化protobuf
+            const initProtobuf = async () => {
+                try {
+                    // 定义protobuf schema for response
+                    const protoSchema = `
+                        syntax = "proto3";
+                        package api;
+                        
+                        message DataPoint {
+                            string label = 1;
+                            double value = 2;
+                            string unit = 3;
+                            int64 timestamp = 4;
+                        }
+                        
+                        message ChartData {
+                            string chart_type = 1;
+                            string title = 2;
+                            repeated DataPoint data_points = 3;
+                            map<string, string> metadata = 4;
+                        }
+                        
+                        message ReportData {
+                            string report_id = 1;
+                            string title = 2;
+                            string description = 3;
+                            repeated ChartData charts = 4;
+                            map<string, double> summary_metrics = 5;
+                            int64 generated_at = 6;
+                        }
+                        
+                        message DataResponse {
+                            string request_id = 1;
+                            int64 timestamp = 2;
+                            bool success = 3;
+                            string message = 4;
+                            int32 code = 5;
+                            string category = 6;
+                            string option = 7;
+                            ReportData report_data = 8;
+                        }
+                    `;
+                    
+                    protobufRoot = protobuf.parse(protoSchema).root;
+                    console.log('Protocol Buffers response schema loaded successfully');
+                } catch (error) {
+                    console.error('Failed to load protobuf response schema:', error);
+                }
+            };
+            
+            // 处理分类选择
+            $('.category-card').on('click', function() {
+                $('.category-card').removeClass('selected');
+                $(this).addClass('selected');
+                selectedCategory = $(this).data('category');
+                selectedOption = null;
+                
+                // 隐藏所有选项
+                $('.query-options').removeClass('active');
+                $('.option-btn').removeClass('selected');
+                
+                // 显示对应选项
+                $(`#${selectedCategory}Options`).addClass('active');
+                
+                updateFetchButton();
+            });
+            
+            // 处理选项选择
+            $(document).on('click', '.option-btn', function() {
+                $('.option-btn').removeClass('selected');
+                $(this).addClass('selected');
+                selectedOption = $(this).data('option');
+                
+                updateFetchButton();
+            });
+            
+            // 更新获取按钮状态
+            const updateFetchButton = () => {
+                if (selectedCategory && selectedOption) {
+                    $('#fetchBtn').prop('disabled', false);
+                } else {
+                    $('#fetchBtn').prop('disabled', true);
+                }
+            };
+            
+            // 反序列化protobuf响应
+            const deserializeProtobufResponse = (buffer) => {
+                try {
+                    const DataResponse = protobufRoot.lookupType('api.DataResponse');
+                    const message = DataResponse.decode(buffer);
+                    return {
+                        success: true,
+                        data: DataResponse.toObject(message)
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            };
+            
+            // 显示结果
+            const displayResult = (data) => {
+                let html = `
+                    <h2 class="result-title">📊 Protocol Buffers 数据解析结果</h2>
+                    
+                    <div class="stats-summary">
+                        <div class="stats-row">
+                            <span class="stats-label">请求ID:</span>
+                            <span class="stats-value">${data.request_id}</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="stats-label">数据类型:</span>
+                            <span class="stats-value">${data.category} - ${data.option}</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="stats-label">响应状态:</span>
+                            <span class="stats-value">${data.success ? '成功' : '失败'}</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="stats-label">生成时间:</span>
+                            <span class="stats-value">${new Date(data.timestamp * 1000).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+                
+                if (data.report_data) {
+                    const report = data.report_data;
+                    
+                    html += `
+                        <div class="data-grid">
+                            <div class="data-card">
+                                <h4>📋 报告信息</h4>
+                                <div class="data-row">
+                                    <span class="data-label">报告ID:</span>
+                                    <span class="data-value">${report.report_id}</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">标题:</span>
+                                    <span class="data-value">${report.title}</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">描述:</span>
+                                    <span class="data-value">${report.description}</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">生成时间:</span>
+                                    <span class="data-value">${new Date(report.generated_at * 1000).toLocaleString()}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="data-card">
+                                <h4>📈 关键指标</h4>
+                    `;
+                    
+                    if (report.summary_metrics) {
+                        Object.entries(report.summary_metrics).forEach(([key, value]) => {
+                            html += `
+                                <div class="data-row">
+                                    <span class="data-label">${key}:</span>
+                                    <span class="data-value">${typeof value === 'number' ? value.toLocaleString() : value}</span>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 显示图表数据
+                    if (report.charts && report.charts.length > 0) {
+                        html += '<div class="data-grid">';
+                        
+                        report.charts.forEach((chart, index) => {
+                            html += `
+                                <div class="data-card">
+                                    <h4>📊 ${chart.title}</h4>
+                                    <div class="data-row">
+                                        <span class="data-label">图表类型:</span>
+                                        <span class="data-value">${chart.chart_type}</span>
+                                    </div>
+                            `;
+                            
+                            if (chart.data_points && chart.data_points.length > 0) {
+                                chart.data_points.slice(0, 5).forEach(point => {
+                                    html += `
+                                        <div class="data-row">
+                                            <span class="data-label">${point.label}:</span>
+                                            <span class="data-value">${point.value}${point.unit || ''}</span>
+                                        </div>
+                                    `;
+                                });
+                                
+                                if (chart.data_points.length > 5) {
+                                    html += `
+                                        <div class="data-row">
+                                            <span class="data-label">...</span>
+                                            <span class="data-value">还有 ${chart.data_points.length - 5} 个数据点</span>
+                                        </div>
+                                    `;
+                                }
+                            }
+                            
+                            html += '</div>';
+                        });
+                        
+                        html += '</div>';
+                    }
+                }
+                
+                $('#resultSection').html(html).show();
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (responseBuffer, deserializedData, isGitHubPagesMode = false) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - Protocol Buffers 响应体解析过程</div>
+                    
+                    <div class="protobuf-flow">
+                        <div class="flow-step">HTTP请求</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">服务器处理</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Protobuf序列化</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">二进制响应</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">前端解析</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">数据展示</div>
+                    </div>
+                    
+                    <div class="step-title">📡 HTTP请求信息</div>
+                    <div class="step-block">
+                        <div class="step-title">请求参数:</div>
+                        <div class="json-content">Category: ${selectedCategory}
+Option: ${selectedOption}
+Accept: application/x-protobuf</div>
+                    </div>
+                    
+                    <div class="step-title">📥 Protocol Buffers 响应解析</div>
+                    <div class="step-block">
+                        <div class="step-title">1. 服务器返回的${isGitHubPagesMode ? 'JSON模拟' : '二进制'}数据:</div>
+                        <div class="binary-content">${responseBuffer ? Array.from(responseBuffer).map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 200) + '...' : (isGitHubPagesMode ? 'GitHub Pages环境使用JSON模拟protobuf响应' : '模拟数据')}</div>
+                    </div>
+                    
+                    ${isGitHubPagesMode ? `
+                    <div class="step-block">
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107; margin: 15px 0;">
+                            <strong>⚠️ GitHub Pages 环境说明:</strong><br>
+                            由于GitHub Pages是静态托管，无法处理真实的Protocol Buffers二进制响应。<br>
+                            本演示使用JSON格式模拟protobuf响应，展示数据结构和解析流程。<br>
+                            在真实环境中，响应是高效的二进制格式。
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="step-block">
+                        <div class="step-title">2. 解析后的数据结构:</div>
+                        <div class="json-content">${JSON.stringify(deserializedData, null, 2)}</div>
+                    </div>
+                    
+                    <strong>🔧 Protocol Buffers 响应优势:</strong><br>
+                    • 响应体积小，传输效率高，特别适合移动端<br>
+                    • 强类型定义，确保数据结构的一致性和可靠性<br>
+                    • 向前向后兼容，便于API版本演进<br>
+                    • 跨语言支持，适合微服务架构<br>
+                    • 在大数据量传输场景中性能优势明显
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 获取数据
+            $('#fetchBtn').on('click', async function() {
+                if (!selectedCategory || !selectedOption) return;
+                
+                // 显示加载状态
+                $('#resultSection').html('<div class="loading">🔄 正在获取 Protocol Buffers 数据...</div>').show();
+                $(this).prop('disabled', true).text('🔄 获取中...');
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = `api/protobuf-response-${selectedCategory}-${selectedOption}`;
+                } else {
+                    apiUrl = `http://localhost:48159/api/protobuf-response?category=${selectedCategory}&option=${selectedOption}`;
+                }
+                
+                try {
+                    if (isGitHubPages) {
+                        // GitHub Pages环境：使用JSON模拟
+                        const response = await fetch(apiUrl);
+                        const jsonResponse = await response.json();
+                        
+                        if (jsonResponse.success) {
+                            displayResult(jsonResponse.data);
+                            showDebugInfo(null, jsonResponse.data, true);
+                        } else {
+                            throw new Error(jsonResponse.message || '请求失败');
+                        }
+                    } else {
+                        // 本地环境：真实的protobuf通信
+                        const response = await fetch(apiUrl, {
+                            headers: {
+                                'Accept': 'application/x-protobuf'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const responseBuffer = new Uint8Array(await response.arrayBuffer());
+                            const deserializeResult = deserializeProtobufResponse(responseBuffer);
+                            
+                            if (deserializeResult.success) {
+                                displayResult(deserializeResult.data);
+                                showDebugInfo(responseBuffer, deserializeResult.data, false);
+                            } else {
+                                $('#resultSection').html(`
+                                    <div class="error">
+                                        <h3>❌ 响应解析失败</h3>
+                                        <p>错误信息: ${deserializeResult.error}</p>
+                                    </div>
+                                `);
+                            }
+                        } else {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                    }
+                } catch (error) {
+                    $('#resultSection').html(`
+                        <div class="error">
+                            <h3>❌ 请求失败</h3>
+                            <p>错误信息: ${error.message}</p>
+                            <p>请检查网络连接或稍后重试。</p>
+                        </div>
+                    `);
+                    
+                    // 显示调试信息（即使请求失败）
+                    showDebugInfo(null, null, isGitHubPages);
+                }
+                
+                $(this).prop('disabled', false).text('🔍 获取 Protocol Buffers 数据');
+            });
+            
+            // 初始化
+            initProtobuf();
+            
+            // 默认选择第一个分类
+            $('.category-card').first().click();
+        });
+    </script>
+</body>
+</html>

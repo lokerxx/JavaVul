@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟请求头签名验证响应",
+  "data": {
+    "request_id": "REQDEF456TRANSFER",
+    "timestamp": 1738252800,
+    "signature_valid": true,
+    "api_type": "transfer",
+    "client_id": "CLIENT_DEF456GHI789",
+    "transfer_result": {
+      "status": "processing",
+      "transfer_id": "TRFBANK567890123",
+      "amount": 5000.00,
+      "currency": "CNY",
+      "from_account": "6222021234567890123",
+      "to_account": "6222029876543210987",
+      "estimated_arrival": "2-24小时内到账"
+    }
+  }
+}

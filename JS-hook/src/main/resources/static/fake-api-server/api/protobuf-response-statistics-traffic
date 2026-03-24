@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟 Protocol Buffers 响应",
+  "data": {
+    "request_id": "ghi789traffic",
+    "timestamp": 1738252800,
+    "success": true,
+    "message": "statistics-traffic 数据获取成功",
+    "code": 200,
+    "category": "statistics",
+    "option": "traffic",
+    "report_data": {
+      "report_id": "RPT789TRAFFIC",
+      "title": "流量统计报告",
+      "description": "网站流量来源分析，包括访问量、页面浏览量和用户行为路径",
+      "generated_at": 1738252800,
+      "summary_metrics": {
+        "总访问量": 156780,
+        "独立访客": 89450,
+        "页面浏览量": 345670,
+        "跳出率": 35.6
+      },
+      "charts": [{
+        "chart_type": "line",
+        "title": "网站流量趋势",
+        "data_points": [
+          {"label": "第1天", "value": 8500, "unit": "PV", "timestamp": 1735660800},
+          {"label": "第2天", "value": 9200, "unit": "PV", "timestamp": 1735747200},
+          {"label": "第3天", "value": 7800, "unit": "PV", "timestamp": 1735833600},
+          {"label": "第4天", "value": 10500, "unit": "PV", "timestamp": 1735920000},
+          {"label": "第5天", "value": 11200, "unit": "PV", "timestamp": 1736006400}
+        ],
+        "metadata": {
+          "period": "最近30天"
+        }
+      }]
+    }
+  }
+}

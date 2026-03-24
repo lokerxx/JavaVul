@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Header Signing</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+        .api-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .api-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .api-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .api-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+        .api-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .api-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .api-card p {
+            color: #7f8c8d;
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .api-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .form-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-top: 20px;
+            display: none;
+        }
+        .form-container.active {
+            display: block;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .result-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .result-card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+        .result-value {
+            flex: 1;
+            text-align: right;
+            color: #495057;
+            word-break: break-all;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+        }
+        .step-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        .code-content {
+            color: #e74c3c;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .json-content {
+            color: #27ae60;
+            white-space: pre-wrap;
+        }
+        .header-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .flow-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #dc3545;
+            margin-top: 20px;
+        }
+        .success {
+            background: #d1ecf1;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #28a745;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .header-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .header-row:last-child {
+            border-bottom: none;
+        }
+        .header-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .header-value {
+            color: #667eea;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>API安全认证平台</h1>
+            <p>Request Header Signing Case - 请求头签名验证</p>
+        </div>
+
+        <div class="api-section">
+            <h2 class="section-title">🔐 选择API接口</h2>
+            
+            <div class="api-cards">
+                <div class="api-card" data-api="payment">
+                    <span class="api-icon">💳</span>
+                    <h3>支付接口</h3>
+                    <p>处理支付请求，需要高级别的安全验证和签名保护</p>
+                </div>
+                <div class="api-card" data-api="transfer">
+                    <span class="api-icon">💸</span>
+                    <h3>转账接口</h3>
+                    <p>银行转账操作，要求严格的身份验证和请求完整性</p>
+                </div>
+                <div class="api-card" data-api="sensitive">
+                    <span class="api-icon">🔒</span>
+                    <h3>敏感数据接口</h3>
+                    <p>访问敏感信息，需要多重安全验证和访问控制</p>
+                </div>
+                <div class="api-card" data-api="admin">
+                    <span class="api-icon">⚙️</span>
+                    <h3>管理员接口</h3>
+                    <p>系统管理操作，需要最高级别的权限验证和审计</p>
+                </div>
+            </div>
+
+            <!-- 支付接口表单 -->
+            <div id="paymentForm" class="form-container">
+                <h3>💳 支付接口</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paymentAmount">支付金额:</label>
+                        <input type="number" id="paymentAmount" placeholder="请输入支付金额" value="1299.99" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentMethod">支付方式:</label>
+                        <select id="paymentMethod" required>
+                            <option value="credit_card">信用卡</option>
+                            <option value="alipay" selected>支付宝</option>
+                            <option value="wechat_pay">微信支付</option>
+                            <option value="bank_card">银行卡</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paymentOrderId">订单号:</label>
+                        <input type="text" id="paymentOrderId" placeholder="请输入订单号" value="PAY202501270001">
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentMerchant">商户号:</label>
+                        <input type="text" id="paymentMerchant" placeholder="请输入商户号" value="MCH123456789">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 转账接口表单 -->
+            <div id="transferForm" class="form-container">
+                <h3>💸 转账接口</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transferAmount">转账金额:</label>
+                        <input type="number" id="transferAmount" placeholder="请输入转账金额" value="5000.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="transferCurrency">货币类型:</label>
+                        <select id="transferCurrency" required>
+                            <option value="CNY" selected>人民币</option>
+                            <option value="USD">美元</option>
+                            <option value="EUR">欧元</option>
+                            <option value="JPY">日元</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transferFrom">转出账户:</label>
+                        <input type="text" id="transferFrom" placeholder="请输入转出账户" value="6222021234567890123">
+                    </div>
+                    <div class="form-group">
+                        <label for="transferTo">转入账户:</label>
+                        <input type="text" id="transferTo" placeholder="请输入转入账户" value="6222029876543210987">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="transferRemark">转账备注:</label>
+                    <textarea id="transferRemark" placeholder="请输入转账备注">业务往来款项</textarea>
+                </div>
+            </div>
+
+            <!-- 敏感数据接口表单 -->
+            <div id="sensitiveForm" class="form-container">
+                <h3>🔒 敏感数据接口</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dataType">数据类型:</label>
+                        <select id="dataType" required>
+                            <option value="personal">个人信息</option>
+                            <option value="financial" selected>财务数据</option>
+                            <option value="medical">医疗记录</option>
+                            <option value="legal">法律文件</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="accessLevel">访问级别:</label>
+                        <select id="accessLevel" required>
+                            <option value="read">只读</option>
+                            <option value="write" selected>读写</option>
+                            <option value="admin">管理员</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userId">用户ID:</label>
+                        <input type="text" id="userId" placeholder="请输入用户ID" value="USER789012345">
+                    </div>
+                    <div class="form-group">
+                        <label for="department">部门:</label>
+                        <select id="department" required>
+                            <option value="finance" selected>财务部</option>
+                            <option value="hr">人事部</option>
+                            <option value="legal">法务部</option>
+                            <option value="it">技术部</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 管理员接口表单 -->
+            <div id="adminForm" class="form-container">
+                <h3>⚙️ 管理员接口</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adminAction">管理操作:</label>
+                        <select id="adminAction" required>
+                            <option value="user_management">用户管理</option>
+                            <option value="system_config" selected>系统配置</option>
+                            <option value="security_audit">安全审计</option>
+                            <option value="data_backup">数据备份</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminLevel">管理级别:</label>
+                        <select id="adminLevel" required>
+                            <option value="super" selected>超级管理员</option>
+                            <option value="system">系统管理员</option>
+                            <option value="security">安全管理员</option>
+                            <option value="audit">审计管理员</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adminId">管理员ID:</label>
+                        <input type="text" id="adminId" placeholder="请输入管理员ID" value="ADMIN001">
+                    </div>
+                    <div class="form-group">
+                        <label for="sessionId">会话ID:</label>
+                        <input type="text" id="sessionId" placeholder="请输入会话ID" value="SES123456789ABC">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="operationReason">操作原因:</label>
+                    <textarea id="operationReason" placeholder="请输入操作原因">系统维护和安全检查</textarea>
+                </div>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" disabled>🔐 发送带签名头的请求</button>
+        </div>
+
+        <div id="resultSection" class="result-section"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            let selectedApi = null;
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 处理API选择
+            $('.api-card').on('click', function() {
+                $('.api-card').removeClass('selected');
+                $(this).addClass('selected');
+                selectedApi = $(this).data('api');
+                
+                // 隐藏所有表单
+                $('.form-container').removeClass('active');
+                
+                // 显示对应表单
+                const formMap = {
+                    'payment': 'paymentForm',
+                    'transfer': 'transferForm',
+                    'sensitive': 'sensitiveForm',
+                    'admin': 'adminForm'
+                };
+                
+                $(`#${formMap[selectedApi]}`).addClass('active');
+                $('#submitBtn').prop('disabled', false);
+            });
+            
+            // 生成签名
+            const generateSignature = (data, timestamp, nonce, secretKey = 'your-secret-key-2025') => {
+                // 将数据按key排序并拼接
+                const sortedKeys = Object.keys(data).sort();
+                const paramString = sortedKeys.map(key => `${key}=${data[key]}`).join('&');
+                
+                // 构建签名字符串
+                const signString = `${paramString}&timestamp=${timestamp}&nonce=${nonce}&key=${secretKey}`;
+                
+                // 生成HMAC-SHA256签名
+                const signature = CryptoJS.HmacSHA256(signString, secretKey).toString();
+                
+                return {
+                    signature: signature,
+                    signString: signString,
+                    paramString: paramString
+                };
+            };
+            
+            // 获取表单数据
+            const getFormData = () => {
+                const baseData = {
+                    api_type: selectedApi,
+                    client_id: 'CLIENT_' + Math.random().toString(36).substring(2, 15).toUpperCase(),
+                    version: '1.0'
+                };
+                
+                switch(selectedApi) {
+                    case 'payment':
+                        return {
+                            ...baseData,
+                            amount: parseFloat($('#paymentAmount').val()),
+                            payment_method: $('#paymentMethod').val(),
+                            order_id: $('#paymentOrderId').val(),
+                            merchant_id: $('#paymentMerchant').val()
+                        };
+                    case 'transfer':
+                        return {
+                            ...baseData,
+                            amount: parseFloat($('#transferAmount').val()),
+                            currency: $('#transferCurrency').val(),
+                            from_account: $('#transferFrom').val(),
+                            to_account: $('#transferTo').val(),
+                            remark: $('#transferRemark').val()
+                        };
+                    case 'sensitive':
+                        return {
+                            ...baseData,
+                            data_type: $('#dataType').val(),
+                            access_level: $('#accessLevel').val(),
+                            user_id: $('#userId').val(),
+                            department: $('#department').val()
+                        };
+                    case 'admin':
+                        return {
+                            ...baseData,
+                            action: $('#adminAction').val(),
+                            admin_level: $('#adminLevel').val(),
+                            admin_id: $('#adminId').val(),
+                            session_id: $('#sessionId').val(),
+                            reason: $('#operationReason').val()
+                        };
+                    default:
+                        return baseData;
+                }
+            };
+            
+            // 显示结果
+            const displayResult = (data) => {
+                let html = `
+                    <h2 class="result-title">✅ 请求头签名验证成功</h2>
+                    
+                    <div class="header-info">
+                        <div class="header-row">
+                            <span class="header-label">请求ID:</span>
+                            <span class="header-value">${data.request_id}</span>
+                        </div>
+                        <div class="header-row">
+                            <span class="header-label">API类型:</span>
+                            <span class="header-value">${data.api_type}</span>
+                        </div>
+                        <div class="header-row">
+                            <span class="header-label">验证状态:</span>
+                            <span class="header-value">${data.signature_valid ? '签名验证通过' : '签名验证失败'}</span>
+                        </div>
+                        <div class="header-row">
+                            <span class="header-label">处理时间:</span>
+                            <span class="header-value">${new Date(data.timestamp * 1000).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+                
+                html += '<div class="result-grid">';
+                
+                // 根据API类型显示具体响应数据
+                if (data.api_type === 'payment' && data.payment_result) {
+                    const payment = data.payment_result;
+                    html += `
+                        <div class="result-card">
+                            <h4>💳 支付结果</h4>
+                            <div class="result-row">
+                                <span class="result-label">支付状态:</span>
+                                <span class="result-value">${payment.status}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">交易号:</span>
+                                <span class="result-value">${payment.transaction_id}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">支付金额:</span>
+                                <span class="result-value">¥${payment.amount}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">支付方式:</span>
+                                <span class="result-value">${payment.payment_method}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">手续费:</span>
+                                <span class="result-value">¥${payment.fee}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (data.api_type === 'transfer' && data.transfer_result) {
+                    const transfer = data.transfer_result;
+                    html += `
+                        <div class="result-card">
+                            <h4>💸 转账结果</h4>
+                            <div class="result-row">
+                                <span class="result-label">转账状态:</span>
+                                <span class="result-value">${transfer.status}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">转账单号:</span>
+                                <span class="result-value">${transfer.transfer_id}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">转账金额:</span>
+                                <span class="result-value">${transfer.amount} ${transfer.currency}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">预计到账:</span>
+                                <span class="result-value">${transfer.estimated_arrival}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (data.api_type === 'sensitive' && data.access_result) {
+                    const access = data.access_result;
+                    html += `
+                        <div class="result-card">
+                            <h4>🔒 访问结果</h4>
+                            <div class="result-row">
+                                <span class="result-label">访问状态:</span>
+                                <span class="result-value">${access.status}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">数据类型:</span>
+                                <span class="result-value">${access.data_type}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">权限级别:</span>
+                                <span class="result-value">${access.access_level}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">访问令牌:</span>
+                                <span class="result-value">${access.access_token}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (data.api_type === 'admin' && data.admin_result) {
+                    const admin = data.admin_result;
+                    html += `
+                        <div class="result-card">
+                            <h4>⚙️ 管理结果</h4>
+                            <div class="result-row">
+                                <span class="result-label">操作状态:</span>
+                                <span class="result-value">${admin.status}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">操作类型:</span>
+                                <span class="result-value">${admin.action}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">操作ID:</span>
+                                <span class="result-value">${admin.operation_id}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">审计日志:</span>
+                                <span class="result-value">${admin.audit_log}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                $('#resultSection').html(html).show();
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (formData, signatureInfo, headers, isGitHubPagesMode = false) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - 请求头签名验证过程</div>
+                    
+                    <div class="header-flow">
+                        <div class="flow-step">表单数据</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">参数排序</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">签名生成</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">请求头设置</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">服务器验证</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">响应返回</div>
+                    </div>
+                    
+                    <div class="step-title">📝 签名生成过程</div>
+                    <div class="step-block">
+                        <div class="step-title">1. 原始表单数据:</div>
+                        <div class="json-content">${JSON.stringify(formData, null, 2)}</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">2. 参数排序拼接:</div>
+                        <div class="code-content">${signatureInfo.paramString}</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">3. 签名字符串:</div>
+                        <div class="code-content">${signatureInfo.signString}</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">4. HMAC-SHA256签名:</div>
+                        <div class="code-content">${signatureInfo.signature}</div>
+                    </div>
+                    
+                    <div class="step-title">📤 HTTP请求头</div>
+                    <div class="step-block">
+                        <div class="step-title">关键请求头信息:</div>
+                        <div class="json-content">X-Sign: ${headers['X-Sign']}
+X-Timestamp: ${headers['X-Timestamp']}
+X-Nonce: ${headers['X-Nonce']}
+X-Client-Id: ${headers['X-Client-Id']}
+Content-Type: ${headers['Content-Type']}</div>
+                    </div>
+                    
+                    ${isGitHubPagesMode ? `
+                    <div class="step-block">
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107; margin: 15px 0;">
+                            <strong>⚠️ GitHub Pages 环境说明:</strong><br>
+                            由于GitHub Pages是静态托管，无法处理真实的请求头验证。<br>
+                            本演示使用JSON格式模拟请求头签名验证，展示签名生成和验证流程。<br>
+                            在真实环境中，服务器会验证X-Sign请求头的完整性。
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <strong>🔧 请求头签名验证优势:</strong><br>
+                    • 防止请求参数被篡改，确保数据完整性<br>
+                    • 通过时间戳防止重放攻击<br>
+                    • 随机数(nonce)增加签名的唯一性<br>
+                    • 密钥验证确保请求来源的合法性<br>
+                    • 适用于高安全要求的API接口<br>
+                    • 常用于支付、转账等敏感操作的安全验证
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 提交表单
+            $('#submitBtn').on('click', async function() {
+                if (!selectedApi) {
+                    alert('请选择API接口');
+                    return;
+                }
+                
+                // 显示加载状态
+                $('#resultSection').html('<div class="loading">🔄 正在进行请求头签名验证...</div>').show();
+                $(this).prop('disabled', true).text('🔄 验证中...');
+                
+                // 获取表单数据
+                const formData = getFormData();
+                
+                // 生成时间戳和随机数
+                const timestamp = Math.floor(Date.now() / 1000);
+                const nonce = Math.random().toString(36).substring(2, 15);
+                
+                // 生成签名
+                const signatureInfo = generateSignature(formData, timestamp, nonce);
+                
+                // 构建请求头
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'X-Sign': signatureInfo.signature,
+                    'X-Timestamp': timestamp.toString(),
+                    'X-Nonce': nonce,
+                    'X-Client-Id': formData.client_id
+                };
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = `api/header-sign-${selectedApi}`;
+                } else {
+                    apiUrl = 'http://localhost:48159/api/header-sign';
+                }
+                
+                try {
+                    if (isGitHubPages) {
+                        // GitHub Pages环境：使用JSON模拟
+                        const response = await fetch(apiUrl);
+                        const jsonResponse = await response.json();
+                        
+                        if (jsonResponse.success) {
+                            displayResult(jsonResponse.data);
+                            showDebugInfo(formData, signatureInfo, headers, true);
+                        } else {
+                            throw new Error(jsonResponse.message || '请求失败');
+                        }
+                    } else {
+                        // 本地环境：真实的请求头验证
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: headers,
+                            body: JSON.stringify(formData)
+                        });
+                        
+                        if (response.ok) {
+                            const responseData = await response.json();
+                            displayResult(responseData);
+                            showDebugInfo(formData, signatureInfo, headers, false);
+                        } else {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                    }
+                } catch (error) {
+                    $('#resultSection').html(`
+                        <div class="error">
+                            <h3>❌ 请求失败</h3>
+                            <p>错误信息: ${error.message}</p>
+                            <p>请检查网络连接或稍后重试。</p>
+                        </div>
+                    `);
+                    
+                    // 显示调试信息（即使请求失败）
+                    showDebugInfo(formData, signatureInfo, headers, isGitHubPages);
+                }
+                
+                $(this).prop('disabled', false).text('🔐 发送带签名头的请求');
+            });
+            
+            // 默认选择第一个API
+            $('.api-card').first().click();
+        });
+    </script>
+</body>
+</html>

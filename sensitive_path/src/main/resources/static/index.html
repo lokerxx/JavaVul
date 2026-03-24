@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统一指纹库靶场</title>
+    <meta name="description" content="统一指纹库靶场，当前库里合并了项目内 file 指纹、cms.xls 指纹、Dayu/Feature.json 指纹。">
+    <style>
+        :root {
+            --bg: #0b1220;
+            --panel: #121a2b;
+            --panel-soft: #182338;
+            --line: rgba(148, 163, 184, 0.18);
+            --text: #e5edf8;
+            --muted: #9cb0cc;
+            --primary: #4f8cff;
+            --accent: #22c55e;
+            --warn: #f59e0b;
+            --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", Inter, system-ui, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(79, 140, 255, 0.16), transparent 28%),
+                linear-gradient(180deg, #0b1220 0%, #0e1728 100%);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .wrap {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 28px 20px 56px;
+        }
+
+        .panel {
+            background: rgba(18, 26, 43, 0.92);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+        }
+
+        .topbar,
+        .hero,
+        .section {
+            padding: 24px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .brand p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .hero h2 {
+            margin: 0 0 14px;
+            font-size: 34px;
+            line-height: 1.15;
+        }
+
+        .hero p {
+            margin: 0 0 14px;
+            color: var(--muted);
+            line-height: 1.9;
+        }
+
+        .hero .desc {
+            white-space: pre-line;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, 0.12);
+            color: #d9ffe7;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .stat {
+            padding: 18px;
+            border-radius: 18px;
+            background: var(--panel-soft);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .section-head h3 {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+
+        .section-head p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: 1.5fr 0.8fr 0.8fr auto;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font: inherit;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+        }
+
+        textarea {
+            min-height: 180px;
+            resize: vertical;
+        }
+
+        button {
+            min-height: 44px;
+            padding: 0 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #fff;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+        }
+
+        .card {
+            background: var(--panel-soft);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            color: #dbe7ff;
+            font-size: 13px;
+        }
+
+        td {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(79, 140, 255, 0.12);
+            color: #dbe7ff;
+            font-size: 12px;
+        }
+
+        .success {
+            background: rgba(34, 197, 94, 0.16);
+            color: #d9ffe7;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .mono {
+            font-family: Consolas, monospace;
+            word-break: break-all;
+        }
+
+        .match {
+            padding: 14px;
+            margin-bottom: 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .match h4 {
+            margin: 0 0 8px;
+            font-size: 17px;
+        }
+
+        .match p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        @media (max-width: 1100px) {
+            .hero,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topbar,
+            .section-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats,
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="panel topbar">
+        <div class="brand">
+            <div class="logo">FP</div>
+            <div>
+                <h1>统一指纹库靶场</h1>
+                <p>SQLite 驱动的真实路径回放与实时匹配环境</p>
+            </div>
+        </div>
+        <div class="hint">运行数据源已统一收敛为 `fingerprint-library.db`</div>
+    </section>
+
+    <section class="panel hero">
+        <div>
+            <h2>统一指纹库靶场</h2>
+            <p class="desc">现在它不再是“敏感目录靶场”，而是统一指纹库靶场。
+当前库里合并了三路数据：项目内 `file` 指纹、`cms.xls` 指纹、`Dayu/Feature.json` 指纹。你可以直接浏览指纹库，也可以点击真实路径回放对应路由，再输入路径和响应内容做实时匹配。</p>
+            <div class="status" id="topStatus">指纹库已加载：2884 条记录。</div>
+        </div>
+        <div class="stats">
+            <div class="stat"><strong id="totalCount">2884</strong><span>总记录数</span></div>
+            <div class="stat"><strong id="productCount">--</strong><span>产品数量</span></div>
+            <div class="stat"><strong id="localCount">--</strong><span>项目内 file 指纹</span></div>
+            <div class="stat"><strong id="cmsCount">--</strong><span>cms.xls 指纹</span></div>
+            <div class="stat"><strong id="dayuCount">--</strong><span>Dayu/Feature.json 指纹</span></div>
+            <div class="stat"><strong id="pathCount">--</strong><span>唯一路径数</span></div>
+        </div>
+    </section>
+
+    <section class="panel section">
+        <div class="section-head">
+            <div>
+                <h3>指纹库浏览</h3>
+                <p>支持按关键字、数据源和匹配类型过滤；路径支持直接点击，方便你用浏览器或扫描器验证真实路由回放。</p>
+            </div>
+        </div>
+        <div class="toolbar">
+            <input id="keywordInput" type="text" placeholder="搜索产品名、路径、分类或描述">
+            <select id="datasetSelect">
+                <option value="">全部数据源</option>
+                <option value="local-json">local-json</option>
+                <option value="cms-xls">cms-xls</option>
+                <option value="dayu-feature">dayu-feature</option>
+            </select>
+            <select id="matchTypeSelect">
+                <option value="">全部匹配类型</option>
+                <option value="path_exact">path_exact</option>
+                <option value="md5">md5</option>
+                <option value="keyword">keyword</option>
+                <option value="header_keyword">header_keyword</option>
+            </select>
+            <button id="searchBtn" type="button">刷新列表</button>
+        </div>
+        <div class="card">
+            <table>
+                <thead>
+                <tr>
+                    <th>产品</th>
+                    <th>路径</th>
+                    <th>数据源</th>
+                    <th>匹配方式</th>
+                    <th>说明</th>
+                </tr>
+                </thead>
+                <tbody id="catalogBody">
+                <tr><td colspan="5">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel section">
+        <div class="section-head">
+            <div>
+                <h3>实时匹配</h3>
+                <p>输入路径和响应内容，后端会按路径、关键字、请求头关键字和 MD5 规则做实时比对。</p>
+            </div>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <div class="toolbar" style="grid-template-columns:1fr 1fr;">
+                    <input id="matchPath" type="text" placeholder="/images/admina/arrow.jpg 或 /actuator">
+                    <input id="manualMd5" type="text" placeholder="可选：直接输入响应 MD5">
+                </div>
+                <textarea id="responseBody" placeholder="把响应内容粘贴到这里；如果留空，则主要依据路径进行命中。"></textarea>
+                <div style="margin-top:12px;">
+                    <button id="matchBtn" type="button">执行匹配</button>
+                </div>
+                <p class="hint" id="matchStatus">还没有执行匹配。</p>
+            </div>
+            <div class="card">
+                <h3 style="margin:0 0 10px;">命中结果</h3>
+                <div id="matchResults"><div class="hint">暂无结果。</div></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function setOverview(overview) {
+  document.getElementById('totalCount').textContent = overview.total ?? '--';
+  document.getElementById('productCount').textContent = overview.productCount ?? '--';
+  document.getElementById('localCount').textContent = overview.datasetCounts?.['local-json'] ?? 0;
+  document.getElementById('cmsCount').textContent = overview.datasetCounts?.['cms-xls'] ?? 0;
+  document.getElementById('dayuCount').textContent = overview.datasetCounts?.['dayu-feature'] ?? 0;
+  document.getElementById('pathCount').textContent = overview.pathCount ?? '--';
+  document.getElementById('topStatus').textContent = `指纹库已加载：${overview.total ?? 0} 条记录。`;
+}
+
+function renderCatalog(items) {
+  const html = items.map(item => `
+    <tr>
+      <td><strong>${escapeHtml(item.productName)}</strong><br><span class="hint">${escapeHtml(item.externalId || '')}</span></td>
+      <td><a class="mono" href="${escapeHtml(item.path)}" target="_blank">${escapeHtml(item.path)}</a></td>
+      <td><span class="pill">${escapeHtml(item.dataset)}</span></td>
+      <td><span class="pill">${escapeHtml(item.matchType)}</span></td>
+      <td>${escapeHtml(item.description || '')}<br><span class="hint">${escapeHtml(item.matchPattern || '')}</span></td>
+    </tr>
+  `).join('');
+  document.getElementById('catalogBody').innerHTML = html || '<tr><td colspan="5">没有匹配到数据。</td></tr>';
+}
+
+function loadCatalog() {
+  const params = new URLSearchParams();
+  if (document.getElementById('keywordInput').value.trim()) params.set('q', document.getElementById('keywordInput').value.trim());
+  if (document.getElementById('datasetSelect').value) params.set('dataset', document.getElementById('datasetSelect').value);
+  if (document.getElementById('matchTypeSelect').value) params.set('matchType', document.getElementById('matchTypeSelect').value);
+
+  fetch(`/fingerprint/api/catalog?${params.toString()}`)
+    .then(resp => resp.json())
+    .then(data => {
+      setOverview(data.overview || {});
+      renderCatalog(data.items || []);
+    })
+    .catch(() => {
+      document.getElementById('topStatus').textContent = '指纹库加载失败，请检查后端是否已启动。';
+      document.getElementById('catalogBody').innerHTML = '<tr><td colspan="5">加载失败。</td></tr>';
+    });
+}
+
+function renderMatches(payload) {
+  const matches = payload.matches || [];
+  if (!matches.length) {
+    document.getElementById('matchResults').innerHTML = '<div class="hint">没有命中任何指纹。</div>';
+    return;
+  }
+  const html = matches.map(item => `
+    <div class="match">
+      <h4>${escapeHtml(item.productName)} <span class="pill success">score ${escapeHtml(item.score)}</span></h4>
+      <p>${escapeHtml(item.matchReason)}</p>
+      <p class="mono">${escapeHtml(item.path)} ｜ ${escapeHtml(item.matchType)} ｜ ${escapeHtml(item.dataset)}</p>
+    </div>
+  `).join('');
+  document.getElementById('matchResults').innerHTML = html;
+}
+
+document.getElementById('searchBtn').addEventListener('click', loadCatalog);
+
+document.getElementById('matchBtn').addEventListener('click', () => {
+  const body = {
+    path: document.getElementById('matchPath').value,
+    responseBody: document.getElementById('responseBody').value,
+    md5: document.getElementById('manualMd5').value
+  };
+  fetch('/fingerprint/api/match', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+    .then(resp => resp.json())
+    .then(data => {
+      document.getElementById('matchStatus').textContent =
+        `候选规则 ${data.candidateCount} 条，命中 ${data.matchCount} 条，计算得到 MD5：${data.computedMd5 || '-'}`;
+      renderMatches(data);
+    })
+    .catch(() => {
+      document.getElementById('matchStatus').textContent = '匹配失败，请检查后端接口。';
+    });
+});
+
+loadCatalog();
+</script>
+</body>
+</html>

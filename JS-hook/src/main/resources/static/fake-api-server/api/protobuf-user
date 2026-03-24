@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟 Protocol Buffers 响应",
+  "data": {
+    "request_id": "abc123",
+    "timestamp": 1738252800,
+    "success": true,
+    "message": "用户 张三 信息处理成功",
+    "code": 200,
+    "user_info": {
+      "name": "张三",
+      "email": "zhangsan@example.com",
+      "age": 28,
+      "phone": "13800138000",
+      "address": "北京市朝阳区",
+      "company": "科技创新有限公司",
+      "position": "高级工程师",
+      "salary": 25000,
+      "skills": ["JavaScript", "Python", "React"],
+      "metadata": {
+        "user_id": "USR123ABC",
+        "created_at": "2025-01-31T16:00:00.000Z",
+        "status": "active"
+      }
+    }
+  }
+}

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Body Field Encryption</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .header h1 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #6c757d;
+            margin: 0;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        .sensitive-field {
+            position: relative;
+        }
+        .sensitive-field::after {
+            content: "🔒";
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            color: #dc3545;
+        }
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        .submit-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #007bff;
+        }
+        .success {
+            background: #d1ecf1;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #495057;
+            font-family: Arial, sans-serif;
+        }
+        .json-block {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .encrypted-field {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>用户信息提交</h1>
+            <p>JSON Body Field Encryption Case - 敏感字段加密传输</p>
+        </div>
+
+        <form id="userForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">姓名:</label>
+                    <input type="text" id="name" name="name" placeholder="请输入真实姓名" value="张三" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">邮箱:</label>
+                    <input type="email" id="email" name="email" placeholder="请输入邮箱地址" value="zhangsan@example.com" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group sensitive-field">
+                    <label for="phone">手机号码 (加密字段):</label>
+                    <input type="tel" id="phone" name="phone" placeholder="请输入手机号码" value="13800138000" required>
+                </div>
+                <div class="form-group sensitive-field">
+                    <label for="idCard">身份证号 (加密字段):</label>
+                    <input type="text" id="idCard" name="idCard" placeholder="请输入身份证号" value="110101199001011234" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">所在城市:</label>
+                    <select id="city" name="city" required>
+                        <option value="beijing">北京</option>
+                        <option value="shanghai">上海</option>
+                        <option value="guangzhou">广州</option>
+                        <option value="shenzhen">深圳</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="age">年龄:</label>
+                    <input type="number" id="age" name="age" placeholder="请输入年龄" value="25" min="18" max="100" required>
+                </div>
+            </div>
+
+            <div class="form-group sensitive-field">
+                <label for="bankCard">银行卡号 (加密字段):</label>
+                <input type="text" id="bankCard" name="bankCard" placeholder="请输入银行卡号" value="6222021234567890123" required>
+            </div>
+
+            <div class="form-group">
+                <label for="remarks">备注信息:</label>
+                <textarea id="remarks" name="remarks" rows="3" placeholder="请输入备注信息（可选）">用户信息提交测试</textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">提交用户信息</button>
+        </form>
+
+        <div id="result" style="display: none;"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            const secretKey = 'json-field-encrypt-2025';
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 加密敏感字段
+            const encryptSensitiveField = (value) => {
+                return CryptoJS.AES.encrypt(value, secretKey).toString();
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (originalData, encryptedData) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - JSON字段加密过程</div>
+                    
+                    <strong>📝 原始表单数据:</strong>
+                    <div class="json-block">${JSON.stringify(originalData, null, 2)}</div>
+                    
+                    <strong>🔒 加密后的JSON请求体:</strong>
+                    <div class="json-block">
+                        {<br>
+                        &nbsp;&nbsp;"name": "${encryptedData.name}",<br>
+                        &nbsp;&nbsp;"email": "${encryptedData.email}",<br>
+                        &nbsp;&nbsp;<span class="encrypted-field">"phone": "${encryptedData.phone.substring(0, 30)}..."</span>,<br>
+                        &nbsp;&nbsp;<span class="encrypted-field">"idCard": "${encryptedData.idCard.substring(0, 30)}..."</span>,<br>
+                        &nbsp;&nbsp;"city": "${encryptedData.city}",<br>
+                        &nbsp;&nbsp;"age": ${encryptedData.age},<br>
+                        &nbsp;&nbsp;<span class="encrypted-field">"bankCard": "${encryptedData.bankCard.substring(0, 30)}..."</span>,<br>
+                        &nbsp;&nbsp;"remarks": "${encryptedData.remarks}",<br>
+                        &nbsp;&nbsp;"timestamp": ${encryptedData.timestamp}<br>
+                        }
+                    </div>
+                    
+                    <strong>🔑 加密说明:</strong><br>
+                    • 手机号、身份证号、银行卡号使用AES加密<br>
+                    • 其他字段保持明文传输<br>
+                    • 服务端会自动解密敏感字段
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 处理表单提交
+            $('#userForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                // 禁用提交按钮
+                $('#submitBtn').prop('disabled', true).text('提交中...');
+                
+                // 获取表单数据
+                const originalData = {
+                    name: $('#name').val(),
+                    email: $('#email').val(),
+                    phone: $('#phone').val(),
+                    idCard: $('#idCard').val(),
+                    city: $('#city').val(),
+                    age: parseInt($('#age').val()),
+                    bankCard: $('#bankCard').val(),
+                    remarks: $('#remarks').val()
+                };
+                
+                // 构建加密后的请求数据
+                const encryptedData = {
+                    name: originalData.name,
+                    email: originalData.email,
+                    phone: encryptSensitiveField(originalData.phone),        // 加密
+                    idCard: encryptSensitiveField(originalData.idCard),      // 加密
+                    city: originalData.city,
+                    age: originalData.age,
+                    bankCard: encryptSensitiveField(originalData.bankCard),  // 加密
+                    remarks: originalData.remarks,
+                    timestamp: Math.floor(Date.now() / 1000)
+                };
+                
+                // 显示调试信息
+                showDebugInfo(originalData, encryptedData);
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = 'api/submit-user-info';
+                } else {
+                    apiUrl = 'http://localhost:48159/api/submit-user-info';
+                }
+                
+                // 发送请求
+                $.ajax({
+                    url: apiUrl,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(encryptedData),
+                    success: (response) => {
+                        const html = `
+                            <div class="result success">
+                                <h3>✅ 用户信息提交成功!</h3>
+                                <p><strong>用户ID:</strong> ${response.userId}</p>
+                                <p><strong>提交时间:</strong> ${new Date(response.submitTime).toLocaleString()}</p>
+                                <p><strong>处理状态:</strong> ${response.status}</p>
+                                <p><strong>解密验证:</strong> 服务端已成功解密敏感字段</p>
+                                <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                                    <strong>解密后的敏感信息:</strong><br>
+                                    手机号: ${response.decryptedData.phone}<br>
+                                    身份证: ${response.decryptedData.idCard}<br>
+                                    银行卡: ${response.decryptedData.bankCard}
+                                </div>
+                            </div>
+                        `;
+                        $('#result').html(html).show();
+                    },
+                    error: (xhr, status, error) => {
+                        let errorMsg = '提交失败';
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMsg = xhr.responseJSON.error;
+                        }
+                        
+                        const html = `
+                            <div class="result error">
+                                <h3>❌ 提交失败</h3>
+                                <p><strong>错误信息:</strong> ${errorMsg}</p>
+                                <p><strong>状态码:</strong> ${xhr.status}</p>
+                                <p>请检查网络连接或稍后重试。</p>
+                            </div>
+                        `;
+                        $('#result').html(html).show();
+                        console.error('Submit error:', error);
+                    },
+                    complete: () => {
+                        // 恢复提交按钮
+                        $('#submitBtn').prop('disabled', false).text('提交用户信息');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

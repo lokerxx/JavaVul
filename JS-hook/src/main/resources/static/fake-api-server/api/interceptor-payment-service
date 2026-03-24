@@ -1,0 +1,23 @@
+{
+  "request_id": "REQGHI789PAYMENT",
+  "timestamp": 1738252800,
+  "signature_valid": true,
+  "service_name": "payment-service",
+  "interceptor_id": "INTPAY789",
+  "client_id": "CLIENT_GHI789JKL012",
+  "service_result": {
+    "status": "success",
+    "total_transactions": 6789,
+    "successful_payments": 6543,
+    "failed_payments": 45,
+    "payment_data": {
+      "total_amount": "567890.12",
+      "average_transaction": "123.45",
+      "payment_methods": {
+        "credit_card": 45,
+        "alipay": 35,
+        "wechat_pay": 20
+      }
+    }
+  }
+}

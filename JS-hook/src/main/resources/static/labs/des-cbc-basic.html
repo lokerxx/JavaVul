@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DES-CBC Basic</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+    <script src="../libs/crypto-js-4.1.1.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>DES-CBC Basic</h1>
+        <p>目标：补老系统常见的 DES-CBC 场景。训练重点还是一样：别先碰算法实现，先抓 key / iv 和进入加密前的业务串。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo / DES</span>
+            <span class="chip">技术点：DES-CBC / 8 字节 key</span>
+            <span class="chip">推荐动作：Hook DES.encrypt</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>function encryptLegacy(body) {
+  const key = CryptoJS.enc.Utf8.parse('DESKey17');
+  const iv = CryptoJS.enc.Utf8.parse('DESIv017');
+  return CryptoJS.DES.encrypt(JSON.stringify(body), key, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  }).ciphertext.toString(CryptoJS.enc.Base64);
+}</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交关键字段，格式：<code>merchant|scene|amount</code></p>
+        <input id="answer" placeholder="例如：m-17|refund|760">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>DES / 3DES 场景常见于历史包袱接口和旧版 SDK。</li>
+            <li>你要练的不是算法细节，而是如何快速从页面里认出它。</li>
+            <li>先把请求明文、key、iv、模式抓齐，再考虑复现。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+const payload = Object.freeze({
+  merchant: 'm-17',
+  scene: 'refund',
+  amount: 760,
+  currency: 'CNY'
+});
+
+function renderPacket(){
+  const key = CryptoJS.enc.Utf8.parse('DESKey17');
+  const iv = CryptoJS.enc.Utf8.parse('DESIv017');
+  const encrypted = CryptoJS.DES.encrypt(JSON.stringify(payload), key, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  });
+  const packet = {
+    alg: 'DES-CBC',
+    iv: btoa('DESIv017'),
+    data: encrypted.ciphertext.toString(CryptoJS.enc.Base64)
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'm-17|refund|760';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '重点找 merchant、scene、amount 进入 DES 前的真实值。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

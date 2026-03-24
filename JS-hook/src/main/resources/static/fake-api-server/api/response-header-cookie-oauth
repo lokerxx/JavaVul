@@ -1,0 +1,25 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟响应头加密Cookie",
+  "data": {
+    "session_id": "SESDEF456OAUTH",
+    "timestamp": 1738252800,
+    "authenticated": true,
+    "service_type": "oauth",
+    "client_ip": "192.168.1.100",
+    "oauth_result": {
+      "status": "authorized",
+      "provider": "github",
+      "access_token": "OATOAUTH789012345IJKLMNOP",
+      "scope": "write",
+      "user_info": "github_user_abc123"
+    }
+  },
+  "headers": {
+    "x-cookie": "U2FsdGVkX1+9RHrLaIMkSwKWn0RyazOvYWJjZGVmZ2hpams2MzQ1Njc4OTBhYmNkZWZnaGlqaw==",
+    "x-session-id": "SESDEF456OAUTH",
+    "x-auth-status": "success",
+    "x-service-type": "oauth",
+    "content-type": "application/json"
+  }
+}

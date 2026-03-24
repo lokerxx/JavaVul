@@ -1,0 +1,40 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟 Protocol Buffers 响应",
+  "data": {
+    "request_id": "def456perf",
+    "timestamp": 1738252800,
+    "success": true,
+    "message": "reports-performance 数据获取成功",
+    "code": 200,
+    "category": "reports",
+    "option": "performance",
+    "report_data": {
+      "report_id": "RPT456PERF",
+      "title": "系统性能报告",
+      "description": "系统各组件性能指标监控，包括响应时间、吞吐量和资源使用率",
+      "generated_at": 1738252800,
+      "summary_metrics": {
+        "平均响应时间": 145.6,
+        "系统可用性": 99.8,
+        "CPU使用率": 65.2,
+        "内存使用率": 72.1
+      },
+      "charts": [{
+        "chart_type": "line",
+        "title": "系统响应时间",
+        "data_points": [
+          {"label": "0:00", "value": 120, "unit": "ms", "timestamp": 1738166400},
+          {"label": "1:00", "value": 135, "unit": "ms", "timestamp": 1738170000},
+          {"label": "2:00", "value": 110, "unit": "ms", "timestamp": 1738173600},
+          {"label": "3:00", "value": 125, "unit": "ms", "timestamp": 1738177200},
+          {"label": "4:00", "value": 140, "unit": "ms", "timestamp": 1738180800},
+          {"label": "5:00", "value": 155, "unit": "ms", "timestamp": 1738184400}
+        ],
+        "metadata": {
+          "period": "最近24小时"
+        }
+      }]
+    }
+  }
+}

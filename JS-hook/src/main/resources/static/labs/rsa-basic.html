@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSA Basic Envelope</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>RSA Basic Envelope</h1>
+        <p>目标：补纯非对称加密题。为了避免额外引入 RSA 库，这里把密文结果做成 mock，但保留了“公钥 + 明文 JSON + 请求封包”的真实分析路径。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo / Rsa</span>
+            <span class="chip">技术点：RSA 封包识别</span>
+            <span class="chip">推荐动作：Hook encrypt 入口前的明文字符串</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>const publicKey = '-----BEGIN PUBLIC KEY-----MIIB...DEMO...IDAQAB-----END PUBLIC KEY-----';
+function rsaEncryptMock(body) {
+  const plain = JSON.stringify(body);
+  return 'RSA$' + btoa(publicKey.slice(0, 18) + '|' + plain)
+    .split('')
+    .reverse()
+    .join('');
+}</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交关键字段，格式：<code>bizType|mobileLast4|nonce</code></p>
+        <input id="answer" placeholder="例如：mobile.login|7788|nonce-31">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>RSA 类题更适合先找“谁在构造待加密字符串”。</li>
+            <li>实际项目里常见库是 <code>JSEncrypt</code>、<code>node-rsa</code> 或 WebCrypto。</li>
+            <li>真正值得提取的是明文业务字段，而不是公钥本身。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+const payload = Object.freeze({
+  bizType: 'mobile.login',
+  mobile: '13800007788',
+  nonce: 'nonce-31',
+  channel: 'web'
+});
+
+function rsaEncryptMock(body){
+  const publicKey = '-----BEGIN PUBLIC KEY-----MIIB...DEMO...IDAQAB-----END PUBLIC KEY-----';
+  const plain = JSON.stringify(body);
+  return 'RSA$' + btoa(publicKey.slice(0, 18) + '|' + plain)
+    .split('')
+    .reverse()
+    .join('');
+}
+
+function renderPacket(){
+  const packet = {
+    alg: 'RSA(mock)',
+    kid: 'rsa-demo-01',
+    cipher: rsaEncryptMock(payload)
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'mobile.login|7788|nonce-31';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '回到 encrypt 前的明文 JSON，重点看 bizType、手机号尾号和 nonce。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

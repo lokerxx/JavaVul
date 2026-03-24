@@ -1,0 +1,74 @@
+[
+  {
+    "challengeId": "dynamic-eval",
+    "judgeType": "contains_all",
+    "keywords": ["eval", "payload"],
+    "notes": "Answer should mention the recovered payload and eval entry."
+  },
+  {
+    "challengeId": "string-array",
+    "judgeType": "contains_all",
+    "keywords": ["string", "array"],
+    "notes": "Answer should describe restored string array behavior."
+  },
+  {
+    "challengeId": "anti-debug-plus",
+    "judgeType": "contains_all",
+    "keywords": ["timing", "devtools"],
+    "notes": "Answer should mention timing checks and DevTools detection."
+  },
+  {
+    "challengeId": "dynamic-sign-live",
+    "judgeType": "contains_all",
+    "keywords": ["nonce", "timestamp"],
+    "notes": "Answer should include runtime sign inputs like nonce and timestamp."
+  },
+  {
+    "challengeId": "aes-gcm-json",
+    "judgeType": "contains_all",
+    "keywords": ["iv", "aad"],
+    "notes": "Answer should identify iv and aad in the envelope."
+  },
+  {
+    "challengeId": "aes-rsa-hybrid-plus",
+    "judgeType": "contains_all",
+    "keywords": ["session", "key"],
+    "notes": "Answer should reference the wrapped session key."
+  },
+  {
+    "challengeId": "sm2-sm4-hybrid",
+    "judgeType": "contains_all",
+    "keywords": ["sm2", "sm4"],
+    "notes": "Answer should mention both SM2 and SM4 in the hybrid flow."
+  },
+  {
+    "challengeId": "query-string-param-sign",
+    "judgeType": "contains_all",
+    "keywords": ["sign", "query"],
+    "notes": "Answer should identify the query sign generation."
+  },
+  {
+    "challengeId": "header-sign",
+    "judgeType": "contains_all",
+    "keywords": ["timestamp", "nonce"],
+    "notes": "Answer should mention header timestamp and nonce generation."
+  },
+  {
+    "challengeId": "bidirectional-hex-encrypt",
+    "judgeType": "contains_all",
+    "keywords": ["hex", "request", "response"],
+    "notes": "Answer should describe both request and response hex flows."
+  },
+  {
+    "challengeId": "bidirectional-protobuf",
+    "judgeType": "contains_all",
+    "keywords": ["protobuf", "request", "response"],
+    "notes": "Answer should mention protobuf handling on both directions."
+  },
+  {
+    "challengeId": "video-segment-encryption",
+    "judgeType": "contains_all",
+    "keywords": ["segment", "key"],
+    "notes": "Answer should describe segment indexing and segment keys."
+  }
+]

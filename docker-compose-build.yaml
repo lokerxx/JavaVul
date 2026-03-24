@@ -727,6 +727,14 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
 
+  js-hook:
+    image: wushangleon/js-hook
+    build:
+      context: ./JS-hook
+      dockerfile: Dockerfile
+    ports:
+      - "48159:8080"
+
 
   flask:
     image: wushangleon/javavul_index

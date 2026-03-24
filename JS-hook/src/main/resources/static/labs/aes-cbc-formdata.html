@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-CBC FormData</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+    <script src="../libs/crypto-js-4.1.1.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>AES-CBC FormData</h1>
+        <p>目标：补齐 multipart / FormData 形态。练习重点是从 <code>FormData</code> 里提取字段，再看它是如何被序列化进 AES-CBC 的。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo / AesCbcFormData</span>
+            <span class="chip">技术点：FormData / multipart</span>
+            <span class="chip">推荐动作：Hook FormData.append / entries</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>const fd = new FormData();
+fd.set('bizNo', 'BIZ-8821');
+fd.set('category', 'invoice');
+fd.set('fileToken', 'up-20260321-k9');
+fd.set('operator', 'alice');
+const ordered = Array.from(fd.entries()).map(([k, v]) => `${k}=${v}`).join('&');
+const cipher = CryptoJS.AES.encrypt(ordered, key, { iv, mode: CryptoJS.mode.CBC });</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交三个关键字段，格式：<code>bizNo|category|fileToken</code></p>
+        <input id="answer" placeholder="例如：BIZ-8821|invoice|up-20260321-k9">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>这题最有价值的 Hook 点是 <code>FormData.append</code> / <code>set</code>。</li>
+            <li>很多上传接口不会直接把文件内容加密，而是先加密业务字段和令牌。</li>
+            <li>把字段顺序抓准，往往比盯密文本身更重要。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+function buildFormData(){
+  const fd = new FormData();
+  fd.set('bizNo', 'BIZ-8821');
+  fd.set('category', 'invoice');
+  fd.set('fileToken', 'up-20260321-k9');
+  fd.set('operator', 'alice');
+  return fd;
+}
+
+function renderPacket(){
+  const fd = buildFormData();
+  const ordered = Array.from(fd.entries()).map(([key, value]) => `${key}=${value}`).join('&');
+  const aesKey = CryptoJS.enc.Utf8.parse('FormDataAesKey01');
+  const iv = CryptoJS.enc.Utf8.parse('FormDataIv-0001');
+  const encrypted = CryptoJS.AES.encrypt(ordered, aesKey, {
+    iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  });
+  const packet = {
+    contentType: 'multipart/form-data; boundary=----LabBoundary',
+    envelope: {
+      iv: btoa('FormDataIv-0001'),
+      data: encrypted.ciphertext.toString(CryptoJS.enc.Base64)
+    }
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'BIZ-8821|invoice|up-20260321-k9';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '去看 FormData 里被写入的 bizNo、category、fileToken。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

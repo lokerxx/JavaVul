@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>水平越权场景</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .card { background: #fff; border-radius: 18px; box-shadow: 0 12px 32px rgba(15,23,42,.08); padding: 24px; margin-bottom: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; }
+        button, a.button { display: inline-block; margin-right: 10px; margin-top: 12px; border: 0; border-radius: 999px; background: #14532d; color: #fff; padding: 10px 16px; cursor: pointer; text-decoration: none; }
+        a.button.secondary, button.secondary { background: #475569; }
+        pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 14px; min-height: 220px; overflow: auto; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>水平越权场景</h1>
+        <p>漏洞版只信任客户端传入的 <code>actingUserId</code>；安全版必须使用 <code>X-Logic-Token</code> 校验资料归属。</p>
+        <a class="button secondary" href="/logic-vul">返回首页</a>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <h2>漏洞版</h2>
+            <input id="profileId" value="2">
+            <input id="actingUserId" value="27">
+            <button onclick="callVul()">读取他人资料</button>
+        </div>
+        <div class="card">
+            <h2>安全版</h2>
+            <input id="horizontalToken" placeholder="先获取安全版 token">
+            <button onclick="getSafeToken()">获取安全版 token</button>
+            <button class="secondary" onclick="callSafe()">读取资料</button>
+        </div>
+    </div>
+    <div class="card"><h2>响应结果</h2><pre id="result">等待发送请求...</pre></div>
+</div>
+<script>
+    async function callVul() {
+        const response = await fetch('/api/personal/' + encodeURIComponent(document.getElementById('profileId').value) + '/vul?actingUserId=' + encodeURIComponent(document.getElementById('actingUserId').value));
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+    async function getSafeToken() {
+        const response = await fetch('/auth/login-safe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'frances.goldner', password: '3jwl2i3t6' }) });
+        const data = await response.json();
+        document.getElementById('horizontalToken').value = data.token || '';
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    }
+    async function callSafe() {
+        const response = await fetch('/api/personal/' + encodeURIComponent(document.getElementById('profileId').value) + '/safe', {
+            headers: { 'X-Logic-Token': document.getElementById('horizontalToken').value }
+        });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+</script>
+</body>
+</html>

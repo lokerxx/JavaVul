@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>列表页面</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+</head>
+<body>
+<div id="container">
+    <h1>列表页面</h1>
+    <div id="loading">加载中...</div>
+    <div id="content" style="display: none;">
+        <ul id="itemList"></ul>
+    </div>
+    <div id="error" style="color: red; display: none;"></div>
+</div>
+
+<script>
+    $(document).ready(() => {
+        const url = 'http://localhost:48159/api/items';
+        const secretKey = 'my-secret-key'; // 替换为你的密钥
+
+        // 生成签名
+        const generateSign = (url) => {
+            return CryptoJS.HmacSHA256(url, secretKey).toString();
+        };
+
+        // 添加默认值
+        const addDefaultItems = () => {
+            const defaultItems = [
+                { name: '默认项目 1' },
+                { name: '默认项目 2' },
+                { name: '默认项目 3' }
+            ];
+            defaultItems.forEach(item => {
+                $('#itemList').append(`<li>${item.name}</li>`);
+            });
+        };
+
+        // 检测是否为GitHub Pages环境
+        const isGitHubPages = window.location.hostname.includes('github.io');
+
+        // 模拟请求
+        const fetchData = () => {
+            if (isGitHubPages) {
+                // GitHub Pages环境，使用静态文件
+                $.ajax({
+                    url: 'api/items',
+                    type: 'GET',
+                    success: (response) => {
+                        $('#loading').hide();
+                        $('#content').show();
+                        $('#itemList').empty(); // 清空默认值
+                        response.items.forEach(item => {
+                            $('#itemList').append(`<li>${item.name}</li>`);
+                        });
+                    },
+                    error: (error) => {
+                        $('#loading').hide();
+                        $('#error').text('加载数据失败，显示默认值。').show();
+                        addDefaultItems(); // 显示默认值
+                        console.error('Error:', error);
+                    }
+                });
+            } else {
+                // 本地开发环境，使用动态API
+                const sign = generateSign('/api/items');
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: { sign },
+                    success: (response) => {
+                        $('#loading').hide();
+                        $('#content').show();
+                        $('#itemList').empty(); // 清空默认值
+                        response.items.forEach(item => {
+                            $('#itemList').append(`<li>${item.name}</li>`);
+                        });
+                    },
+                    error: (error) => {
+                        $('#loading').hide();
+                        $('#error').text('加载数据失败，显示默认值。').show();
+                        addDefaultItems(); // 显示默认值
+                        console.error('Error:', error);
+                    }
+                });
+            }
+        };
+
+        addDefaultItems(); // 页面加载时显示默认值
+        fetchData(); // 发起API请求
+    });
+</script>
+</body>
+</html>

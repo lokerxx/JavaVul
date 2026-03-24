@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "message": "消息发送成功",
+  "messageId": "abc123def456",
+  "sender": "Alice",
+  "timestamp": "2025-01-31T13:00:00.000Z",
+  "encryptedContent": "U2FsdGVkX19NsM9dRTZhUSFVUEeQiUKaqo+3uRF/gRwdQUX1CUhPM5e35C2EWeo1",
+  "originalMessage": "这是一条需要加密传输的重要消息！"
+}

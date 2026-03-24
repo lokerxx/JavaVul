@@ -1,0 +1,20 @@
+{
+  "request_id": "REQJKL012INVENTORY",
+  "timestamp": 1738252800,
+  "signature_valid": true,
+  "service_name": "inventory-service",
+  "interceptor_id": "INTINV012",
+  "client_id": "CLIENT_JKL012MNO345",
+  "service_result": {
+    "status": "success",
+    "total_products": 1567,
+    "in_stock": 1456,
+    "out_of_stock": 23,
+    "inventory_data": {
+      "total_value": "3456789.00",
+      "low_stock_alerts": 12,
+      "categories": 34,
+      "warehouses": 6
+    }
+  }
+}

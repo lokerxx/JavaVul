@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>logic_vul Playground</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: linear-gradient(135deg, #f5f3ea, #dce7f7); color: #1f2937; }
+        .shell { max-width: 1180px; margin: 0 auto; padding: 36px 20px 48px; }
+        .hero, .card { background: #fff; border-radius: 18px; box-shadow: 0 10px 30px rgba(15,23,42,.08); }
+        .hero { padding: 28px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+        .card { padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+        h1, h2, p { margin: 0; }
+        code { background: #eef2ff; padding: 2px 6px; border-radius: 6px; }
+        a.button { display: inline-block; width: fit-content; background: #14532d; color: #fff; border-radius: 999px; padding: 10px 16px; text-decoration: none; }
+        a.button.blue { background: #1d4ed8; }
+        .tips { margin-top: 20px; padding: 20px 24px; background: rgba(255,255,255,.78); border-radius: 18px; }
+        ul { margin: 10px 0 0; padding-left: 20px; }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <div class="hero">
+        <h1>logic_vul Playground</h1>
+        <p style="margin-top:12px;">首页现在只负责导航。每一个业务逻辑场景都拆成了独立页面，进入后会在自己的区域里演示漏洞版与安全版。</p>
+        <p style="margin-top:10px;">你也可以直接访问 <code>/logic-vul/info</code> 查看所有演示接口、账号和样例数据。</p>
+    </div>
+
+    <div class="grid">
+        <div class="card"><h2>伪造身份</h2><p>客户端可控 <code>debugUserId</code> 与 <code>bypassPassword</code> 导致认证绕过。</p><a class="button" href="/logic-vul/identity">打开场景</a></div>
+        <div class="card"><h2>水平越权</h2><p>普通用户通过篡改参数读取其他用户资料。</p><a class="button" href="/logic-vul/horizontal">打开场景</a></div>
+        <div class="card"><h2>垂直越权</h2><p>服务端信任客户端角色头，直接返回管理员报表。</p><a class="button" href="/logic-vul/vertical">打开场景</a></div>
+        <div class="card"><h2>流程绕过</h2><p>客户端可篡改金额、支付状态和库存检查参数。</p><a class="button" href="/logic-vul/checkout">打开场景</a></div>
+        <div class="card"><h2>短信验证码逻辑</h2><p>演示验证码回显、未绑定手机号、可复用等问题。</p><a class="button" href="/logic-vul/sms-code">打开场景</a></div>
+        <div class="card"><h2>短信轰炸</h2><p>演示无频控发送与安全版限流的对照。</p><a class="button" href="/logic-vul/sms-bomb">打开场景</a></div>
+        <div class="card"><h2>弱口令登录爆破</h2><p>SQLite 弱口令账号、用户名枚举、无验证码与无锁定。</p><a class="button blue" href="/auth/bruteforce-vul">打开场景</a></div>
+        <div class="card"><h2>图形验证码登录</h2><p>数字字母图形验证码、统一错误提示、失败临时锁定。</p><a class="button blue" href="/auth/bruteforce-safe">打开场景</a></div>
+        <div class="card"><h2>优惠券重复核销</h2><p>一次性优惠券被并发或重复使用。</p><a class="button" href="/logic-vul/coupon">打开场景</a></div>
+        <div class="card"><h2>重复退款</h2><p>缺少幂等键、支付状态和归属校验导致重复退款。</p><a class="button" href="/logic-vul/refund">打开场景</a></div>
+        <div class="card"><h2>折扣叠加</h2><p>优惠券、会员折扣、闪购和积分发生异常叠加。</p><a class="button" href="/logic-vul/discount">打开场景</a></div>
+        <div class="card"><h2>密码重置 Token 复用</h2><p>演示可预测、可复用、未绑定目标账号的重置令牌。</p><a class="button" href="/logic-vul/reset">打开场景</a></div>
+        <div class="card"><h2>审批流跳步</h2><p>客户端直接指定审批结果，跳过服务端流程校验。</p><a class="button" href="/logic-vul/approval">打开场景</a></div>
+        <div class="card"><h2>订单状态机绕过</h2><p>订单从创建态直接跳到完成态，绕过正常流转。</p><a class="button" href="/logic-vul/state-machine">打开场景</a></div>
+    </div>
+
+    <div class="tips">
+        <h2>说明</h2>
+        <ul>
+            <li>每个页面都保留了输入框、示例参数和响应结果区域，方便直接演示。</li>
+            <li>需要安全版 token 的场景，可先在对应页面点击“获取安全版 token”。</li>
+            <li>弱口令登录爆破与图形验证码登录页面已改成中文描述。</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

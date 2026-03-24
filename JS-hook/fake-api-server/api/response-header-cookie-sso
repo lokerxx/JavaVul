@@ -1,0 +1,25 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟响应头加密Cookie",
+  "data": {
+    "session_id": "SESGHI789SSO",
+    "timestamp": 1738252800,
+    "authenticated": true,
+    "service_type": "sso",
+    "client_ip": "192.168.1.100",
+    "sso_result": {
+      "status": "authenticated",
+      "provider": "saml",
+      "user_identifier": "company.com\\user_def456",
+      "domain": "company.com",
+      "service_ticket": "STSSO345678901234"
+    }
+  },
+  "headers": {
+    "x-cookie": "U2FsdGVkX1+0SIsNbJQlTwLXo1SzbzQvYWJjZGVmZ2hpams3NDU2Nzg5MGFiY2RlZmdoaWpr",
+    "x-session-id": "SESGHI789SSO",
+    "x-auth-status": "success",
+    "x-service-type": "sso",
+    "content-type": "application/json"
+  }
+}

@@ -1,0 +1,400 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端协议拆解训练场</title>
+    <meta name="description" content="聚合 JS 逆向、XHR Hook、协议加解密、Protobuf、国密与动态签名的综合训练场。">
+    <style>
+        :root{
+            --bg:#08101f;
+            --panel:rgba(13,23,48,.84);
+            --panel-strong:#121d3b;
+            --line:rgba(148,163,184,.14);
+            --text:#e8eeff;
+            --muted:#9fb0d7;
+            --blue:#5b8cff;
+            --cyan:#38bdf8;
+            --violet:#8b5cf6;
+            --shadow:0 30px 100px rgba(0,0,0,.32);
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            color:var(--text);
+            font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(91,140,255,.18), transparent 28%),
+                radial-gradient(circle at top right, rgba(139,92,246,.18), transparent 25%),
+                linear-gradient(180deg, var(--bg) 0%, #0c1428 100%);
+        }
+        a{color:inherit;text-decoration:none}
+        .wrap{max-width:1240px;margin:0 auto;padding:28px 20px 56px}
+        .panel{
+            background:var(--panel);
+            border:1px solid var(--line);
+            border-radius:24px;
+            box-shadow:var(--shadow);
+            backdrop-filter:blur(16px);
+        }
+        .nav,.hero,.section,.footer{padding:22px 24px}
+        .nav{
+            display:flex;justify-content:space-between;align-items:center;gap:16px;
+            margin-bottom:20px;
+        }
+        .brand{display:flex;align-items:center;gap:14px}
+        .logo{
+            width:44px;height:44px;border-radius:14px;
+            display:grid;place-items:center;
+            background:linear-gradient(135deg,var(--blue),var(--violet));
+            font-weight:800;
+        }
+        .brand h1{margin:0;font-size:18px}
+        .brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+        .nav-links{display:flex;gap:10px;flex-wrap:wrap}
+        .btn,.ghost,.nav-link{
+            display:inline-flex;align-items:center;justify-content:center;
+            min-height:42px;padding:0 16px;border-radius:12px;
+            transition:.2s ease;font-weight:600;
+        }
+        .btn{
+            color:#fff;background:linear-gradient(135deg,var(--blue),var(--violet));
+            box-shadow:0 14px 28px rgba(91,140,255,.24);
+        }
+        .ghost,.nav-link{
+            color:var(--muted);
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(148,163,184,.12);
+        }
+        .btn:hover,.ghost:hover,.nav-link:hover{transform:translateY(-1px);color:var(--text)}
+        .hero{position:relative;overflow:hidden}
+        .hero::after{
+            content:"";
+            position:absolute;right:-90px;bottom:-120px;
+            width:320px;height:320px;border-radius:50%;
+            background:radial-gradient(circle, rgba(56,189,248,.24), transparent 65%);
+        }
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.25fr .95fr;
+            gap:24px;
+            position:relative;
+            z-index:1;
+        }
+        .eyebrow{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:7px 12px;border-radius:999px;
+            color:#dce6ff;background:rgba(91,140,255,.14);
+            border:1px solid rgba(91,140,255,.24);
+            font-size:13px;margin-bottom:16px;
+        }
+        .hero h2{
+            margin:0 0 14px;
+            font-size:46px;line-height:1.08;letter-spacing:-.02em;
+        }
+        .hero p{margin:0;color:var(--muted);line-height:1.85;font-size:16px}
+        .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+        .stats{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:14px;
+        }
+        .stat{
+            padding:18px;border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(148,163,184,.12);
+        }
+        .stat strong{display:block;font-size:28px;margin-bottom:6px}
+        .stat span{color:var(--muted);font-size:13px}
+        .tip{
+            margin-top:14px;padding:18px;border-radius:18px;
+            background:linear-gradient(180deg, rgba(56,189,248,.08), rgba(91,140,255,.02));
+            border:1px solid rgba(56,189,248,.14);
+        }
+        .tip h3{margin:0 0 10px;font-size:16px}
+        .tip ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.8}
+        .section{margin-top:20px}
+        .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px}
+        .section-head h3{margin:0 0 8px;font-size:28px}
+        .section-head p{margin:0;color:var(--muted);line-height:1.75}
+        .grid-3,.grid-4,.featured-grid{display:grid;gap:16px}
+        .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+        .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+        .featured-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+        .card,.featured-card{
+            background:var(--panel-strong);
+            border:1px solid rgba(148,163,184,.12);
+            border-radius:20px;
+            padding:20px;
+        }
+        .card h4,.featured-card h4{margin:0 0 8px;font-size:20px}
+        .card p,.featured-card p{margin:0;color:var(--muted);line-height:1.75}
+        .track-top,.featured-top{
+            display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+            margin-bottom:14px;
+        }
+        .icon{
+            width:44px;height:44px;border-radius:14px;
+            display:grid;place-items:center;background:rgba(255,255,255,.06);
+            font-size:20px;
+        }
+        .pill,.mini{
+            display:inline-flex;align-items:center;
+            border-radius:999px;font-size:12px;
+        }
+        .pill{
+            padding:5px 10px;background:rgba(91,140,255,.12);
+            border:1px solid rgba(91,140,255,.2);color:#dce6ff;
+        }
+        .mini{padding:5px 9px;background:rgba(255,255,255,.04);color:var(--muted)}
+        .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+        .link{display:inline-flex;align-items:center;gap:8px;margin-top:16px;color:#dce6ff;font-weight:600}
+        .footer{
+            margin-top:20px;
+            display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+            color:var(--muted);
+        }
+        .empty{padding:18px;border-radius:16px;background:rgba(255,255,255,.04);color:var(--muted)}
+        @media (max-width: 1024px){
+            .hero-grid,.grid-3,.grid-4,.featured-grid{grid-template-columns:1fr 1fr}
+        }
+        @media (max-width: 768px){
+            .nav,.section-head,.footer{flex-direction:column;align-items:flex-start}
+            .hero-grid,.grid-3,.grid-4,.featured-grid,.stats{grid-template-columns:1fr}
+            .hero h2{font-size:34px}
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="panel nav">
+        <div class="brand">
+            <div class="logo">JS</div>
+            <div>
+                <h1>前端协议拆解训练场</h1>
+                <p>面向 JS 逆向、Hook 调试、协议分析与加解密实战</p>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a class="nav-link" href="#tracks">训练分区</a>
+            <a class="nav-link" href="#featured">精选题目</a>
+            <a class="nav-link" href="admin.html">后台</a>
+            <a class="btn" href="js-labs.html">进入题库</a>
+        </div>
+    </section>
+
+    <section class="panel hero">
+        <div class="hero-grid">
+            <div>
+                <div class="eyebrow">综合训练 · Spring Boot 版本入口</div>
+                <h2>把 JS 混淆、Hook 与协议拆解放进一个统一靶场</h2>
+                <p>
+                    这里聚合了三条核心训练线：前端逆向、接口协议拆解、XHR / Fetch Hook 实战。
+                    我们已经把常见题型基本铺满，下一阶段重点会放在后台管理、判题、做题记录和微服务网关联动上。
+                </p>
+                <div class="actions">
+                    <a class="btn" href="js-labs.html">打开题库总入口</a>
+                    <a class="ghost" href="#roadmap">查看当前缺口</a>
+                </div>
+            </div>
+            <div>
+                <div class="stats">
+                    <div class="stat">
+                        <strong id="totalCount">--</strong>
+                        <span>当前题目总数</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="trackCount">3</strong>
+                        <span>训练分区</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="apiCount">--</strong>
+                        <span>接口联动题</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="advancedCount">--</strong>
+                        <span>高阶题数量</span>
+                    </div>
+                </div>
+                <div class="tip">
+                    <h3>推荐上手顺序</h3>
+                    <ul>
+                        <li>先走 `JS 逆向训练`，熟悉 payload、反调试与 source map 缺失定位。</li>
+                        <li>再走 `协议与加解密`，补齐 AES、RSA、SM2、SM4 等常见协议拆包。</li>
+                        <li>最后进入 `XHR / Hook 实战`，在真实请求链路里练习签名、加密与解包。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel section" id="tracks">
+        <div class="section-head">
+            <div>
+                <h3>训练分区</h3>
+                <p>三条分区覆盖主流前端逆向题型、协议拆包题型与接口联动题型。</p>
+            </div>
+        </div>
+        <div class="grid-3">
+            <article class="card">
+                <div class="track-top">
+                    <div class="icon">🧠</div>
+                    <span class="pill">JS 逆向训练</span>
+                </div>
+                <h4>从代码还原到运行时追踪</h4>
+                <p>覆盖动态执行、字符串数组、控制流平坦化、JSFuck、反调试、动态签名与无 source map 定位。</p>
+                <div class="meta">
+                    <span class="mini">偏静态分析</span>
+                    <span class="mini" id="reverseCount">-- 题</span>
+                </div>
+                <a class="link" href="js-labs.html#js-reverse">查看分区 →</a>
+            </article>
+            <article class="card">
+                <div class="track-top">
+                    <div class="icon">🔐</div>
+                    <span class="pill">协议与加解密</span>
+                </div>
+                <h4>算法题面基本齐全</h4>
+                <p>覆盖 AES-CBC / ECB / GCM、AES-RSA、RSA、DES、3DES、SM2、SM4、SM2+SM4 以及多种传输形态。</p>
+                <div class="meta">
+                    <span class="mini">偏协议拆包</span>
+                    <span class="mini" id="protocolCount">-- 题</span>
+                </div>
+                <a class="link" href="js-labs.html#protocol">查看分区 →</a>
+            </article>
+            <article class="card">
+                <div class="track-top">
+                    <div class="icon">🪝</div>
+                    <span class="pill">XHR / Hook 实战</span>
+                </div>
+                <h4>更贴近真实前端接口链路</h4>
+                <p>包含 query、form、JSON、header、cookie、Hex、Protobuf、拦截器、视频分片等经典 Hook 题。</p>
+                <div class="meta">
+                    <span class="mini">接口联动</span>
+                    <span class="mini" id="xhrCount">-- 题</span>
+                </div>
+                <a class="link" href="js-labs.html#xhr-hook">查看分区 →</a>
+            </article>
+        </div>
+    </section>
+
+    <section class="panel section" id="featured">
+        <div class="section-head">
+            <div>
+                <h3>精选题目</h3>
+                <p>挑了几道更贴近实战的题，方便快速验证当前题型覆盖面。</p>
+            </div>
+        </div>
+        <div class="featured-grid" id="featuredGrid">
+            <div class="empty">题库加载中…</div>
+        </div>
+    </section>
+
+    <section class="panel section" id="roadmap">
+        <div class="section-head">
+            <div>
+                <h3>下一阶段缺口</h3>
+                <p>题型大类已经基本齐了，后面重点是把“题目集合”升级成“可运营靶场平台”。</p>
+            </div>
+        </div>
+        <div class="grid-4">
+            <article class="card">
+                <h4>后台管理</h4>
+                <p>补题目增删改、难度管理、标签管理、答案开关与题目发布流程。</p>
+            </article>
+            <article class="card">
+                <h4>统一判题</h4>
+                <p>校验是否真正拿到明文、复现 sign 或定位到关键 Hook 点，而不只是静态浏览题面。</p>
+            </article>
+            <article class="card">
+                <h4>做题记录</h4>
+                <p>接入 SQLite 持久化提交历史、学习进度；后续再按需要补 Redis 做 nonce 与重放窗口。</p>
+            </article>
+            <article class="card">
+                <h4>网关联动</h4>
+                <p>补 Spring Cloud Gateway、业务服务与真实业务流，向完整链路靶场靠拢。</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="panel footer">
+        <div>当前入口：`/` 与 `js-labs.html`</div>
+        <div>建议优先从 `js-labs.html` 开始浏览全部题目</div>
+    </section>
+</div>
+
+<script>
+const featuredIds = [
+  'anti-debug-plus',
+  'dynamic-sign-live',
+  'aes-gcm-bidirectional',
+  'sm2-sm4-hybrid',
+  'bidirectional-protobuf',
+  'video-segment-encryption'
+];
+
+const trackLabels = {
+  'js-reverse': 'JS 逆向训练',
+  'protocol': '协议与加解密',
+  'xhr-hook': 'XHR / Hook 实战'
+};
+
+const difficultyLabels = {
+  'beginner': '入门',
+  'intermediate': '进阶',
+  'advanced': '高阶'
+};
+
+const modeLabels = {
+  'static-analysis': '静态分析',
+  'lab-page': '训练页',
+  'api-backed': '接口联动'
+};
+
+function setSummary(items){
+  const byTrack = items.reduce((acc, item) => {
+    acc[item.trackKey] = (acc[item.trackKey] || 0) + 1;
+    return acc;
+  }, {});
+  document.getElementById('totalCount').textContent = String(items.length);
+  document.getElementById('apiCount').textContent = String(items.filter(item => item.mode === '接口联动').length);
+  document.getElementById('advancedCount').textContent = String(items.filter(item => item.difficulty === '高阶').length);
+  document.getElementById('reverseCount').textContent = `${byTrack['js-reverse'] || 0} 题`;
+  document.getElementById('protocolCount').textContent = `${byTrack['protocol'] || 0} 题`;
+  document.getElementById('xhrCount').textContent = `${byTrack['xhr-hook'] || 0} 题`;
+}
+
+function renderFeatured(items){
+  const featured = featuredIds
+    .map(id => items.find(item => item.id === id))
+    .filter(Boolean);
+  const html = featured.map(item => `
+    <article class="featured-card">
+      <div class="featured-top">
+        <span class="pill">${trackLabels[item.trackKey] || item.trackKey}</span>
+        <span class="mini">${difficultyLabels[item.difficulty] || item.difficulty}</span>
+      </div>
+      <h4>${item.title}</h4>
+      <p>${item.summary}</p>
+      <div class="meta">
+        <span class="mini">${item.topic}</span>
+        <span class="mini">${modeLabels[item.mode] || item.mode}</span>
+      </div>
+      <a class="link" href="${item.href}">进入题目 →</a>
+    </article>
+  `).join('');
+  document.getElementById('featuredGrid').innerHTML = html || '<div class="empty">暂无可展示题目。</div>';
+}
+
+fetch('labs/challenges.json')
+  .then(resp => resp.json())
+  .then(items => {
+    setSummary(items);
+    renderFeatured(items);
+  })
+  .catch(() => {
+    document.getElementById('featuredGrid').innerHTML = '<div class="empty">题库清单加载失败，请检查 `labs/challenges.json`。</div>';
+  });
+</script>
+</body>
+</html>

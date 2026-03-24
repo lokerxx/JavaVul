@@ -1,0 +1,9 @@
+version: '3'
+services:
+  js-hook:
+    image: wushangleon/js-hook
+    build:
+      context: .
+      dockerfile: Dockerfile_local
+    ports:
+      - "48159:8080"

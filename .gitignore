@@ -37,3 +37,5 @@ base_vul/base_vul.iml
 collections/collections.iml
 CVE-2019-10173/CVE-2019-10173.iml
 CVE-2019-12384/CVE-2019-12384.iml
+node_modules/
+/.m2

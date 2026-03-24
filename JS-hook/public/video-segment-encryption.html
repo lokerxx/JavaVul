@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Segment Encryption</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+        .video-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .video-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .video-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+        .video-card.loading {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+        .video-card.success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .video-card.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        .video-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .video-card p {
+            color: #7f8c8d;
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .video-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .video-info {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+        .video-status {
+            font-weight: bold;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin-top: 10px;
+        }
+        .status-pending {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+        .status-loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .control-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .control-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .control-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        .control-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .control-btn.secondary {
+            background: #6c757d;
+        }
+        .control-btn.danger {
+            background: #dc3545;
+        }
+        .control-btn.success {
+            background: #28a745;
+        }
+        .player-container {
+            background: #000;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .player-placeholder {
+            font-size: 18px;
+            color: #ccc;
+        }
+        .segment-list {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .segment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #f1f3f4;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .segment-item:last-child {
+            border-bottom: none;
+        }
+        .segment-item.encrypted {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .segment-item.decrypted {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .segment-item.error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .segment-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .segment-status {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .stats-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+        .stats-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .stats-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+        }
+        .step-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        .code-content {
+            color: #e74c3c;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .json-content {
+            color: #27ae60;
+            white-space: pre-wrap;
+        }
+        .video-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .flow-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 5px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>流媒体加密平台</h1>
+            <p>Video Segment Encryption Case - 加密视频片段处理</p>
+        </div>
+
+        <div class="video-section">
+            <h2 class="section-title">🎬 视频内容库</h2>
+            
+            <div class="player-container">
+                <div class="player-placeholder" id="playerPlaceholder">
+                    🎥 选择视频内容开始播放
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <div class="control-row">
+                    <button class="control-btn" id="loadAllSegments">📥 加载所有片段</button>
+                    <button class="control-btn secondary" id="decryptSegments">🔓 解密片段</button>
+                    <button class="control-btn success" id="playVideo">▶️ 播放视频</button>
+                    <button class="control-btn danger" id="clearSegments">🗑️ 清空片段</button>
+                </div>
+                <div class="control-row">
+                    <button class="control-btn" id="loadSingleSegment">🎯 单片段测试</button>
+                    <button class="control-btn" id="simulateStreaming">📡 模拟流式加载</button>
+                    <button class="control-btn" id="testEncryption">🔐 测试加密</button>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stats-row">
+                    <span class="stats-label">总片段数:</span>
+                    <span class="stats-value" id="totalSegments">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">已加载:</span>
+                    <span class="stats-value" id="loadedSegments">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">已解密:</span>
+                    <span class="stats-value" id="decryptedSegments">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">解密进度:</span>
+                    <span class="stats-value" id="decryptionProgress">0%</span>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <h3 class="section-title">🎞️ 视频内容选择</h3>
+            <div class="video-grid">
+                <div class="video-card" data-video="movie-action">
+                    <span class="video-icon">🎬</span>
+                    <h3>动作电影</h3>
+                    <p>高清动作大片，包含多个加密片段</p>
+                    <div class="video-info">时长: 120分钟 | 分辨率: 1080p | 片段: 240个</div>
+                    <div class="video-status status-pending">待加载</div>
+                </div>
+                <div class="video-card" data-video="series-drama">
+                    <span class="video-icon">📺</span>
+                    <h3>电视剧集</h3>
+                    <p>热门电视剧，分集加密存储</p>
+                    <div class="video-info">时长: 45分钟 | 分辨率: 720p | 片段: 90个</div>
+                    <div class="video-status status-pending">待加载</div>
+                </div>
+                <div class="video-card" data-video="documentary">
+                    <span class="video-icon">🌍</span>
+                    <h3>纪录片</h3>
+                    <p>自然纪录片，4K超高清画质</p>
+                    <div class="video-info">时长: 90分钟 | 分辨率: 4K | 片段: 180个</div>
+                    <div class="video-status status-pending">待加载</div>
+                </div>
+                <div class="video-card" data-video="live-stream">
+                    <span class="video-icon">📡</span>
+                    <h3>直播流</h3>
+                    <p>实时直播内容，动态加密</p>
+                    <div class="video-info">实时流 | 分辨率: 1080p | 动态片段</div>
+                    <div class="video-status status-pending">待加载</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="segment-list" id="segmentList">
+            <h4>📋 视频片段列表</h4>
+            <div class="segment-item">
+                <span class="segment-name">等待选择视频内容...</span>
+                <span class="segment-status status-pending">待选择</span>
+            </div>
+        </div>
+
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            let selectedVideo = null;
+            let videoSegments = [];
+            let loadedSegments = 0;
+            let decryptedSegments = 0;
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 视频配置
+            const videoConfigs = {
+                'movie-action': {
+                    title: '动作电影 - 速度与激情',
+                    duration: 120,
+                    resolution: '1080p',
+                    segmentCount: 240,
+                    segmentDuration: 30,
+                    encryptionKey: 'movie-action-key-2025'
+                },
+                'series-drama': {
+                    title: '电视剧集 - 权力的游戏',
+                    duration: 45,
+                    resolution: '720p',
+                    segmentCount: 90,
+                    segmentDuration: 30,
+                    encryptionKey: 'series-drama-key-2025'
+                },
+                'documentary': {
+                    title: '纪录片 - 地球脉动',
+                    duration: 90,
+                    resolution: '4K',
+                    segmentCount: 180,
+                    segmentDuration: 30,
+                    encryptionKey: 'documentary-key-2025'
+                },
+                'live-stream': {
+                    title: '直播流 - 新闻频道',
+                    duration: 0,
+                    resolution: '1080p',
+                    segmentCount: 20,
+                    segmentDuration: 10,
+                    encryptionKey: 'live-stream-key-2025'
+                }
+            };
+            
+            // 处理视频选择
+            $('.video-card').on('click', function() {
+                $('.video-card').removeClass('loading success error');
+                $('.video-card .video-status').removeClass('status-loading status-success status-error').addClass('status-pending').text('待加载');
+                
+                $(this).addClass('loading');
+                $(this).find('.video-status').removeClass('status-pending').addClass('status-loading').html('加载中 <span class="loading-spinner"></span>');
+                
+                selectedVideo = $(this).data('video');
+                const config = videoConfigs[selectedVideo];
+                
+                $('#playerPlaceholder').text(`🎥 ${config.title} - 准备加载加密片段`);
+                
+                // 生成视频片段
+                generateVideoSegments(config);
+                
+                setTimeout(() => {
+                    $(this).removeClass('loading').addClass('success');
+                    $(this).find('.video-status').removeClass('status-loading').addClass('status-success').text('已选择');
+                    updateStats();
+                }, 1000);
+            });
+            
+            // 生成视频片段
+            function generateVideoSegments(config) {
+                videoSegments = [];
+                loadedSegments = 0;
+                decryptedSegments = 0;
+                
+                for (let i = 0; i < config.segmentCount; i++) {
+                    const segment = {
+                        id: i,
+                        name: `segment_${i.toString().padStart(3, '0')}.ts`,
+                        startTime: i * config.segmentDuration,
+                        duration: config.segmentDuration,
+                        encrypted: true,
+                        decrypted: false,
+                        encryptionKey: config.encryptionKey,
+                        url: `/api/video-segment/${selectedVideo}/${i}`,
+                        size: Math.floor(Math.random() * 500000) + 100000, // 100KB-600KB
+                        status: 'pending'
+                    };
+                    videoSegments.push(segment);
+                }
+                
+                updateSegmentList();
+                updateStats();
+            }
+            
+            // 更新片段列表显示
+            function updateSegmentList() {
+                const segmentList = $('#segmentList');
+                let html = '<h4>📋 视频片段列表</h4>';
+                
+                if (videoSegments.length === 0) {
+                    html += '<div class="segment-item"><span class="segment-name">等待选择视频内容...</span><span class="segment-status status-pending">待选择</span></div>';
+                } else {
+                    const displaySegments = videoSegments.slice(0, 20); // 只显示前20个
+                    displaySegments.forEach(segment => {
+                        let cssClass = 'segment-item';
+                        let statusClass = 'segment-status status-pending';
+                        let statusText = '待加载';
+                        
+                        if (segment.status === 'loading') {
+                            cssClass += ' encrypted';
+                            statusClass = 'segment-status status-loading';
+                            statusText = '加载中';
+                        } else if (segment.status === 'loaded') {
+                            cssClass += ' encrypted';
+                            statusClass = 'segment-status status-loading';
+                            statusText = '已加载(加密)';
+                        } else if (segment.status === 'decrypted') {
+                            cssClass += ' decrypted';
+                            statusClass = 'segment-status status-success';
+                            statusText = '已解密';
+                        } else if (segment.status === 'error') {
+                            cssClass += ' error';
+                            statusClass = 'segment-status status-error';
+                            statusText = '错误';
+                        }
+                        
+                        html += `
+                            <div class="${cssClass}">
+                                <span class="segment-name">${segment.name} (${(segment.size/1024).toFixed(1)}KB)</span>
+                                <span class="${statusClass}">${statusText}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    if (videoSegments.length > 20) {
+                        html += `<div class="segment-item"><span class="segment-name">... 还有 ${videoSegments.length - 20} 个片段</span><span class="segment-status">省略显示</span></div>`;
+                    }
+                }
+                
+                segmentList.html(html);
+            }
+            
+            // 更新统计信息
+            function updateStats() {
+                $('#totalSegments').text(videoSegments.length);
+                $('#loadedSegments').text(loadedSegments);
+                $('#decryptedSegments').text(decryptedSegments);
+                
+                const progress = videoSegments.length > 0 ? ((decryptedSegments / videoSegments.length) * 100).toFixed(1) : 0;
+                $('#decryptionProgress').text(progress + '%');
+                $('#progressFill').css('width', progress + '%');
+            }
+            
+            // 加载视频片段
+            async function loadVideoSegment(segment) {
+                segment.status = 'loading';
+                updateSegmentList();
+                
+                try {
+                    let apiUrl;
+                    if (isGitHubPages) {
+                        apiUrl = `api/video-segment-${selectedVideo}-${segment.id}`;
+                    } else {
+                        apiUrl = `http://localhost:48159/api/video-segment/${selectedVideo}/${segment.id}`;
+                    }
+                    
+                    const response = await fetch(apiUrl);
+                    
+                    if (response.ok) {
+                        const segmentData = await response.json();
+                        segment.encryptedData = segmentData.encrypted_data;
+                        segment.iv = segmentData.iv;
+                        segment.status = 'loaded';
+                        loadedSegments++;
+                        
+                        updateSegmentList();
+                        updateStats();
+                        return true;
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                } catch (error) {
+                    segment.status = 'error';
+                    updateSegmentList();
+                    console.error('片段加载失败:', error);
+                    return false;
+                }
+            }
+            
+            // 解密视频片段
+            function decryptVideoSegment(segment) {
+                try {
+                    if (!segment.encryptedData || !segment.iv) {
+                        throw new Error('缺少加密数据或IV');
+                    }
+                    
+                    // 使用AES解密
+                    const key = CryptoJS.enc.Utf8.parse(segment.encryptionKey);
+                    const iv = CryptoJS.enc.Hex.parse(segment.iv);
+                    
+                    const decrypted = CryptoJS.AES.decrypt(segment.encryptedData, key, {
+                        iv: iv,
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+                    
+                    segment.decryptedData = decrypted.toString(CryptoJS.enc.Base64);
+                    segment.status = 'decrypted';
+                    segment.decrypted = true;
+                    decryptedSegments++;
+                    
+                    updateSegmentList();
+                    updateStats();
+                    return true;
+                } catch (error) {
+                    segment.status = 'error';
+                    updateSegmentList();
+                    console.error('片段解密失败:', error);
+                    return false;
+                }
+            }
+            
+            // 控制按钮事件
+            $('#loadAllSegments').on('click', async () => {
+                if (!selectedVideo || videoSegments.length === 0) {
+                    alert('请先选择视频内容');
+                    return;
+                }
+                
+                $('#playerPlaceholder').text('🔄 正在加载所有加密片段...');
+                
+                for (const segment of videoSegments) {
+                    if (segment.status === 'pending') {
+                        await loadVideoSegment(segment);
+                        await new Promise(resolve => setTimeout(resolve, 50)); // 间隔50ms
+                    }
+                }
+                
+                $('#playerPlaceholder').text(`✅ 已加载 ${loadedSegments} 个加密片段`);
+            });
+            
+            $('#decryptSegments').on('click', () => {
+                if (loadedSegments === 0) {
+                    alert('请先加载视频片段');
+                    return;
+                }
+                
+                $('#playerPlaceholder').text('🔓 正在解密视频片段...');
+                
+                videoSegments.forEach(segment => {
+                    if (segment.status === 'loaded') {
+                        decryptVideoSegment(segment);
+                    }
+                });
+                
+                $('#playerPlaceholder').text(`🎥 已解密 ${decryptedSegments} 个视频片段，可以播放`);
+            });
+            
+            $('#playVideo').on('click', () => {
+                if (decryptedSegments === 0) {
+                    alert('请先解密视频片段');
+                    return;
+                }
+                
+                const config = videoConfigs[selectedVideo];
+                $('#playerPlaceholder').html(`
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; margin-bottom: 10px;">▶️ 正在播放</div>
+                        <div style="font-size: 18px; color: #28a745;">${config.title}</div>
+                        <div style="font-size: 14px; margin-top: 10px;">
+                            ${decryptedSegments}/${videoSegments.length} 片段已解密 | ${config.resolution} | ${config.duration > 0 ? config.duration + '分钟' : '直播'}
+                        </div>
+                    </div>
+                `);
+            });
+            
+            $('#clearSegments').on('click', () => {
+                videoSegments = [];
+                loadedSegments = 0;
+                decryptedSegments = 0;
+                selectedVideo = null;
+                
+                $('.video-card').removeClass('loading success error');
+                $('.video-card .video-status').removeClass('status-loading status-success status-error').addClass('status-pending').text('待加载');
+                
+                $('#playerPlaceholder').text('🎥 选择视频内容开始播放');
+                updateSegmentList();
+                updateStats();
+            });
+            
+            $('#loadSingleSegment').on('click', async () => {
+                if (!selectedVideo || videoSegments.length === 0) {
+                    alert('请先选择视频内容');
+                    return;
+                }
+                
+                const pendingSegments = videoSegments.filter(s => s.status === 'pending');
+                if (pendingSegments.length === 0) {
+                    alert('所有片段已加载');
+                    return;
+                }
+                
+                const randomSegment = pendingSegments[Math.floor(Math.random() * pendingSegments.length)];
+                await loadVideoSegment(randomSegment);
+                
+                if (randomSegment.status === 'loaded') {
+                    decryptVideoSegment(randomSegment);
+                }
+            });
+            
+            $('#simulateStreaming').on('click', async () => {
+                if (!selectedVideo || videoSegments.length === 0) {
+                    alert('请先选择视频内容');
+                    return;
+                }
+                
+                $('#playerPlaceholder').text('📡 模拟流式加载...');
+                
+                // 模拟流式加载前10个片段
+                for (let i = 0; i < Math.min(10, videoSegments.length); i++) {
+                    const segment = videoSegments[i];
+                    if (segment.status === 'pending') {
+                        await loadVideoSegment(segment);
+                        if (segment.status === 'loaded') {
+                            decryptVideoSegment(segment);
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 200)); // 间隔200ms
+                    }
+                }
+                
+                $('#playerPlaceholder').text('📡 流式加载完成，可以开始播放');
+            });
+            
+            $('#testEncryption').on('click', () => {
+                showDebugInfo();
+            });
+            
+            // 显示调试信息
+            function showDebugInfo() {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - 加密视频片段处理过程</div>
+                    
+                    <div class="video-flow">
+                        <div class="flow-step">视频分段</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">AES加密</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">片段存储</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">客户端请求</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">片段解密</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">视频播放</div>
+                    </div>
+                    
+                    <div class="step-title">🎬 视频加密流程</div>
+                    <div class="step-block">
+                        <div class="step-title">1. 视频分段 (HLS/DASH):</div>
+                        <div class="code-content">原始视频 → 30秒片段 → .ts文件格式</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">2. AES-128-CBC加密:</div>
+                        <div class="code-content">每个片段使用独立的IV + 共享密钥进行AES加密</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">3. 客户端解密:</div>
+                        <div class="code-content">获取加密片段 → 使用密钥和IV解密 → 重组视频流</div>
+                    </div>
+                    
+                    ${selectedVideo ? `
+                    <div class="step-title">📊 当前视频信息</div>
+                    <div class="step-block">
+                        <div class="step-title">视频配置:</div>
+                        <div class="json-content">${JSON.stringify(videoConfigs[selectedVideo], null, 2)}</div>
+                    </div>
+                    ` : ''}
+                    
+                    ${videoSegments.length > 0 ? `
+                    <div class="step-title">🎞️ 片段示例</div>
+                    <div class="step-block">
+                        <div class="step-title">第一个片段信息:</div>
+                        <div class="json-content">${JSON.stringify({
+                            name: videoSegments[0].name,
+                            startTime: videoSegments[0].startTime,
+                            duration: videoSegments[0].duration,
+                            encrypted: videoSegments[0].encrypted,
+                            status: videoSegments[0].status,
+                            size: videoSegments[0].size
+                        }, null, 2)}</div>
+                    </div>
+                    ` : ''}
+                    
+                    <strong>🔧 视频加密优势:</strong><br>
+                    • 保护视频内容版权，防止盗版和非法下载<br>
+                    • 支持DRM数字版权管理，确保内容安全<br>
+                    • 分段加密降低解密复杂度，提升播放性能<br>
+                    • 支持自适应码率流，根据网络条件调整画质<br>
+                    • 广泛应用于Netflix、YouTube等流媒体平台<br>
+                    • 符合HLS、DASH等现代流媒体标准
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            }
+            
+            // 初始化
+            showDebugInfo();
+            
+            // 3秒后自动选择第一个视频进行演示
+            setTimeout(() => {
+                $('.video-card').first().click();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>流程绕过场景</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .card { background: #fff; border-radius: 18px; box-shadow: 0 12px 32px rgba(15,23,42,.08); padding: 24px; margin-bottom: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        input, textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; }
+        textarea { min-height: 120px; }
+        button, a.button { display: inline-block; margin-right: 10px; margin-top: 12px; border: 0; border-radius: 999px; background: #14532d; color: #fff; padding: 10px 16px; cursor: pointer; text-decoration: none; }
+        a.button.secondary, button.secondary { background: #475569; }
+        pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 14px; min-height: 220px; overflow: auto; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>流程绕过场景</h1>
+        <p>漏洞版会信任客户端提供的金额、支付状态和库存检查参数；安全版必须校验 token、库存锁定和支付流水号。</p>
+        <a class="button secondary" href="/logic-vul">返回首页</a>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <h2>漏洞版</h2>
+            <input id="orderId" value="5002">
+            <input id="checkoutActingUserId" value="27">
+            <textarea id="checkoutBody">{ "clientTotal": 0.01, "markAsPaid": true, "skipInventoryCheck": true }</textarea>
+            <button onclick="callCheckoutVul()">执行漏洞版</button>
+        </div>
+        <div class="card">
+            <h2>安全版</h2>
+            <input id="checkoutToken" placeholder="先获取安全版 token">
+            <textarea id="checkoutSafeBody">{ "paymentReference": "PAY-DEMO-20260321" }</textarea>
+            <button onclick="getCheckoutToken()">获取安全版 token</button>
+            <button class="secondary" onclick="callCheckoutSafe()">执行安全版</button>
+        </div>
+    </div>
+    <div class="card"><h2>响应结果</h2><pre id="result">等待发送请求...</pre></div>
+</div>
+<script>
+    async function callCheckoutVul() {
+        const response = await fetch('/api/orders/' + encodeURIComponent(document.getElementById('orderId').value) + '/checkout/vul?actingUserId=' + encodeURIComponent(document.getElementById('checkoutActingUserId').value), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: document.getElementById('checkoutBody').value
+        });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+    async function getCheckoutToken() {
+        const response = await fetch('/auth/login-safe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'man.hackett', password: 'oikihbi4xb' }) });
+        const data = await response.json();
+        document.getElementById('checkoutToken').value = data.token || '';
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    }
+    async function callCheckoutSafe() {
+        const response = await fetch('/api/orders/' + encodeURIComponent(document.getElementById('orderId').value) + '/checkout/safe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Logic-Token': document.getElementById('checkoutToken').value },
+            body: document.getElementById('checkoutSafeBody').value
+        });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+</script>
+</body>
+</html>

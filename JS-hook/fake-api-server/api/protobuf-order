@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟 Protocol Buffers 响应",
+  "data": {
+    "request_id": "ghi789",
+    "timestamp": 1738252800,
+    "success": true,
+    "message": "订单 ORD789GHI 处理成功",
+    "code": 200,
+    "order_info": {
+      "order_id": "ORD789GHI",
+      "customer_name": "李四",
+      "customer_email": "lisi@example.com",
+      "products": [{
+        "name": "智能手机",
+        "price": 2999.99,
+        "category": "electronics",
+        "brand": "TechBrand",
+        "stock": 1
+      }],
+      "total_amount": 5999.98,
+      "status": "confirmed",
+      "created_at": 1738252800,
+      "shipping_address": "上海市浦东新区张江高科技园区",
+      "payment_method": "credit_card"
+    }
+  }
+}

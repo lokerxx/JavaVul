@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "message": "用户信息提交成功",
+  "userId": 12345,
+  "submitTime": "2025-01-31T12:30:00.000Z",
+  "status": "已处理",
+  "decryptedData": {
+    "phone": "13800138000",
+    "idCard": "110101********1234",
+    "bankCard": "6222****0123"
+  },
+  "userInfo": {
+    "name": "张三",
+    "email": "zhangsan@example.com",
+    "city": "beijing",
+    "age": 25,
+    "remarks": "用户信息提交测试"
+  }
+}

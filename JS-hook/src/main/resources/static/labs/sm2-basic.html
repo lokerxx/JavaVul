@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SM2 Basic Envelope</title>
+    <style>
+        body{margin:0;font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0}
+        .wrap{max-width:1180px;margin:0 auto;padding:24px}
+        .card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .back{display:inline-block;color:#93c5fd;text-decoration:none;margin-bottom:12px}
+        .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#172554;color:#dbeafe;font-size:12px}
+        pre,input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #334155;background:#111827;color:#e2e8f0;padding:14px;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+        .ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <section class="card">
+        <a class="back" href="../js-labs.html">← 返回题库</a>
+        <h1>SM2 Basic Envelope</h1>
+        <p>目标：补国密非对称加密题。由于当前页面没有额外引入国密算法库，这里把 SM2 运算做成 mock，但保留公钥、明文 JSON、封包格式和国密字段命名习惯。</p>
+        <div class="chips">
+            <span class="chip">参考方向：GalaxyDemo / Sm2</span>
+            <span class="chip">技术点：SM2 / 国密公钥封包</span>
+            <span class="chip">推荐动作：Hook sm2Encrypt 前的明文串</span>
+        </div>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>运行时代码片段</h2>
+<pre>const publicKey = '04f2d1...sm2-demo-public-key...73ac';
+function sm2EncryptMock(body) {
+  const plain = JSON.stringify(body);
+  const core = btoa(publicKey.slice(0, 16) + '|' + plain).replace(/=/g, '');
+  return '04' + core.split('').reverse().join('') + 'c3c2';
+}</pre>
+        </section>
+
+        <section class="card">
+            <h2>模拟流量</h2>
+            <pre id="packet">正在生成...</pre>
+            <div style="margin-top:12px"><button onclick="renderPacket()">重新生成</button></div>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>提交答案</h2>
+        <p>请提交关键字段，格式：<code>customerId|scene|amount</code></p>
+        <input id="answer" placeholder="例如：c-9007|contract.sign|1314">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </section>
+
+    <section class="card">
+        <h2>解题提示</h2>
+        <ol>
+            <li>这题想让你熟悉的是“国密封包长什么样”，不是实现 SM2 数学细节。</li>
+            <li>实战里常见库有 <code>sm-crypto</code>、wasm 包装或客户端原生桥接。</li>
+            <li>先找谁在拼明文，再看谁在调用国密加密入口。</li>
+        </ol>
+    </section>
+</div>
+
+<script>
+const payload = Object.freeze({
+  customerId: 'c-9007',
+  scene: 'contract.sign',
+  amount: 1314,
+  tenant: 'acme-gm'
+});
+
+function sm2EncryptMock(body){
+  const publicKey = '04f2d1...sm2-demo-public-key...73ac';
+  const plain = JSON.stringify(body);
+  const core = btoa(publicKey.slice(0, 16) + '|' + plain).replace(/=/g, '');
+  return '04' + core.split('').reverse().join('') + 'c3c2';
+}
+
+function renderPacket(){
+  const packet = {
+    alg: 'SM2(mock)',
+    curve: 'sm2p256v1',
+    cipher: sm2EncryptMock(payload)
+  };
+  document.getElementById('packet').textContent = JSON.stringify(packet, null, 2);
+}
+
+function check(){
+  const expected = 'c-9007|contract.sign|1314';
+  const actual = document.getElementById('answer').value.trim();
+  const result = document.getElementById('result');
+  const ok = actual === expected;
+  result.textContent = ok ? '回答正确' : '回到 sm2Encrypt 前的 JSON，抓 customerId、scene、amount。';
+  result.className = ok ? 'ok' : 'bad';
+}
+
+renderPacket();
+</script>
+</body>
+</html>

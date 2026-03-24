@@ -208,6 +208,11 @@ OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
 - https://github.com/lemono0/FastJsonParty/
 - https://github.com/roottusk/vapi
 - https://github.com/jweny/shiro-cve-2020-17523
+- https://github.com/SwagXz/encrypt-labs
+- https://github.com/JSREI/js-xhr-hook-goat
+- https://github.com/outlaws-bai/GalaxyDemo
+- https://github.com/0ctDay/encrypt-decrypt-vuls/
+- https://github.com/r0eXpeR/fingerprint
 
 ## Star History Chart
 

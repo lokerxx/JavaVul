@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "message": "获取用户信息成功",
+  "data": {
+    "id": 1003,
+    "name": "王五",
+    "email": "wangwu@company.com",
+    "department": "财务部",
+    "encryptedPhone": "U2FsdGVkX19G5GWtbM1TYc9cQqbl0mxePC9cI8Pn4oI=",
+    "encryptedIdCard": "U2FsdGVkX180bcR4UhAet7fF7HrOlDboacmzLdzSFZqyMBSKIxMCeApUagfal9bH",
+    "encryptedBankCard": "U2FsdGVkX18eEs1ooJ3U3bt3iE35AI5HrR8DtAtr/sHdCyaAklV9xdFuv37tPLwe",
+    "encryptedAddress": "U2FsdGVkX18iR2TgyxPlE31yftcx69C9dK3Wploj7twyBqGE12wErlXpRVG5yMqHoGJhVOEOlOpdIOamrMqf2A==",
+    "createdAt": "2023-03-10T14:20:00Z",
+    "lastLogin": "2025-01-30T16:45:00Z",
+    "status": "正常"
+  },
+  "timestamp": "2025-01-31T12:45:00.000Z"
+}

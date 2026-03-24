@@ -1,0 +1,20 @@
+{
+  "request_id": "REQMNO345ANALYTICS",
+  "timestamp": 1738252800,
+  "signature_valid": true,
+  "service_name": "analytics-service",
+  "interceptor_id": "INTANA345",
+  "client_id": "CLIENT_MNO345PQR678",
+  "service_result": {
+    "status": "success",
+    "reports_generated": 78,
+    "data_points": 567890,
+    "processing_time": "3.45",
+    "analytics_data": {
+      "conversion_rate": "8.76",
+      "bounce_rate": "34.56",
+      "avg_session_duration": "245",
+      "top_pages": "产品页"
+    }
+  }
+}

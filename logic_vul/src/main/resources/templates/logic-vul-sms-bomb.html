@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>短信轰炸场景</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .card { background: #fff; border-radius: 18px; box-shadow: 0 12px 32px rgba(15,23,42,.08); padding: 24px; margin-bottom: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; }
+        button, a.button { display: inline-block; margin-right: 10px; margin-top: 12px; border: 0; border-radius: 999px; background: #14532d; color: #fff; padding: 10px 16px; cursor: pointer; text-decoration: none; }
+        a.button.secondary, button.secondary { background: #475569; }
+        pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 14px; min-height: 220px; overflow: auto; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>短信轰炸场景</h1>
+        <p>漏洞版没有图形验证码、冷却时间和发送频控；安全版会限制单手机号的发送次数。</p>
+        <a class="button secondary" href="/logic-vul">返回首页</a>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <h2>发送参数</h2>
+            <input id="bombPhone" value="15134299958">
+            <input id="bombBatch" value="5">
+            <button onclick="callBomb('/sms/bomb-vul')">执行漏洞版</button>
+            <button class="secondary" onclick="callBomb('/sms/bomb-safe')">执行安全版</button>
+        </div>
+        <div class="card">
+            <h2>观察点</h2>
+            <p>关注发送次数、验证码列表，以及安全版是否在达到阈值后阻止继续发送。</p>
+        </div>
+    </div>
+    <div class="card"><h2>响应结果</h2><pre id="result">等待发送请求...</pre></div>
+</div>
+<script>
+    async function callBomb(url) {
+        const response = await fetch(url + '?phoneNumber=' + encodeURIComponent(document.getElementById('bombPhone').value) + '&batch=' + encodeURIComponent(document.getElementById('bombBatch').value), { method: 'POST' });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+</script>
+</body>
+</html>

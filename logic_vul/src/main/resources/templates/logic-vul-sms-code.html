@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>短信验证码逻辑场景</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .card { background: #fff; border-radius: 18px; box-shadow: 0 12px 32px rgba(15,23,42,.08); padding: 24px; margin-bottom: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; }
+        button, a.button { display: inline-block; margin-right: 10px; margin-top: 12px; border: 0; border-radius: 999px; background: #14532d; color: #fff; padding: 10px 16px; cursor: pointer; text-decoration: none; }
+        a.button.secondary, button.secondary { background: #475569; }
+        pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 14px; min-height: 220px; overflow: auto; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>短信验证码逻辑场景</h1>
+        <p>这里演示验证码回显、跨手机号复用、重复使用，以及安全版对手机号绑定和尝试次数的控制。</p>
+        <a class="button secondary" href="/logic-vul">返回首页</a>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <h2>发送验证码</h2>
+            <input id="sendPhone" value="15134299958">
+            <button onclick="sendSms('/sms/send-vul')">发送漏洞版验证码</button>
+            <button class="secondary" onclick="sendSms('/sms/send-safe')">发送安全版验证码</button>
+        </div>
+        <div class="card">
+            <h2>校验验证码</h2>
+            <input id="verifyPhone" value="15933988032">
+            <input id="smsCode" placeholder="先从发送结果里复制验证码">
+            <button onclick="verifySms('/sms/verify-vul')">校验漏洞版</button>
+            <button class="secondary" onclick="verifySms('/sms/verify-safe')">校验安全版</button>
+        </div>
+    </div>
+    <div class="card"><h2>响应结果</h2><pre id="result">等待发送请求...</pre></div>
+</div>
+<script>
+    async function sendSms(url) {
+        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phoneNumber: document.getElementById('sendPhone').value }) });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+    async function verifySms(url) {
+        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phoneNumber: document.getElementById('verifyPhone').value, smsCode: document.getElementById('smsCode').value }) });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+</script>
+</body>
+</html>

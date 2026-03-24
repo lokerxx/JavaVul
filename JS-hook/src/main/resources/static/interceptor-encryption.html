@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interceptor Encryption</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+        .dashboard-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .api-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .api-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+        .api-card.loading {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+        .api-card.success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .api-card.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        .api-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .api-card p {
+            color: #7f8c8d;
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .api-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .api-status {
+            font-weight: bold;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin-top: 10px;
+        }
+        .status-pending {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+        .status-loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .control-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .control-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .control-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        .control-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .control-btn.secondary {
+            background: #6c757d;
+        }
+        .control-btn.danger {
+            background: #dc3545;
+        }
+        .control-btn.success {
+            background: #28a745;
+        }
+        .interceptor-status {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin-bottom: 20px;
+        }
+        .interceptor-status.disabled {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .result-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .result-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .request-log {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 10px;
+            border-bottom: 1px solid #f1f3f4;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .log-entry.request {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        .log-entry.response {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+        }
+        .log-entry.error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+        }
+        .step-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        .code-content {
+            color: #e74c3c;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .json-content {
+            color: #27ae60;
+            white-space: pre-wrap;
+        }
+        .interceptor-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .flow-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .stats-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+        .stats-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .stats-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 5px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>企业数据中心</h1>
+            <p>Interceptor Encryption Case - 拦截器自动签名加密</p>
+        </div>
+
+        <div class="dashboard-section">
+            <h2 class="section-title">🔄 API请求拦截器控制台</h2>
+            
+            <div class="interceptor-status" id="interceptorStatus">
+                <strong>🛡️ 拦截器状态:</strong> <span id="statusText">已启用 - 自动为所有请求添加签名参数</span>
+            </div>
+            
+            <div class="control-panel">
+                <div class="control-row">
+                    <button class="control-btn" id="enableInterceptor">🔓 启用拦截器</button>
+                    <button class="control-btn secondary" id="disableInterceptor">🔒 禁用拦截器</button>
+                    <button class="control-btn success" id="testAllApis">🚀 测试所有API</button>
+                    <button class="control-btn danger" id="clearLogs">🗑️清空日志</button>
+                </div>
+                <div class="control-row">
+                    <button class="control-btn" id="testSingleApi">🎯 单个测试</button>
+                    <button class="control-btn" id="testBatchApi">📦 批量测试</button>
+                    <button class="control-btn" id="stressTest">⚡ 压力测试</button>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stats-row">
+                    <span class="stats-label">拦截器状态:</span>
+                    <span class="stats-value" id="interceptorEnabled">已启用</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">总请求数:</span>
+                    <span class="stats-value" id="totalRequests">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">成功请求:</span>
+                    <span class="stats-value" id="successRequests">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">失败请求:</span>
+                    <span class="stats-value" id="errorRequests">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">签名验证率:</span>
+                    <span class="stats-value" id="signatureRate">100%</span>
+                </div>
+            </div>
+            
+            <h3 class="section-title">📡 API服务列表</h3>
+            <div class="api-grid">
+                <div class="api-card" data-api="user-service">
+                    <span class="api-icon">👥</span>
+                    <h3>用户服务</h3>
+                    <p>用户信息查询和管理</p>
+                    <div class="api-status status-pending">待请求</div>
+                </div>
+                <div class="api-card" data-api="order-service">
+                    <span class="api-icon">📦</span>
+                    <h3>订单服务</h3>
+                    <p>订单创建和状态查询</p>
+                    <div class="api-status status-pending">待请求</div>
+                </div>
+                <div class="api-card" data-api="payment-service">
+                    <span class="api-icon">💳</span>
+                    <h3>支付服务</h3>
+                    <p>支付处理和账单管理</p>
+                    <div class="api-status status-pending">待请求</div>
+                </div>
+                <div class="api-card" data-api="inventory-service">
+                    <span class="api-icon">📊</span>
+                    <h3>库存服务</h3>
+                    <p>商品库存和仓储管理</p>
+                    <div class="api-status status-pending">待请求</div>
+                </div>
+                <div class="api-card" data-api="analytics-service">
+                    <span class="api-icon">📈</span>
+                    <h3>分析服务</h3>
+                    <p>数据分析和报表生成</p>
+                    <div class="api-status status-pending">待请求</div>
+                </div>
+                <div class="api-card" data-api="notification-service">
+                    <span class="api-icon">🔔</span>
+                    <h3>通知服务</h3>
+                    <p>消息推送和通知管理</p>
+                    <div class="api-status status-pending">待请求</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultSection" class="result-section">
+            <h2 class="result-title">📋 请求日志</h2>
+            <div class="request-log" id="requestLog">
+                <div class="log-entry">
+                    <strong>系统初始化完成</strong> - 拦截器已就绪，等待API请求...
+                </div>
+            </div>
+        </div>
+
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            let interceptorEnabled = true;
+            let totalRequests = 0;
+            let successRequests = 0;
+            let errorRequests = 0;
+            let requestLog = [];
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 原始XMLHttpRequest
+            const originalXHR = window.XMLHttpRequest;
+            
+            // 拦截器实现
+            function setupInterceptor() {
+                window.XMLHttpRequest = function() {
+                    const xhr = new originalXHR();
+                    const originalOpen = xhr.open;
+                    const originalSend = xhr.send;
+                    
+                    xhr.open = function(method, url, async, user, password) {
+                        this._method = method;
+                        this._url = url;
+                        return originalOpen.apply(this, arguments);
+                    };
+                    
+                    xhr.send = function(data) {
+                        if (interceptorEnabled && this._url && this._url.includes('/api/interceptor-')) {
+                            // 自动添加签名参数
+                            const signedData = addSignatureToRequest(this._method, this._url, data);
+                            logRequest(this._method, this._url, signedData);
+                            return originalSend.call(this, signedData);
+                        }
+                        return originalSend.call(this, data);
+                    };
+                    
+                    return xhr;
+                };
+            }
+            
+            // 恢复原始XMLHttpRequest
+            function restoreXHR() {
+                window.XMLHttpRequest = originalXHR;
+            }
+            
+            // 为请求添加签名
+            function addSignatureToRequest(method, url, data) {
+                const timestamp = Math.floor(Date.now() / 1000);
+                const nonce = Math.random().toString(36).substring(2, 15);
+                const secretKey = 'interceptor-secret-key-2025';
+                
+                let requestData = {};
+                if (data) {
+                    try {
+                        requestData = JSON.parse(data);
+                    } catch (e) {
+                        requestData = { raw_data: data };
+                    }
+                }
+                
+                // 添加拦截器参数
+                requestData.timestamp = timestamp;
+                requestData.nonce = nonce;
+                requestData.interceptor_id = 'INT' + Math.random().toString(36).substring(2, 10).toUpperCase();
+                
+                // 生成签名
+                const signature = generateSignature(requestData, secretKey);
+                requestData.sign = signature;
+                
+                return JSON.stringify(requestData);
+            }
+            
+            // 生成签名
+            function generateSignature(data, secretKey) {
+                // 排除sign字段，对其他字段排序
+                const signData = { ...data };
+                delete signData.sign;
+                
+                const sortedKeys = Object.keys(signData).sort();
+                const paramString = sortedKeys.map(key => `${key}=${signData[key]}`).join('&');
+                const signString = `${paramString}&key=${secretKey}`;
+                
+                return CryptoJS.MD5(signString).toString();
+            }
+            
+            // 记录请求日志
+            function logRequest(method, url, data) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = {
+                    timestamp: timestamp,
+                    method: method,
+                    url: url,
+                    data: data,
+                    type: 'request'
+                };
+                
+                requestLog.push(logEntry);
+                updateRequestLog();
+                updateStats();
+            }
+            
+            // 记录响应日志
+            function logResponse(url, response, isError = false) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = {
+                    timestamp: timestamp,
+                    url: url,
+                    response: response,
+                    type: isError ? 'error' : 'response'
+                };
+                
+                requestLog.push(logEntry);
+                updateRequestLog();
+                updateStats();
+            }
+            
+            // 更新请求日志显示
+            function updateRequestLog() {
+                const logContainer = $('#requestLog');
+                const recentLogs = requestLog.slice(-20); // 只显示最近20条
+                
+                let html = '';
+                recentLogs.forEach(log => {
+                    const cssClass = log.type === 'error' ? 'error' : (log.type === 'response' ? 'response' : 'request');
+                    html += `
+                        <div class="log-entry ${cssClass}">
+                            <strong>[${log.timestamp}]</strong> ${log.method || 'RESPONSE'} ${log.url}<br>
+                            ${log.data ? `Data: ${log.data.substring(0, 100)}...` : ''}
+                            ${log.response ? `Response: ${JSON.stringify(log.response).substring(0, 100)}...` : ''}
+                        </div>
+                    `;
+                });
+                
+                logContainer.html(html);
+                logContainer.scrollTop(logContainer[0].scrollHeight);
+                $('#resultSection').show();
+            }
+            
+            // 更新统计信息
+            function updateStats() {
+                totalRequests = requestLog.filter(log => log.type === 'request').length;
+                successRequests = requestLog.filter(log => log.type === 'response').length;
+                errorRequests = requestLog.filter(log => log.type === 'error').length;
+                
+                const signatureRate = totalRequests > 0 ? ((successRequests / totalRequests) * 100).toFixed(1) : 100;
+                
+                $('#totalRequests').text(totalRequests);
+                $('#successRequests').text(successRequests);
+                $('#errorRequests').text(errorRequests);
+                $('#signatureRate').text(signatureRate + '%');
+            }
+            
+            // 更新拦截器状态
+            function updateInterceptorStatus() {
+                const status = $('#interceptorStatus');
+                const statusText = $('#statusText');
+                const enabledText = $('#interceptorEnabled');
+                
+                if (interceptorEnabled) {
+                    status.removeClass('disabled');
+                    statusText.text('已启用 - 自动为所有请求添加签名参数');
+                    enabledText.text('已启用');
+                } else {
+                    status.addClass('disabled');
+                    statusText.text('已禁用 - 请求将不会自动添加签名');
+                    enabledText.text('已禁用');
+                }
+            }
+            
+            // 更新API卡片状态
+            function updateApiCardStatus(apiName, status) {
+                const card = $(`.api-card[data-api="${apiName}"]`);
+                const statusElement = card.find('.api-status');
+                
+                card.removeClass('loading success error');
+                statusElement.removeClass('status-pending status-loading status-success status-error');
+                
+                switch(status) {
+                    case 'loading':
+                        card.addClass('loading');
+                        statusElement.addClass('status-loading').html('请求中 <span class="loading-spinner"></span>');
+                        break;
+                    case 'success':
+                        card.addClass('success');
+                        statusElement.addClass('status-success').text('请求成功');
+                        break;
+                    case 'error':
+                        card.addClass('error');
+                        statusElement.addClass('status-error').text('请求失败');
+                        break;
+                    default:
+                        statusElement.addClass('status-pending').text('待请求');
+                }
+            }
+            
+            // 发送API请求
+            async function sendApiRequest(apiName) {
+                updateApiCardStatus(apiName, 'loading');
+                
+                const apiData = {
+                    service: apiName,
+                    action: 'query',
+                    client_id: 'CLIENT_' + Math.random().toString(36).substring(2, 10).toUpperCase()
+                };
+                
+                try {
+                    let apiUrl;
+                    if (isGitHubPages) {
+                        apiUrl = `api/interceptor-${apiName}`;
+                    } else {
+                        apiUrl = `http://localhost:48159/api/interceptor-${apiName}`;
+                    }
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(apiData)
+                    });
+                    
+                    if (response.ok) {
+                        const responseData = await response.json();
+                        updateApiCardStatus(apiName, 'success');
+                        logResponse(apiUrl, responseData);
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                } catch (error) {
+                    updateApiCardStatus(apiName, 'error');
+                    logResponse(`/api/interceptor-${apiName}`, { error: error.message }, true);
+                }
+            }
+            
+            // 控制按钮事件
+            $('#enableInterceptor').on('click', () => {
+                interceptorEnabled = true;
+                setupInterceptor();
+                updateInterceptorStatus();
+            });
+            
+            $('#disableInterceptor').on('click', () => {
+                interceptorEnabled = false;
+                restoreXHR();
+                updateInterceptorStatus();
+            });
+            
+            $('#testAllApis').on('click', async () => {
+                const apis = ['user-service', 'order-service', 'payment-service', 'inventory-service', 'analytics-service', 'notification-service'];
+                
+                for (const api of apis) {
+                    await sendApiRequest(api);
+                    await new Promise(resolve => setTimeout(resolve, 500)); // 间隔500ms
+                }
+            });
+            
+            $('#testSingleApi').on('click', async () => {
+                const apis = ['user-service', 'order-service', 'payment-service', 'inventory-service', 'analytics-service', 'notification-service'];
+                const randomApi = apis[Math.floor(Math.random() * apis.length)];
+                await sendApiRequest(randomApi);
+            });
+            
+            $('#testBatchApi').on('click', async () => {
+                const apis = ['user-service', 'order-service', 'payment-service'];
+                const promises = apis.map(api => sendApiRequest(api));
+                await Promise.all(promises);
+            });
+            
+            $('#stressTest').on('click', async () => {
+                const apis = ['user-service', 'order-service', 'payment-service', 'inventory-service', 'analytics-service', 'notification-service'];
+                
+                for (let i = 0; i < 10; i++) {
+                    const randomApi = apis[Math.floor(Math.random() * apis.length)];
+                    sendApiRequest(randomApi); // 不等待，并发执行
+                    await new Promise(resolve => setTimeout(resolve, 100)); // 间隔100ms
+                }
+            });
+            
+            $('#clearLogs').on('click', () => {
+                requestLog = [];
+                totalRequests = 0;
+                successRequests = 0;
+                errorRequests = 0;
+                updateRequestLog();
+                updateStats();
+                
+                // 重置API卡片状态
+                $('.api-card').each(function() {
+                    const apiName = $(this).data('api');
+                    updateApiCardStatus(apiName, 'pending');
+                });
+                
+                $('#requestLog').html('<div class="log-entry">日志已清空 - 等待新的API请求...</div>');
+            });
+            
+            // API卡片点击事件
+            $('.api-card').on('click', function() {
+                const apiName = $(this).data('api');
+                sendApiRequest(apiName);
+            });
+            
+            // 显示调试信息
+            function showDebugInfo() {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - 拦截器自动签名加密过程</div>
+                    
+                    <div class="interceptor-flow">
+                        <div class="flow-step">原始请求</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">拦截器捕获</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">添加时间戳</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">生成签名</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">发送请求</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">服务器验证</div>
+                    </div>
+                    
+                    <div class="step-title">🔄 拦截器工作原理</div>
+                    <div class="step-block">
+                        <div class="step-title">1. XMLHttpRequest拦截:</div>
+                        <div class="code-content">重写XMLHttpRequest.prototype.send方法，在发送前自动处理请求</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">2. 自动签名生成:</div>
+                        <div class="code-content">timestamp + nonce + MD5(params + key) = 自动签名</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">3. 批量请求处理:</div>
+                        <div class="code-content">每个API请求都会自动经过拦截器处理，无需手动添加签名</div>
+                    </div>
+                    
+                    <strong>🔧 拦截器加密优势:</strong><br>
+                    • 自动化签名处理，开发者无需手动添加<br>
+                    • 统一的安全策略，确保所有请求都有签名保护<br>
+                    • 支持批量请求和并发请求的自动处理<br>
+                    • 可动态启用/禁用，便于调试和测试<br>
+                    • 适用于大型应用中的多API请求场景<br>
+                    • 常用于企业级应用的统一安全拦截
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            }
+            
+            // 初始化
+            setupInterceptor();
+            updateInterceptorStatus();
+            showDebugInfo();
+            
+            // 5秒后自动显示演示
+            setTimeout(() => {
+                $('#testSingleApi').click();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

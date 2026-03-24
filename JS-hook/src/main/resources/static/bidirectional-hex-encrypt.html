@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bidirectional Hex Encryption</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+        .communication-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .operation-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .operation-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .operation-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+        .operation-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .operation-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .operation-card p {
+            color: #7f8c8d;
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .operation-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .form-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-top: 20px;
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .execute-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .execute-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        .execute-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .result-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .result-display {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+        .result-value {
+            flex: 2;
+            text-align: right;
+            color: #495057;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+        }
+        .step-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        .hex-content {
+            color: #e74c3c;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .json-content {
+            color: #27ae60;
+            white-space: pre-wrap;
+        }
+        .encryption-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .flow-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #dc3545;
+            margin-top: 20px;
+        }
+        .success {
+            background: #d1ecf1;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #28a745;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>超级安全通信系统</h1>
+            <p>Bidirectional Hex Encryption Case - 双向十六进制加密通信</p>
+        </div>
+
+        <div class="communication-section">
+            <h2 class="section-title">🔐 选择安全操作</h2>
+            
+            <div class="operation-cards">
+                <div class="operation-card" data-operation="transfer">
+                    <span class="operation-icon">💰</span>
+                    <h3>资金转账</h3>
+                    <p>执行高安全级别的资金转账操作，包含完整的加密验证流程</p>
+                </div>
+                <div class="operation-card" data-operation="contract">
+                    <span class="operation-icon">📋</span>
+                    <h3>合同签署</h3>
+                    <p>提交重要合同文件，使用双向加密确保文档安全性</p>
+                </div>
+                <div class="operation-card" data-operation="audit">
+                    <span class="operation-icon">🔍</span>
+                    <h3>安全审计</h3>
+                    <p>执行系统安全审计，获取加密的审计报告和建议</p>
+                </div>
+                <div class="operation-card" data-operation="backup">
+                    <span class="operation-icon">💾</span>
+                    <h3>数据备份</h3>
+                    <p>创建重要数据的安全备份，确保数据完整性和机密性</p>
+                </div>
+            </div>
+
+            <!-- 资金转账表单 -->
+            <div id="transferForm" class="form-section">
+                <h3>💰 资金转账操作</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fromAccount">转出账户:</label>
+                        <input type="text" id="fromAccount" placeholder="请输入转出账户" value="6222021234567890123" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="toAccount">转入账户:</label>
+                        <input type="text" id="toAccount" placeholder="请输入转入账户" value="6222021234567890456" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="amount">转账金额:</label>
+                        <input type="number" id="amount" placeholder="请输入转账金额" value="50000" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="currency">货币类型:</label>
+                        <select id="currency" required>
+                            <option value="CNY">人民币 (CNY)</option>
+                            <option value="USD">美元 (USD)</option>
+                            <option value="EUR">欧元 (EUR)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="transferReason">转账说明:</label>
+                    <textarea id="transferReason" placeholder="请输入转账说明" required>项目合作款项转账</textarea>
+                </div>
+            </div>
+
+            <!-- 合同签署表单 -->
+            <div id="contractForm" class="form-section">
+                <h3>📋 合同签署操作</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contractTitle">合同标题:</label>
+                        <input type="text" id="contractTitle" placeholder="请输入合同标题" value="技术服务合作协议" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contractType">合同类型:</label>
+                        <select id="contractType" required>
+                            <option value="service">服务合同</option>
+                            <option value="purchase">采购合同</option>
+                            <option value="partnership">合作协议</option>
+                            <option value="employment">劳动合同</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contractValue">合同金额:</label>
+                        <input type="number" id="contractValue" placeholder="请输入合同金额" value="1200000" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signatureMethod">签署方式:</label>
+                        <select id="signatureMethod" required>
+                            <option value="digital">数字签名</option>
+                            <option value="electronic">电子签名</option>
+                            <option value="biometric">生物识别</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="contractContent">合同内容:</label>
+                    <textarea id="contractContent" placeholder="请输入合同主要内容" required>双方就技术服务合作事宜达成一致，甲方委托乙方提供专业技术服务...</textarea>
+                </div>
+            </div>
+
+            <!-- 安全审计表单 -->
+            <div id="auditForm" class="form-section">
+                <h3>🔍 安全审计操作</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="auditScope">审计范围:</label>
+                        <select id="auditScope" required>
+                            <option value="system">系统安全审计</option>
+                            <option value="network">网络安全审计</option>
+                            <option value="data">数据安全审计</option>
+                            <option value="application">应用安全审计</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="auditLevel">审计级别:</label>
+                        <select id="auditLevel" required>
+                            <option value="basic">基础审计</option>
+                            <option value="standard">标准审计</option>
+                            <option value="comprehensive">全面审计</option>
+                            <option value="critical">关键审计</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="auditReason">审计原因:</label>
+                    <textarea id="auditReason" placeholder="请说明审计原因和目标" required>定期安全检查，确保系统符合安全标准和合规要求</textarea>
+                </div>
+            </div>
+
+            <!-- 数据备份表单 -->
+            <div id="backupForm" class="form-section">
+                <h3>💾 数据备份操作</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="backupType">备份类型:</label>
+                        <select id="backupType" required>
+                            <option value="full">完整备份</option>
+                            <option value="incremental">增量备份</option>
+                            <option value="differential">差异备份</option>
+                            <option value="selective">选择性备份</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="backupLocation">备份位置:</label>
+                        <select id="backupLocation" required>
+                            <option value="local">本地存储</option>
+                            <option value="cloud">云端存储</option>
+                            <option value="remote">远程服务器</option>
+                            <option value="hybrid">混合存储</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="encryptionLevel">加密级别:</label>
+                        <select id="encryptionLevel" required>
+                            <option value="aes128">AES-128</option>
+                            <option value="aes256" selected>AES-256</option>
+                            <option value="rsa2048">RSA-2048</option>
+                            <option value="rsa4096">RSA-4096</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="retentionPeriod">保留期限:</label>
+                        <select id="retentionPeriod" required>
+                            <option value="30">30天</option>
+                            <option value="90">90天</option>
+                            <option value="365" selected>1年</option>
+                            <option value="1825">5年</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="backupDescription">备份说明:</label>
+                    <textarea id="backupDescription" placeholder="请描述备份内容和要求" required>重要业务数据定期备份，确保数据安全和业务连续性</textarea>
+                </div>
+            </div>
+
+            <button class="execute-btn" id="executeBtn" disabled>🔐 执行安全操作</button>
+        </div>
+
+        <div id="resultSection" class="result-section"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            const secretKey = 'bidirectional-hex-2025';
+            let selectedOperation = null;
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 处理操作选择
+            $('.operation-card').on('click', function() {
+                $('.operation-card').removeClass('selected');
+                $(this).addClass('selected');
+                selectedOperation = $(this).data('operation');
+                
+                // 隐藏所有表单
+                $('.form-section').removeClass('active');
+                
+                // 显示对应表单
+                $(`#${selectedOperation}Form`).addClass('active');
+                
+                $('#executeBtn').prop('disabled', false);
+            });
+            
+            // 加密整个请求体并转换为十六进制
+            const encryptRequestToHex = (data) => {
+                // 1. 将数据转换为JSON字符串
+                const jsonString = JSON.stringify(data);
+                
+                // 2. 使用AES加密
+                const encrypted = CryptoJS.AES.encrypt(jsonString, secretKey).toString();
+                
+                // 3. 转换为十六进制
+                const hexEncoded = CryptoJS.enc.Utf8.parse(encrypted).toString(CryptoJS.enc.Hex);
+                
+                return {
+                    original: jsonString,
+                    encrypted: encrypted,
+                    hexEncoded: hexEncoded
+                };
+            };
+            
+            // 解密十六进制响应体
+            const decryptHexResponse = (hexData) => {
+                try {
+                    // 1. 从十六进制转换回加密的字符串
+                    const encryptedData = CryptoJS.enc.Hex.parse(hexData).toString(CryptoJS.enc.Utf8);
+                    
+                    // 2. 解密数据
+                    const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+                    const decryptedString = decryptedBytes.toString(CryptoJS.enc.Utf8);
+                    
+                    if (!decryptedString) {
+                        throw new Error('解密失败');
+                    }
+                    
+                    // 3. 解析JSON
+                    const jsonData = JSON.parse(decryptedString);
+                    
+                    return {
+                        success: true,
+                        data: jsonData,
+                        encryptedData: encryptedData,
+                        hexData: hexData
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            };
+            
+            // 获取表单数据
+            const getFormData = (operation) => {
+                const baseData = {
+                    operation: operation,
+                    timestamp: Math.floor(Date.now() / 1000),
+                    requestId: Math.random().toString(36).substring(2, 15),
+                    securityLevel: 'TOP_SECRET'
+                };
+                
+                switch(operation) {
+                    case 'transfer':
+                        return {
+                            ...baseData,
+                            fromAccount: $('#fromAccount').val(),
+                            toAccount: $('#toAccount').val(),
+                            amount: parseFloat($('#amount').val()),
+                            currency: $('#currency').val(),
+                            reason: $('#transferReason').val()
+                        };
+                    case 'contract':
+                        return {
+                            ...baseData,
+                            title: $('#contractTitle').val(),
+                            type: $('#contractType').val(),
+                            value: parseFloat($('#contractValue').val()),
+                            signatureMethod: $('#signatureMethod').val(),
+                            content: $('#contractContent').val()
+                        };
+                    case 'audit':
+                        return {
+                            ...baseData,
+                            scope: $('#auditScope').val(),
+                            level: $('#auditLevel').val(),
+                            reason: $('#auditReason').val()
+                        };
+                    case 'backup':
+                        return {
+                            ...baseData,
+                            type: $('#backupType').val(),
+                            location: $('#backupLocation').val(),
+                            encryptionLevel: $('#encryptionLevel').val(),
+                            retentionPeriod: parseInt($('#retentionPeriod').val()),
+                            description: $('#backupDescription').val()
+                        };
+                    default:
+                        return baseData;
+                }
+            };
+            
+            // 显示结果
+            const displayResult = (data) => {
+                let html = `
+                    <h2 class="result-title">✅ 操作执行成功</h2>
+                    <div class="result-display">
+                `;
+                
+                // 通用字段
+                html += `
+                    <div class="result-row">
+                        <span class="result-label">操作ID:</span>
+                        <span class="result-value">${data.operationId}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">执行状态:</span>
+                        <span class="result-value">${data.status}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">执行时间:</span>
+                        <span class="result-value">${new Date(data.executionTime).toLocaleString()}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">安全级别:</span>
+                        <span class="result-value">${data.securityLevel}</span>
+                    </div>
+                `;
+                
+                // 根据操作类型显示特定字段
+                if (data.operation === 'transfer') {
+                    html += `
+                        <div class="result-row">
+                            <span class="result-label">转账金额:</span>
+                            <span class="result-value">¥${data.details.amount.toLocaleString()}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">手续费:</span>
+                            <span class="result-value">¥${data.details.fee.toLocaleString()}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">交易流水号:</span>
+                            <span class="result-value">${data.details.transactionId}</span>
+                        </div>
+                    `;
+                } else if (data.operation === 'contract') {
+                    html += `
+                        <div class="result-row">
+                            <span class="result-label">合同编号:</span>
+                            <span class="result-value">${data.details.contractNumber}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">签署状态:</span>
+                            <span class="result-value">${data.details.signatureStatus}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">法律效力:</span>
+                            <span class="result-value">${data.details.legalStatus}</span>
+                        </div>
+                    `;
+                } else if (data.operation === 'audit') {
+                    html += `
+                        <div class="result-row">
+                            <span class="result-label">审计报告ID:</span>
+                            <span class="result-value">${data.details.reportId}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">发现问题:</span>
+                            <span class="result-value">${data.details.issuesFound}个</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">风险等级:</span>
+                            <span class="result-value">${data.details.riskLevel}</span>
+                        </div>
+                    `;
+                } else if (data.operation === 'backup') {
+                    html += `
+                        <div class="result-row">
+                            <span class="result-label">备份ID:</span>
+                            <span class="result-value">${data.details.backupId}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">备份大小:</span>
+                            <span class="result-value">${data.details.backupSize}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">完整性校验:</span>
+                            <span class="result-value">${data.details.integrityCheck}</span>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                $('#resultSection').html(html).show();
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (requestSteps, responseSteps) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - 双向十六进制加密通信过程</div>
+                    
+                    <div class="encryption-flow">
+                        <div class="flow-step">请求JSON</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">AES加密</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">十六进制编码</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">服务器</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">十六进制响应</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">AES解密</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">响应JSON</div>
+                    </div>
+                    
+                    <div class="step-title">📤 请求加密过程</div>
+                    <div class="step-block">
+                        <div class="step-title">1. 原始请求数据:</div>
+                        <div class="json-content">${JSON.stringify(JSON.parse(requestSteps.original), null, 2)}</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">2. AES加密后:</div>
+                        <div style="color: #f39c12; word-break: break-all;">${requestSteps.encrypted.substring(0, 100)}...</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">3. 十六进制编码:</div>
+                        <div class="hex-content">${requestSteps.hexEncoded.substring(0, 200)}...</div>
+                    </div>
+                    
+                    <div class="step-title">📥 响应解密过程</div>
+                    <div class="step-block">
+                        <div class="step-title">1. 服务器十六进制响应:</div>
+                        <div class="hex-content">${responseSteps.hexData.substring(0, 200)}...</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">2. AES解密后:</div>
+                        <div style="color: #f39c12; word-break: break-all;">${responseSteps.encryptedData.substring(0, 100)}...</div>
+                    </div>
+                    <div class="step-block">
+                        <div class="step-title">3. 最终响应数据:</div>
+                        <div class="json-content">${JSON.stringify(responseSteps.data, null, 2)}</div>
+                    </div>
+                    
+                    <strong>🔑 双向加密说明:</strong><br>
+                    • 请求: JSON → AES加密 → 十六进制编码 → 发送<br>
+                    • 响应: 接收 → 十六进制解码 → AES解密 → JSON解析<br>
+                    • 这是最高级别的双向加密通信保护方式<br>
+                    • 确保了请求和响应的完全机密性
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 执行操作
+            $('#executeBtn').on('click', function() {
+                if (!selectedOperation) return;
+                
+                // 显示加载状态
+                $('#resultSection').html('<div class="loading">🔄 正在执行安全操作...</div>').show();
+                $(this).prop('disabled', true).text('🔄 执行中...');
+                
+                // 获取表单数据
+                const formData = getFormData(selectedOperation);
+                
+                // 加密请求体
+                const requestSteps = encryptRequestToHex(formData);
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = `api/secure-operation-${selectedOperation}`;
+                } else {
+                    apiUrl = 'http://localhost:48159/api/secure-operation';
+                }
+                
+                // 发送请求 - 整个请求体是十六进制字符串
+                $.ajax({
+                    url: apiUrl,
+                    type: 'POST',
+                    contentType: 'text/plain',
+                    data: requestSteps.hexEncoded,
+                    success: (hexResponse) => {
+                        // 解密响应
+                        const responseSteps = decryptHexResponse(hexResponse);
+                        
+                        if (responseSteps.success) {
+                            displayResult(responseSteps.data);
+                            showDebugInfo(requestSteps, responseSteps);
+                        } else {
+                            $('#resultSection').html(`
+                                <div class="error">
+                                    <h3>❌ 响应解密失败</h3>
+                                    <p>错误信息: ${responseSteps.error}</p>
+                                </div>
+                            `);
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        $('#resultSection').html(`
+                            <div class="error">
+                                <h3>❌ 操作执行失败</h3>
+                                <p>错误信息: ${error}</p>
+                                <p>状态码: ${xhr.status}</p>
+                            </div>
+                        `);
+                    },
+                    complete: () => {
+                        $('#executeBtn').prop('disabled', false).text('🔐 执行安全操作');
+                    }
+                });
+            });
+            
+            // 默认选择第一个操作
+            $('.operation-card').first().click();
+        });
+    </script>
+</body>
+</html>

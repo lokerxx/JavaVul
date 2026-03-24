@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hex Response Decryption</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 300;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+        .query-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .query-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .query-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .query-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .query-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        .query-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .query-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .query-card p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 14px;
+        }
+        .fetch-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .fetch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        .fetch-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .response-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #e9ecef;
+        }
+        .response-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .data-display {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .data-row:last-child {
+            border-bottom: none;
+        }
+        .data-label {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+        .data-value {
+            flex: 2;
+            text-align: right;
+            color: #495057;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+        }
+        .step-block {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+        .hex-content {
+            color: #e74c3c;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        .json-content {
+            color: #27ae60;
+            white-space: pre-wrap;
+        }
+        .decryption-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .flow-arrow {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #dc3545;
+            margin-top: 20px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>机密数据查询系统</h1>
+            <p>Hex Response Decryption Case - 整个响应体十六进制解密</p>
+        </div>
+
+        <div class="query-section">
+            <h2 class="query-title">🔍 选择查询类型</h2>
+            
+            <div class="query-options">
+                <div class="query-card" data-type="financial">
+                    <h3>💰 财务报表</h3>
+                    <p>查询公司财务数据和报表信息</p>
+                </div>
+                <div class="query-card" data-type="employee">
+                    <h3>👥 员工信息</h3>
+                    <p>查询员工详细信息和薪资数据</p>
+                </div>
+                <div class="query-card" data-type="customer">
+                    <h3>🏢 客户资料</h3>
+                    <p>查询客户信息和交易记录</p>
+                </div>
+                <div class="query-card" data-type="project">
+                    <h3>📊 项目数据</h3>
+                    <p>查询项目进度和预算信息</p>
+                </div>
+            </div>
+
+            <button class="fetch-btn" id="fetchBtn" disabled>🔐 获取加密数据</button>
+        </div>
+
+        <div id="responseSection" class="response-section"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            const secretKey = 'hex-response-decrypt-2025';
+            let selectedQueryType = null;
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 处理查询类型选择
+            $('.query-card').on('click', function() {
+                $('.query-card').removeClass('selected');
+                $(this).addClass('selected');
+                selectedQueryType = $(this).data('type');
+                $('#fetchBtn').prop('disabled', false);
+            });
+            
+            // 解密十六进制响应体
+            const decryptHexResponse = (hexData) => {
+                try {
+                    // 1. 从十六进制转换回加密的字符串
+                    const encryptedData = CryptoJS.enc.Hex.parse(hexData).toString(CryptoJS.enc.Utf8);
+                    
+                    // 2. 解密数据
+                    const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+                    const decryptedString = decryptedBytes.toString(CryptoJS.enc.Utf8);
+                    
+                    if (!decryptedString) {
+                        throw new Error('解密失败');
+                    }
+                    
+                    // 3. 解析JSON
+                    const jsonData = JSON.parse(decryptedString);
+                    
+                    return {
+                        success: true,
+                        data: jsonData,
+                        encryptedData: encryptedData,
+                        hexData: hexData
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            };
+            
+            // 显示解密后的数据
+            const displayDecryptedData = (data) => {
+                let html = `
+                    <h2 class="response-title">📋 解密后的数据</h2>
+                    <div class="data-display">
+                `;
+                
+                // 根据数据类型显示不同的字段
+                if (data.type === 'financial') {
+                    html += `
+                        <div class="data-row">
+                            <span class="data-label">报表类型:</span>
+                            <span class="data-value">${data.reportType}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">报告期间:</span>
+                            <span class="data-value">${data.period}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">总收入:</span>
+                            <span class="data-value">¥${data.revenue.toLocaleString()}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">净利润:</span>
+                            <span class="data-value">¥${data.profit.toLocaleString()}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">资产总额:</span>
+                            <span class="data-value">¥${data.assets.toLocaleString()}</span>
+                        </div>
+                    `;
+                } else if (data.type === 'employee') {
+                    html += `
+                        <div class="data-row">
+                            <span class="data-label">员工姓名:</span>
+                            <span class="data-value">${data.name}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">员工ID:</span>
+                            <span class="data-value">${data.employeeId}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">部门:</span>
+                            <span class="data-value">${data.department}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">职位:</span>
+                            <span class="data-value">${data.position}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">月薪:</span>
+                            <span class="data-value">¥${data.salary.toLocaleString()}</span>
+                        </div>
+                    `;
+                } else if (data.type === 'customer') {
+                    html += `
+                        <div class="data-row">
+                            <span class="data-label">客户名称:</span>
+                            <span class="data-value">${data.companyName}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">客户ID:</span>
+                            <span class="data-value">${data.customerId}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">联系人:</span>
+                            <span class="data-value">${data.contactPerson}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">年度交易额:</span>
+                            <span class="data-value">¥${data.annualRevenue.toLocaleString()}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">信用等级:</span>
+                            <span class="data-value">${data.creditRating}</span>
+                        </div>
+                    `;
+                } else if (data.type === 'project') {
+                    html += `
+                        <div class="data-row">
+                            <span class="data-label">项目名称:</span>
+                            <span class="data-value">${data.projectName}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">项目ID:</span>
+                            <span class="data-value">${data.projectId}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">项目经理:</span>
+                            <span class="data-value">${data.manager}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">项目预算:</span>
+                            <span class="data-value">¥${data.budget.toLocaleString()}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">完成进度:</span>
+                            <span class="data-value">${data.progress}%</span>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                        <div class="data-row">
+                            <span class="data-label">查询时间:</span>
+                            <span class="data-value">${new Date(data.timestamp).toLocaleString()}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">数据等级:</span>
+                            <span class="data-value">${data.securityLevel}</span>
+                        </div>
+                    </div>
+                `;
+                
+                $('#responseSection').html(html).show();
+            };
+            
+            // 显示调试信息
+            const showDebugInfo = (hexData, encryptedData, decryptedData) => {
+                const debugHtml = `
+                    <div class="debug-title">🔍 调试信息 - 整个响应体十六进制解密过程</div>
+                    
+                    <div class="decryption-flow">
+                        <div class="flow-step">服务器响应</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">十六进制数据</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">AES解密</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">JSON解析</div>
+                    </div>
+                    
+                    <div class="step-title">📡 步骤1: 服务器返回的十六进制响应体</div>
+                    <div class="step-block">
+                        <div class="hex-content">${hexData.substring(0, 200)}...</div>
+                        <div style="margin-top: 10px; color: #7f8c8d; font-size: 11px;">
+                            总长度: ${hexData.length} 字符
+                        </div>
+                    </div>
+                    
+                    <div class="step-title">🔓 步骤2: 十六进制转换为加密数据</div>
+                    <div class="step-block">
+                        <div style="color: #f39c12; word-break: break-all;">${encryptedData.substring(0, 100)}...</div>
+                    </div>
+                    
+                    <div class="step-title">📋 步骤3: AES解密后的JSON数据</div>
+                    <div class="step-block">
+                        <div class="json-content">${JSON.stringify(decryptedData, null, 2)}</div>
+                    </div>
+                    
+                    <strong>🔑 解密说明:</strong><br>
+                    • 服务器返回整个响应体都是十六进制编码的加密数据<br>
+                    • 前端需要先将十六进制转换为加密字符串<br>
+                    • 然后使用AES算法解密得到原始JSON数据<br>
+                    • 这是最高级别的响应体加密保护方式
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 获取数据
+            $('#fetchBtn').on('click', function() {
+                if (!selectedQueryType) return;
+                
+                // 显示加载状态
+                $('#responseSection').html('<div class="loading">🔄 正在获取加密数据...</div>').show();
+                $(this).prop('disabled', true).text('🔄 获取中...');
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = `api/secure-query-${selectedQueryType}`;
+                } else {
+                    apiUrl = `http://localhost:48159/api/secure-query/${selectedQueryType}`;
+                }
+                
+                // 发送请求
+                $.ajax({
+                    url: apiUrl,
+                    type: 'GET',
+                    success: (hexResponse) => {
+                        // 解密响应
+                        const decryptResult = decryptHexResponse(hexResponse);
+                        
+                        if (decryptResult.success) {
+                            displayDecryptedData(decryptResult.data);
+                            showDebugInfo(decryptResult.hexData, decryptResult.encryptedData, decryptResult.data);
+                        } else {
+                            $('#responseSection').html(`
+                                <div class="error">
+                                    <h3>❌ 解密失败</h3>
+                                    <p>错误信息: ${decryptResult.error}</p>
+                                </div>
+                            `);
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        $('#responseSection').html(`
+                            <div class="error">
+                                <h3>❌ 请求失败</h3>
+                                <p>错误信息: ${error}</p>
+                                <p>状态码: ${xhr.status}</p>
+                            </div>
+                        `);
+                    },
+                    complete: () => {
+                        $('#fetchBtn').prop('disabled', false).text('🔐 获取加密数据');
+                    }
+                });
+            });
+            
+            // 默认选择第一个查询类型
+            $('.query-card').first().click();
+        });
+    </script>
+</body>
+</html>

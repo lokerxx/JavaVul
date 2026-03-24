@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Anti Debug</title>
+    <style>
+        body{font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0;margin:0}
+        .wrap{max-width:1100px;margin:0 auto;padding:24px}.card{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:20px;margin-bottom:18px}
+        pre,input{background:#111827;color:#e2e8f0;border:1px solid #334155;border-radius:12px;padding:12px;width:100%;box-sizing:border-box;white-space:pre-wrap}
+        button{background:#2563eb;color:#fff;border:none;border-radius:10px;padding:10px 14px}.ok{color:#22c55e}.bad{color:#f87171}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>Advanced Anti Debug</h1>
+        <p>目标：绕过基于时间差的反调试。提示：观察 <code>performance.now()</code> 前后差值，真实逆向中可以 Hook 计时函数。</p>
+    </div>
+    <div class="card">
+<pre>function guard() {
+  const start = 100;
+  const end = 850;
+  if (end - start > 500) {
+    return 'debug-detected';
+  }
+  return 'ADV-ANTI-DEBUG-OK-7788';
+}
+console.log(guard());</pre>
+        <input id="answer" placeholder="提交绕过后的输出">
+        <div style="margin-top:12px"><button onclick="check()">校验</button> <span id="result"></span></div>
+    </div>
+</div>
+<script>
+function check(){
+  const ok = document.getElementById('answer').value.trim() === 'ADV-ANTI-DEBUG-OK-7788';
+  document.getElementById('result').textContent = ok ? '回答正确' : '继续考虑如何 Hook 计时逻辑';
+  document.getElementById('result').className = ok ? 'ok' : 'bad';
+}
+</script>
+</body>
+</html>

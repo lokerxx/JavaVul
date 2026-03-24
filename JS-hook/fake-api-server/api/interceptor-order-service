@@ -1,0 +1,19 @@
+{
+  "request_id": "REQDEF456ORDER",
+  "timestamp": 1738252800,
+  "signature_valid": true,
+  "service_name": "order-service",
+  "interceptor_id": "INTORDER456",
+  "client_id": "CLIENT_DEF456GHI789",
+  "service_result": {
+    "status": "success",
+    "total_orders": 3456,
+    "pending_orders": 123,
+    "completed_orders": 3200,
+    "order_data": {
+      "daily_orders": 234,
+      "average_value": "156.78",
+      "top_category": "电子产品"
+    }
+  }
+}

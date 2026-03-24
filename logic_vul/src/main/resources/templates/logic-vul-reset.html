@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>密码重置 Token 复用场景</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .card { background: #fff; border-radius: 18px; box-shadow: 0 12px 32px rgba(15,23,42,.08); padding: 24px; margin-bottom: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        textarea, input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; }
+        textarea { min-height: 160px; }
+        button, a.button { display: inline-block; margin-right: 10px; margin-top: 12px; border: 0; border-radius: 999px; background: #14532d; color: #fff; padding: 10px 16px; cursor: pointer; text-decoration: none; }
+        a.button.secondary, button.secondary { background: #475569; }
+        pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 14px; min-height: 220px; overflow: auto; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>密码重置 Token 复用场景</h1>
+        <p>漏洞版令牌可预测、可复用，还允许客户端指定目标账号；安全版令牌随机、绑定单一账号并带有效期。</p>
+        <a class="button secondary" href="/logic-vul">返回首页</a>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <h2>发送重置令牌</h2>
+            <textarea id="resetSendBody">{ "username": "portal.alice" }</textarea>
+            <button onclick="postJson('/auth/reset/send-vul', 'resetSendBody')">发送漏洞版令牌</button>
+            <button class="secondary" onclick="postJson('/auth/reset/send-safe', 'resetSendBody')">发送安全版令牌</button>
+        </div>
+        <div class="card">
+            <h2>提交重置</h2>
+            <textarea id="resetConfirmBody">{ "token": "reset-portal.alice", "targetUsername": "portal.bob", "newPassword": "ChangedByReuse-1" }</textarea>
+            <button onclick="postJson('/auth/reset/confirm-vul', 'resetConfirmBody')">提交漏洞版重置</button>
+            <button class="secondary" onclick="postJson('/auth/reset/confirm-safe', 'resetConfirmBody')">提交安全版重置</button>
+        </div>
+    </div>
+    <div class="card"><h2>响应结果</h2><pre id="result">等待发送请求...</pre></div>
+</div>
+<script>
+    async function postJson(url, id) {
+        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: document.getElementById(id).value });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+</script>
+</body>
+</html>

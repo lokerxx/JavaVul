@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query String Parameter Encryption</title>
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/crypto-js-4.1.1.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            border-left: 4px solid #007cba;
+        }
+        .error {
+            color: red;
+            border-left-color: red;
+        }
+        .success {
+            color: green;
+            border-left-color: green;
+        }
+        .debug-info {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Query String Parameter Encryption Case</h1>
+    <p>这个案例演示如何对URL查询参数进行加密。用户输入查询条件，系统会加密这些参数并发送请求。</p>
+
+    <div class="container">
+        <h2>商品搜索</h2>
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="keyword">搜索关键词:</label>
+                <input type="text" id="keyword" name="keyword" placeholder="请输入商品名称" value="手机">
+            </div>
+            <div class="form-group">
+                <label for="category">商品分类:</label>
+                <select id="category" name="category">
+                    <option value="electronics">电子产品</option>
+                    <option value="clothing">服装</option>
+                    <option value="books">图书</option>
+                    <option value="home">家居</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="minPrice">最低价格:</label>
+                <input type="number" id="minPrice" name="minPrice" placeholder="0" value="100">
+            </div>
+            <div class="form-group">
+                <label for="maxPrice">最高价格:</label>
+                <input type="number" id="maxPrice" name="maxPrice" placeholder="9999" value="5000">
+            </div>
+            <button type="submit">搜索商品</button>
+        </form>
+
+        <div id="result" style="display: none;"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            const secretKey = 'query-encrypt-key-2025';
+            
+            // 检测是否为GitHub Pages环境
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // 加密查询参数
+            const encryptParams = (params) => {
+                const paramString = JSON.stringify(params);
+                const encrypted = CryptoJS.AES.encrypt(paramString, secretKey).toString();
+                return encrypted;
+            };
+            
+            // 生成时间戳和随机数
+            const generateTimestamp = () => Math.floor(Date.now() / 1000);
+            const generateNonce = () => Math.random().toString(36).substring(2, 15);
+            
+            // 显示调试信息
+            const showDebugInfo = (originalParams, encryptedParams, url) => {
+                const debugHtml = `
+                    <strong>调试信息:</strong><br>
+                    原始参数: ${JSON.stringify(originalParams, null, 2)}<br>
+                    加密后参数: ${encryptedParams}<br>
+                    请求URL: ${url}
+                `;
+                $('#debugInfo').html(debugHtml).show();
+            };
+            
+            // 处理表单提交
+            $('#searchForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                // 获取表单数据
+                const formData = {
+                    keyword: $('#keyword').val(),
+                    category: $('#category').val(),
+                    minPrice: parseInt($('#minPrice').val()) || 0,
+                    maxPrice: parseInt($('#maxPrice').val()) || 9999,
+                    timestamp: generateTimestamp(),
+                    nonce: generateNonce()
+                };
+                
+                // 加密参数
+                const encryptedParams = encryptParams(formData);
+                
+                // 构建请求URL
+                let apiUrl;
+                if (isGitHubPages) {
+                    apiUrl = 'api/search-products';
+                } else {
+                    apiUrl = `http://localhost:48159/api/search-products?q=${encodeURIComponent(encryptedParams)}`;
+                }
+                
+                // 显示调试信息
+                showDebugInfo(formData, encryptedParams, apiUrl);
+                
+                // 发送请求
+                $.ajax({
+                    url: apiUrl,
+                    type: 'GET',
+                    success: (response) => {
+                        let html = '<div class="result success">';
+                        html += '<h3>搜索结果:</h3>';
+                        html += '<ul>';
+                        response.products.forEach(product => {
+                            html += `<li><strong>${product.name}</strong> - ¥${product.price} (${product.category})</li>`;
+                        });
+                        html += '</ul>';
+                        html += `<p>共找到 ${response.products.length} 个商品</p>`;
+                        html += '</div>';
+                        $('#result').html(html).show();
+                    },
+                    error: (xhr, status, error) => {
+                        const html = `
+                            <div class="result error">
+                                <h3>请求失败:</h3>
+                                <p>错误信息: ${error}</p>
+                                <p>状态码: ${xhr.status}</p>
+                                <p>显示默认搜索结果...</p>
+                                <ul>
+                                    <li><strong>默认商品1</strong> - ¥999 (电子产品)</li>
+                                    <li><strong>默认商品2</strong> - ¥299 (服装)</li>
+                                    <li><strong>默认商品3</strong> - ¥199 (图书)</li>
+                                </ul>
+                            </div>
+                        `;
+                        $('#result').html(html).show();
+                        console.error('Search error:', error);
+                    }
+                });
+            });
+            
+            // 页面加载时自动执行一次搜索
+            $('#searchForm').trigger('submit');
+        });
+    </script>
+</body>
+</html>

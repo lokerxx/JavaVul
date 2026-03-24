@@ -1,0 +1,25 @@
+{
+  "success": true,
+  "message": "GitHub Pages 环境下的模拟双向 Protocol Buffers 响应",
+  "data": {
+    "request_id": "ghi789analytics",
+    "timestamp": 1738252800,
+    "success": true,
+    "service_name": "data-analytics",
+    "status_code": 200,
+    "analytics_response": {
+      "success": true,
+      "message": "sales分析完成",
+      "report_id": "RPTEF789GH012",
+      "analytics_type": "sales",
+      "metrics": {
+        "总数据量": 85000,
+        "处理时间": 45,
+        "准确率": 92,
+        "覆盖率": 88
+      },
+      "download_url": "https://reports.example.com/download/abc123def456",
+      "generated_at": 1738252800
+    }
+  }
+}

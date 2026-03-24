@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>伪造身份场景</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+        .card { background: #fff; border-radius: 18px; box-shadow: 0 12px 32px rgba(15,23,42,.08); padding: 24px; margin-bottom: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        textarea { width: 100%; box-sizing: border-box; min-height: 140px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; }
+        button, a.button { display: inline-block; margin-right: 10px; margin-top: 12px; border: 0; border-radius: 999px; background: #14532d; color: #fff; padding: 10px 16px; cursor: pointer; text-decoration: none; }
+        a.button.secondary, button.secondary { background: #475569; }
+        pre { background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 14px; min-height: 220px; overflow: auto; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>伪造身份场景</h1>
+        <p>漏洞版登录会信任客户端传入的 <code>debugUserId</code> 或 <code>bypassPassword</code>，从而直接拿到别人的身份令牌。</p>
+        <a class="button secondary" href="/logic-vul">返回首页</a>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <h2>漏洞版</h2>
+            <textarea id="identityBody">{ "username": "frances.goldner", "debugUserId": 29 }</textarea>
+            <button onclick="postJson('/auth/login-vul', 'identityBody')">执行漏洞版</button>
+            <button class="secondary" onclick="fillBypass()">填充 bypassPassword 示例</button>
+        </div>
+        <div class="card">
+            <h2>安全版</h2>
+            <textarea id="identitySafeBody">{ "username": "frances.goldner", "password": "3jwl2i3t6" }</textarea>
+            <button onclick="postJson('/auth/login-safe', 'identitySafeBody')">执行安全版</button>
+        </div>
+    </div>
+    <div class="card"><h2>响应结果</h2><pre id="result">等待发送请求...</pre></div>
+</div>
+<script>
+    function fillBypass() {
+        document.getElementById('identityBody').value = '{ "username": "frances.goldner", "bypassPassword": true }';
+    }
+    async function postJson(url, id) {
+        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: document.getElementById(id).value });
+        document.getElementById('result').textContent = 'HTTP ' + response.status + '\n' + await response.text();
+    }
+</script>
+</body>
+</html>

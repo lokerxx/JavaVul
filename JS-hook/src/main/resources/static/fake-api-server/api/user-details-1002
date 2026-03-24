@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "message": "获取用户信息成功",
+  "data": {
+    "id": 1002,
+    "name": "李四",
+    "email": "lisi@company.com",
+    "department": "市场部",
+    "encryptedPhone": "U2FsdGVkX183M4bw9qh4jJo7SJLZxPN+jKKqxdsjpII=",
+    "encryptedIdCard": "U2FsdGVkX18iEY9CSXbsW4BOE8dKeHrQbuv8jRanjce0AzRCZ3zYnESQhNLYsrYj",
+    "encryptedBankCard": "U2FsdGVkX1/NKn7zOdrAu/jyndYCwBef8KefRNcIg1atqb7ajVpWfBRk8MtR433z",
+    "encryptedAddress": "U2FsdGVkX18c7zS/H+Uq76KjgotHkJIHC74djFGbo6WkmC2GEJ42WCQfxDXVYY5R87TWJE/w+SfrGQMmtyDDYg==",
+    "createdAt": "2023-02-20T09:45:00Z",
+    "lastLogin": "2025-01-31T09:30:00Z",
+    "status": "正常"
+  },
+  "timestamp": "2025-01-31T12:45:00.000Z"
+}

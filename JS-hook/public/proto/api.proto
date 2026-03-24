@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package api;
+
+// 用户信息消息
+message UserInfo {
+  string name = 1;
+  string email = 2;
+  int32 age = 3;
+  string phone = 4;
+  string address = 5;
+  string company = 6;
+  string position = 7;
+  int64 salary = 8;
+  repeated string skills = 9;
+  map<string, string> metadata = 10;
+}
+
+// 产品信息消息
+message ProductInfo {
+  string name = 1;
+  string description = 2;
+  double price = 3;
+  string category = 4;
+  string brand = 5;
+  int32 stock = 6;
+  repeated string tags = 7;
+  map<string, string> attributes = 8;
+}
+
+// 订单信息消息
+message OrderInfo {
+  string order_id = 1;
+  string customer_name = 2;
+  string customer_email = 3;
+  repeated ProductInfo products = 4;
+  double total_amount = 5;
+  string status = 6;
+  int64 created_at = 7;
+  string shipping_address = 8;
+  string payment_method = 9;
+}
+
+// 通用请求消息
+message ApiRequest {
+  string request_id = 1;
+  int64 timestamp = 2;
+  string operation = 3;
+  
+  oneof data {
+    UserInfo user_info = 10;
+    ProductInfo product_info = 11;
+    OrderInfo order_info = 12;
+  }
+}
+
+// 通用响应消息
+message ApiResponse {
+  string request_id = 1;
+  int64 timestamp = 2;
+  bool success = 3;
+  string message = 4;
+  int32 code = 5;
+  
+  oneof data {
+    UserInfo user_info = 10;
+    ProductInfo product_info = 11;
+    OrderInfo order_info = 12;
+  }
+}

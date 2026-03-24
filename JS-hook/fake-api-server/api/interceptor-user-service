@@ -1,0 +1,19 @@
+{
+  "request_id": "REQABC123USER",
+  "timestamp": 1738252800,
+  "signature_valid": true,
+  "service_name": "user-service",
+  "interceptor_id": "INTUSER123",
+  "client_id": "CLIENT_ABC123DEF456",
+  "service_result": {
+    "status": "success",
+    "user_count": 8567,
+    "active_users": 3245,
+    "new_registrations": 67,
+    "user_data": {
+      "total_users": 45678,
+      "premium_users": 3456,
+      "last_login_24h": 6789
+    }
+  }
+}
