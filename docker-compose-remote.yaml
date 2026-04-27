@@ -428,11 +428,3 @@ services:
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
-
-
-  flask:
-    image: wushangleon/javavul_index
-    ports:
-      - "5000:5000"
-    environment:
-      - HOST=192.168.0.9
