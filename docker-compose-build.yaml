@@ -612,6 +612,19 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
 
+  ghost-bits:
+    image: wushangleon/ghost-bits
+    build:
+      context: ./ghost-bits
+      dockerfile: Dockerfile
+    ports:
+      - "9943:8080"
+    volumes:
+      - ./agent:/agent/
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
+      - JAVA_OPTS=-Xms256m -Xmx512m
+
   struts2-s2-015:
     image: wushangleon/struts2-s2-015
     build:
@@ -734,14 +747,3 @@ services:
       dockerfile: Dockerfile
     ports:
       - "48159:8080"
-
-
-  flask:
-    image: wushangleon/javavul_index
-    build:
-      context: ./index
-      dockerfile: Dockerfile
-    ports:
-      - "5000:5000"      
-    environment:
-      - HOST=192.168.0.9

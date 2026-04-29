@@ -29,7 +29,7 @@ cd JavaVul
 
 3. 启动后按需使用：
 
-- 总控台：`http://宿主机IP:5000/`
+- JS Hook 题库：`http://宿主机IP:48159/js-labs.html`
 - 单项目访问：参考 [`doc/project-tutorials.md`](./doc/project-tutorials.md)
 - 接口批量回放：参考 [`doc/testing-pocs.md`](./doc/testing-pocs.md)
 
@@ -99,10 +99,9 @@ OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
 
 ## 运行说明
 
-- 运行前，请把 compose 里的 `flask.environment.HOST` 改成宿主机 IP，方便首页测试和回放脚本访问靶场。
 - 当前 compose 默认已经挂载 `agent/agent.jar`。如果你要测试 IAST Agent，可以直接替换这个文件。
 - `SimpleAgent` 的构建与挂载说明见 [`doc/projects/simpleagent.md`](./doc/projects/simpleagent.md)。
-- 如果你要测试被动代理扫描，需要把 `index/app.py` 里的 `proxy_mode` 改成 `True`，并配置自己的代理地址 `proxies`。
+- 仓库当前不再包含 `index` 首页控制台服务，测试请直接访问各靶场端口和对应入口。
 - 仓库里的靶场较多，默认每个应用分配 `512M-1024M` 内存；全部启动时建议预留 `16G` 左右内存。
 - 如果需要增大内存测试 Agent 或压力场景，可以统一调整 compose 文件里的 `-Xms512m -Xmx1024m`。
 
@@ -151,6 +150,7 @@ OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
 | `CVE-2019-10173` | XStream 反序列化漏洞 | 漏洞 |  |
 | `CVE-2019-12384` | Jackson-databind 反序列化漏洞 | 漏洞 |  |
 | `collections` | Commons Collections 反序列化 | 漏洞 | 已接入统一 compose 与回放脚本 |
+| `ghost-bits` | Ghost Bits / Cast Attack 低字节语义差异 | 漏洞 | 综合演示上传绕过、路径穿越、文件读取、CRLF、Fastjson、SQLi 与 XSS |
 
 ### Shiro 系列
 
@@ -195,6 +195,23 @@ OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
 如果你想直接看“按项目怎么测”的总表入口，可以看：
 
 [doc/project-tutorials.md](./doc/project-tutorials.md)
+
+## JS Hook 模块
+
+仓库当前包含一个独立的 `JS-hook` 训练场，定位是前端逆向、协议拆解与 XHR/Hook 实战题库。
+
+- 目录：`JS-hook`
+- 默认端口：`48159`
+- 题库入口：`http://宿主机IP:48159/js-labs.html`
+- 管理页：`http://宿主机IP:48159/admin.html`
+
+当前这套题库主要覆盖三类内容：
+
+- `JS 逆向训练`：动态执行、字符串数组恢复、控制流平坦化、反调试、JSFuck、动态签名、source map 缺失定位。
+- `协议与加解密`：AES-CBC、AES-ECB、AES-GCM、AES-RSA、RSA、DES、3DES、SM2、SM4、双向报文、头签名、动态密钥、重放窗口。
+- `XHR / Hook 实战`：query sign / encrypt、form body、JSON 字段加密、响应解密、cookie、Hex、Protobuf、拦截器链、视频分片。
+
+模块运行方式与其他单体靶场一致，直接执行 `bash run-local-build.sh` 即可；单独说明见 [`doc/projects/js-hook.md`](./doc/projects/js-hook.md)。
 
 
 ## 参考开发代码

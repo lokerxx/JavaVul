@@ -374,6 +374,11 @@ services:
     ports:
       - "9945:8080"
 
+  ghost-bits:
+    image: wushangleon/ghost-bits
+    ports:
+      - "9943:8080"
+
   struts2-s2-015:
     image: wushangleon/struts2-s2-015
     ports:
@@ -428,11 +433,3 @@ services:
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/agent/agent.jar
       - JAVA_OPTS=-Xms256m -Xmx512m
-
-
-  flask:
-    image: wushangleon/javavul_index
-    ports:
-      - "5000:5000"
-    environment:
-      - HOST=192.168.0.9
