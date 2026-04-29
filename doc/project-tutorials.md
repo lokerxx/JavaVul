@@ -64,6 +64,7 @@
 | Struts2 S2-003 | `struts2-s2-003` | `9964` | `/index.action` | 点击页面内置 payload，观察 `session.user` 和 `session.isAdmin` 是否被恶意参数名污染。 |
 | Struts2 S2-001 | `struts2-s2-001` | `9965` | `/login.action` | 用空密码触发回填，再观察用户名字段是否发生 OGNL 解析。 |
 | Collections | `collections` | `9945` | `/playground` | 先触发 `touch /tmp/collections-success`，再访问 `/status` 查看执行状态。 |
+| Ghost Bits | `ghost-bits` | `9943` | `/ghost-bits` | 先看 low-byte 视图，再依次测试上传绕过、路径穿越、`/etc/passwd` 文件读取、CRLF、Fastjson、SQLi 和 XSS。 |
 | 业务逻辑漏洞靶场 | `logic_vul` | 未接入 compose | `/` | 单独运行后访问首页，验证伪造身份、越权和业务数据接口。 |
 | Web 敏感路径靶场 | `sensitive_path` | `9944` | `/sensitive-path` | 首页按分类展示真实超链接；`/sensitive-path/links` 提供平铺链接页，适合测试爬虫、目录扫描和敏感路径识别。 |
 
@@ -71,4 +72,5 @@
 
 1. 先启动单体靶场，再挑一个目标项目做单点验证。
 2. `collections` 建议先走 `/playground -> touch 标记 -> 查看状态` 这一条链，确认反序列化链路已经打通。
-3. 需要自定义 payload 时，直接用文档里的 `curl` 或你自己的代理工具重放请求。
+3. `ghost-bits` 建议按 `低字节视图 -> 上传扩展名 -> 路径变形 -> /etc/passwd 文件读取 -> Header CRLF -> Fastjson -> SQLi -> XSS` 的顺序观察“检查视图”和“执行视图”的差异。
+4. 需要自定义 payload 时，直接用文档里的 `curl` 或你自己的代理工具重放请求。

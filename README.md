@@ -150,6 +150,7 @@ OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
 | `CVE-2019-10173` | XStream 反序列化漏洞 | 漏洞 |  |
 | `CVE-2019-12384` | Jackson-databind 反序列化漏洞 | 漏洞 |  |
 | `collections` | Commons Collections 反序列化 | 漏洞 | 已接入统一 compose 与回放脚本 |
+| `ghost-bits` | Ghost Bits / Cast Attack 低字节语义差异 | 漏洞 | 综合演示上传绕过、路径穿越、文件读取、CRLF、Fastjson、SQLi 与 XSS |
 
 ### Shiro 系列
 

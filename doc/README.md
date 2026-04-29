@@ -69,5 +69,6 @@
 - [struts2-s2-003](./projects/struts2-s2-003.md)
 - [struts2-s2-001](./projects/struts2-s2-001.md)
 - [collections](./projects/collections.md)
+- [ghost-bits](./projects/ghost-bits.md)
 - [logic_vul](./projects/logic-vul.md)
 - [sensitive_path](./projects/sensitive-path.md)

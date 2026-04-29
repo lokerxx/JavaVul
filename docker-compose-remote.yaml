@@ -374,6 +374,11 @@ services:
     ports:
       - "9945:8080"
 
+  ghost-bits:
+    image: wushangleon/ghost-bits
+    ports:
+      - "9943:8080"
+
   struts2-s2-015:
     image: wushangleon/struts2-s2-015
     ports:
