@@ -213,6 +213,23 @@ OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
 
 模块运行方式与其他单体靶场一致，直接执行 `bash run-local-build.sh` 即可；单独说明见 [`doc/projects/js-hook.md`](./doc/projects/js-hook.md)。
 
+## Ghost Bits 模块
+
+仓库当前包含一个独立的 `ghost-bits` 靶场，定位是复现 Black Hat Asia 2026 公开研究《Cast Attack: A New Threat Posed by Ghost Bits in Java》中提到的低字节语义差异问题。
+
+- 目录：`ghost-bits`
+- 默认端口：`9943`
+- 页面入口：`http://宿主机IP:9943/ghost-bits`
+- 项目文档：[`doc/projects/ghost-bits.md`](./doc/projects/ghost-bits.md)
+
+当前这套靶场主要覆盖三类内容：
+
+- `基础对照`：low-byte 视图、上传扩展名绕过。
+- `路径与协议边界`：路径穿越、`/etc/passwd` 文件读取、CRLF / Header 注入。
+- `解析器与业务 Sink`：Fastjson `@type`、JSON 字段绕过、Ghost Bits -> SQLi、Ghost Bits -> XSS。
+
+模块运行方式与其他单体靶场一致，直接执行 `bash run-local-build.sh` 即可；推荐先从页面入口进入，再按 [`doc/project-tutorials.md`](./doc/project-tutorials.md) 里的顺序逐个验证。
+
 
 ## 参考开发代码
 
